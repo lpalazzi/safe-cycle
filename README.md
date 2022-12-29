@@ -1,6 +1,6 @@
-# auth-template
+# safe-cycle
 
-Starter code for projects that require user authentication (email+password)
+Web-based routing app for finding safe cycling routes with the option to avoid user-specified "nogo" paths.
 
 ## Running the app
 
@@ -17,6 +17,8 @@ SESSION_SECRET=your_secret
 
 Run `yarn` to install the required packages.
 
+You must also make sure the `brouter` submodule folder is updated by running `git submodule update --init`.
+
 ### Build and run
 
 Build and run the app by running `yarn build` followed by `yarn start`. This starts the server on `localhost` at the port specified in your `.env` file.
@@ -24,4 +26,3 @@ Build and run the app by running `yarn build` followed by `yarn start`. This sta
 ### Run in development mode
 
 To run the app in development mode run `yarn dev-client` and `yarn dev-server` in two separate terminals. Alternatively, you can simply run `yarn dev` which runs both client and server commands concurrently in the same terminal. This will rebuild and restart the server when changes are made. You will have to refresh the browser to see client changes.
-
