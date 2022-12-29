@@ -1,3 +1,4 @@
 [submodule "brouter"]
 	path = brouter
 	url = git@github.com:lpalazzi/brouter.git
+	branch = master
