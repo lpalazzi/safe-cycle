@@ -1,0 +1,32 @@
+{
+  "name": "auth",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "start": "node build/index.js",
+    "build": "yarn build-client && yarn build-server",
+    "build-client": "yarn workspace client build",
+    "build-server": "yarn workspace server build",
+    "build-client:watch": "yarn workspace client build:watch",
+    "build-server:watch": "yarn workspace server build:watch",
+    "dev": "concurrently \"yarn dev-client\" \"yarn dev-server\" ",
+    "dev-client": "yarn build-client:watch",
+    "dev-server": "nodemon --exec \"yarn build-server && node\" build/index.js"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20",
+    "concurrently": "^7.6.0"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "server/**/*.ts",
+      "public"
+    ],
+    "ext": "ts,js"
+  }
+}
