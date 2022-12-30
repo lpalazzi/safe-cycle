@@ -9,11 +9,13 @@
   ],
   "scripts": {
     "start": "node build/index.js",
+    "brouter": "(cd ./brouter ; bash ./scripts/run.sh)",
     "build": "yarn build-client && yarn build-server",
     "build-client": "yarn workspace client build",
     "build-server": "yarn workspace server build",
     "build-client:watch": "yarn workspace client build:watch",
     "build-server:watch": "yarn workspace server build:watch",
+    "build-brouter": "(cd ./brouter ; bash ./scripts/build.sh)",
     "dev": "concurrently \"yarn dev-client\" \"yarn dev-server\" ",
     "dev-client": "yarn build-client:watch",
     "dev-server": "nodemon --exec \"yarn build-server && node\" build/index.js"
