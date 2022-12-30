@@ -9,15 +9,14 @@ import {
 } from 'api/errors';
 import { IUserLoginDTO, IUserSignupDTO } from 'interfaces';
 
-const route = express.Router();
-
 export const users = (app: express.Router) => {
+  const route = express.Router();
   app.use('/user', route);
   const userService = container.resolve(UserService);
 
   route.get('/getActiveUser', async (req, res, next) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.session?.userId;
 
       if (!userId) {
         return res.json({
@@ -41,24 +40,24 @@ export const users = (app: express.Router) => {
     }
   });
 
-  route.get('/:id', async (req, res, next) => {
-    try {
-      const id = req.params.id;
-      if (!mongoose.isValidObjectId(id)) {
-        throw new BadRequestError(`${id} is not a valid ObjectId`);
-      }
+  // route.get('/:id', checkLoggedIn, async (req, res, next) => {
+  //   try {
+  //     const id = req.params.id;
+  //     if (!mongoose.isValidObjectId(id)) {
+  //       throw new BadRequestError(`${id} is not a valid ObjectId`);
+  //     }
 
-      const user = await userService.getById(new mongoose.Types.ObjectId(id));
-      if (!user) {
-        throw new ModelNotFoundError('User not found');
-      }
-      return res.json({
-        user,
-      });
-    } catch (err) {
-      next(err);
-    }
-  });
+  //     const user = await userService.getById(new mongoose.Types.ObjectId(id));
+  //     if (!user) {
+  //       throw new ModelNotFoundError('User not found');
+  //     }
+  //     return res.json({
+  //       user,
+  //     });
+  //   } catch (err) {
+  //     next(err);
+  //   }
+  // });
 
   route.post('/signup', async (req, res, next) => {
     try {
