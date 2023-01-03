@@ -1,8 +1,8 @@
 import joi from 'joi';
+import mongoose from 'mongoose';
 import { injectable } from 'tsyringe';
 import { INogoList, INogoListCreateDTO, INogoListReturnDTO } from 'interfaces';
 import { NogoListDao } from 'daos';
-import mongoose from 'mongoose';
 import { NoID } from 'types';
 
 @injectable()
@@ -63,5 +63,13 @@ export class NogoListService {
         error: err.message || 'Unhandled error',
       };
     }
+  }
+
+  async doesUserOwnNogoList(
+    nogoListId: mongoose.Types.ObjectId,
+    userId: mongoose.Types.ObjectId
+  ) {
+    const userIdOnNogoList = await this.nogoListDao.getUserIdOnList(nogoListId);
+    return userId.equals(userIdOnNogoList);
   }
 }

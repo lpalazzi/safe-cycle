@@ -20,42 +20,25 @@ export class UserService {
   async signup(
     userDTO: IUserSignupDTO
   ): Promise<{ user: IUserReturnDTO | null; error: string | null }> {
-    const { error } = this.validateUserSignup(userDTO);
-    if (error) {
+    try {
+      this.validateUserSignup(userDTO);
+      const { password, ...userToCreate } = userDTO;
+      const passwordHash = await argon2.hash(password);
+      const user = await this.userDao.create({
+        ...userToCreate,
+        passwordHash,
+      });
+
+      return {
+        user,
+        error: null,
+      };
+    } catch (err: any) {
       return {
         user: null,
-        error: error.message,
+        error: err.message || 'Unhandled error',
       };
     }
-
-    const { password, ...userToCreate } = userDTO;
-    const passwordHash = await argon2.hash(password);
-    const user = await this.userDao.create({
-      ...userToCreate,
-      passwordHash,
-    });
-
-    return {
-      user,
-      error: null,
-    };
-  }
-
-  private userSignupSchema = joi
-    .object({
-      email: joi.string().email().required(),
-      password: joi.string().min(8).max(64).required(),
-      name: joi
-        .object({
-          first: joi.string().required(),
-          last: joi.string().required(),
-        })
-        .required(),
-    })
-    .required();
-
-  private validateUserSignup(userDTO: IUserSignupDTO) {
-    return this.userSignupSchema.validate(userDTO);
   }
 
   async login(
@@ -101,6 +84,26 @@ export class UserService {
         user: null,
         error: err.message || 'Unhandled login error',
       };
+    }
+  }
+
+  private validateUserSignup(userDTO: IUserSignupDTO) {
+    const { error } = joi
+      .object({
+        email: joi.string().email().required(),
+        password: joi.string().min(8).max(64).required(),
+        name: joi
+          .object({
+            first: joi.string().required(),
+            last: joi.string().required(),
+          })
+          .required(),
+      })
+      .required()
+      .validate(userDTO);
+
+    if (error) {
+      throw new Error(error.message);
     }
   }
 }

@@ -13,13 +13,6 @@ const NogoListSchema = new mongoose.Schema<INogoList>({
   },
 });
 
-NogoListSchema.pre(['find', 'findOne'], function () {
-  this.populate({
-    path: 'user',
-    select: 'fullName',
-  });
-});
-
 export const NogoListModel = mongoose.model<INogoList>(
   'NogoList',
   NogoListSchema
