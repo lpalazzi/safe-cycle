@@ -1,2 +1,2 @@
-export * from './users';
-export * from './nogoLists';
+export * from './UserController';
+export * from './NogoListController';

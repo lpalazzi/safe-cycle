@@ -1,9 +1,9 @@
 import express from 'express';
-import { users, nogoLists } from './controllers';
+import * as controllers from './controllers';
 
 const app = express.Router();
 
-users(app);
-nogoLists(app);
+controllers.users(app);
+controllers.nogoLists(app);
 
 export default app;

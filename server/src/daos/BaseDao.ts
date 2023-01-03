@@ -1,31 +1,24 @@
 import mongoose from 'mongoose';
 import { NoID } from 'types';
 
-export class BaseDao<Interface, IReturnInterface = Interface> {
-  constructor(
-    protected model: mongoose.Model<Interface>,
-    protected returnProjection:
-      | mongoose.ProjectionType<Interface>
-      | undefined = undefined
-  ) {}
+export class BaseDao<Interface, ReturnInterface = Interface> {
+  constructor(protected model: mongoose.Model<Interface>) {}
 
   async get(query: mongoose.FilterQuery<Interface>) {
-    const documents: IReturnInterface[] = await this.model
-      .find(query, this.returnProjection)
-      .lean();
+    const documents: ReturnInterface[] = await this.model.find(query).lean();
     return documents;
   }
 
   async getOne(query: mongoose.FilterQuery<Interface>) {
-    const document: IReturnInterface | null = await this.model
-      .findOne(query, this.returnProjection)
+    const document: ReturnInterface | null = await this.model
+      .findOne(query)
       .lean();
     return document;
   }
 
   async getById(id: mongoose.Types.ObjectId) {
-    const document: IReturnInterface | null = await this.model
-      .findById(id, this.returnProjection)
+    const document: ReturnInterface | null = await this.model
+      .findById(id)
       .lean();
     return document;
   }
@@ -36,9 +29,7 @@ export class BaseDao<Interface, IReturnInterface = Interface> {
   }
 
   async create(newDocument: NoID<Interface>) {
-    const createdDocument: Interface = (
-      await this.model.create(newDocument)
-    ).toObject();
-    return createdDocument;
+    const createdDocument = await this.model.create(newDocument);
+    return this.getById(createdDocument._id);
   }
 }
