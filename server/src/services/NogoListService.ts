@@ -51,8 +51,7 @@ export class NogoListService {
         throw new Error(`Name \"${nogoListToCreate.name}\" is already taken`);
       }
 
-      const createdNogoList = await this.nogoListDao.create(nogoListToCreate);
-      const nogoList = await this.getById(createdNogoList._id);
+      const nogoList = await this.nogoListDao.create(nogoListToCreate);
 
       return {
         nogoList,

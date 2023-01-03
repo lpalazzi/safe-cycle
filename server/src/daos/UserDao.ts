@@ -7,24 +7,8 @@ import { BaseDao } from './BaseDao';
 @injectable()
 export class UserDao extends BaseDao<IUser, IUserReturnDTO> {
   constructor() {
-    super(UserModel, '-passwordHash');
+    super(UserModel);
   }
-
-  // async getById(id: mongoose.Types.ObjectId) {
-  //   const document: IUserReturnDTO | null = await this.model
-  //     .findById(id)
-  //     .select('-passwordHash')
-  //     .lean();
-  //   return document;
-  // }
-
-  // async getOne(query: mongoose.FilterQuery<IUser>) {
-  //   const document: IUserReturnDTO | null = await this.model
-  //     .findOne(query)
-  //     .select('-passwordHash')
-  //     .lean();
-  //   return document;
-  // }
 
   async getHashById(id: mongoose.Types.ObjectId) {
     const document = await this.model
