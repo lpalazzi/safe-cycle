@@ -3,8 +3,8 @@ import * as controllers from './controllers';
 
 const app = express.Router();
 
-controllers.users(app);
-controllers.nogos(app);
-controllers.nogoLists(app);
+controllers.user(app);
+controllers.nogo(app);
+controllers.nogoList(app);
 
 export default app;

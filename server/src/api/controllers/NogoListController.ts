@@ -6,7 +6,7 @@ import { INogoListCreateDTO } from 'interfaces';
 import { BadRequestError, InternalServerError } from 'api/errors';
 import { checkLoggedIn } from 'api/middlewares';
 
-export const nogoLists = (app: express.Router) => {
+export const nogoList = (app: express.Router) => {
   const route = express.Router();
   app.use('/nogoList', route);
   const nogoListService = container.resolve(NogoListService);
