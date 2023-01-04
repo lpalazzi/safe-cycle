@@ -9,7 +9,7 @@ import {
 } from 'api/errors';
 import { IUserLoginDTO, IUserSignupDTO } from 'interfaces';
 
-export const users = (app: express.Router) => {
+export const user = (app: express.Router) => {
   const route = express.Router();
   app.use('/user', route);
   const userService = container.resolve(UserService);

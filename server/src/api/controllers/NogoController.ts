@@ -10,7 +10,7 @@ import {
   UnauthorizedError,
 } from 'api/errors';
 
-export const nogos = (app: express.Router) => {
+export const nogo = (app: express.Router) => {
   const route = express.Router();
   app.use('/nogo', route);
   const nogoService = container.resolve(NogoService);
