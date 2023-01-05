@@ -62,13 +62,13 @@ const LoginForm: React.FC = () => {
         />
       </Stack>
       <Group position='right' mt='md'>
-        <Button type='submit'>Log in</Button>
+        <Button type='submit'>Submit</Button>
       </Group>
     </form>
   );
 };
 
 export const LoginModal: ModalSettings = {
-  title: 'Log in',
+  title: 'Sign in',
   children: <LoginForm />,
 };
