@@ -40,6 +40,7 @@ const LoginForm: React.FC = () => {
       showNotification({
         title: 'Login error',
         message: error.message || 'Unknown error',
+        color: 'red',
       });
     }
   };
