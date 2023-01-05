@@ -66,7 +66,7 @@ export const user = (app: express.Router) => {
       if (error) {
         throw new BadRequestError(error);
       } else if (!user) {
-        throw new InternalServerError('Could not log in user');
+        throw new InternalServerError('Could not sign in user');
       }
 
       req.session.userId = user._id.toString();
