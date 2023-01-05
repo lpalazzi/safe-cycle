@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Button, Flex, Group, Stack, TextInput } from '@mantine/core';
+import { Button, Group, Stack, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { closeAllModals } from '@mantine/modals';
 import { ModalSettings } from '@mantine/modals/lib/context';
@@ -71,7 +71,7 @@ const SignupForm: React.FC = () => {
           <TextInput
             withAsterisk
             label='Last Name'
-            placeholder='Watersby'
+            placeholder='Smith'
             {...form.getInputProps('name.last')}
           />
         </Group>
@@ -90,13 +90,13 @@ const SignupForm: React.FC = () => {
         />
       </Stack>
       <Group position='right' mt='md'>
-        <Button type='submit'>Sign up</Button>
+        <Button type='submit'>Submit</Button>
       </Group>
     </form>
   );
 };
 
 export const SignupModal: ModalSettings = {
-  title: 'Sign up',
+  title: 'Create account',
   children: <SignupForm />,
 };

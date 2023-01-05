@@ -1,9 +1,8 @@
 import { MantineProvider } from '@mantine/core';
 import { ModalsProvider } from '@mantine/modals';
 import { NotificationsProvider } from '@mantine/notifications';
+import { Shell } from 'components/shell/Shell';
 import { GlobalContextProvider } from 'contexts/globalContext';
-
-import { LoginPage } from 'views/LoginPage/LoginPage';
 
 function App() {
   return (
@@ -11,7 +10,11 @@ function App() {
       <MantineProvider withGlobalStyles withNormalizeCSS>
         <NotificationsProvider>
           <ModalsProvider>
-            <LoginPage />
+            <Shell>
+              <div style={{ backgroundColor: '#EEEEEE', height: '100%' }}>
+                map will go here
+              </div>
+            </Shell>
           </ModalsProvider>
         </NotificationsProvider>
       </MantineProvider>
