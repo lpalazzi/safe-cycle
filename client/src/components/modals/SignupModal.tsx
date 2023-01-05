@@ -54,6 +54,7 @@ const SignupForm: React.FC = () => {
       showNotification({
         title: 'Signup error',
         message: error.message || 'Unknown error',
+        color: 'red',
       });
     }
   };

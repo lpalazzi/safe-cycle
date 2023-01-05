@@ -53,6 +53,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
       showNotification({
         title: 'Logout error',
         message: error.message || 'Unknown error',
+        color: 'red',
       });
     }
     updateLoggedInUser();
