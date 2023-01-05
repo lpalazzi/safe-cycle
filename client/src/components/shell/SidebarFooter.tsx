@@ -57,7 +57,7 @@ export const SidebarFooter: React.FC = () => {
           </Menu.Target>
 
           <Menu.Dropdown>
-            <Menu.Item icon={<IconSettings size={14} />}>
+            <Menu.Item icon={<IconSettings size={14} />} disabled>
               Manage account
             </Menu.Item>
             <Menu.Item

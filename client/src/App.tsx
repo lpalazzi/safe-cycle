@@ -3,17 +3,16 @@ import { ModalsProvider } from '@mantine/modals';
 import { NotificationsProvider } from '@mantine/notifications';
 import { Shell } from 'components/shell/Shell';
 import { GlobalContextProvider } from 'contexts/globalContext';
+import { Map } from 'views/map/Map';
 
 function App() {
   return (
     <GlobalContextProvider>
       <MantineProvider withGlobalStyles withNormalizeCSS>
-        <NotificationsProvider>
+        <NotificationsProvider position='top-right'>
           <ModalsProvider>
             <Shell>
-              <div style={{ backgroundColor: '#EEEEEE', height: '100%' }}>
-                map will go here
-              </div>
+              <Map />
             </Shell>
           </ModalsProvider>
         </NotificationsProvider>

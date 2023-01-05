@@ -8,7 +8,7 @@ type ShellProps = {
 
 export const Shell: React.FC<ShellProps> = (props) => {
   return (
-    <AppShell padding={0} navbar={<Sidebar />}>
+    <AppShell zIndex={100} padding={0} navbar={<Sidebar />}>
       {props.children}
     </AppShell>
   );
