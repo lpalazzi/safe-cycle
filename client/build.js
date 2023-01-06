@@ -7,6 +7,7 @@ esbuild
   .build({
     entryPoints: ['./src/index.tsx'],
     outfile: '../public/bundle/app.js',
+    publicPath: '/bundle',
     minify: true,
     bundle: true,
     plugins: [inlineImage()],
