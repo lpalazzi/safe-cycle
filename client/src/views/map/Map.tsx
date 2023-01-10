@@ -12,6 +12,7 @@ import 'leaflet.awesome-markers/dist/leaflet.awesome-markers.css';
 import './Map.css';
 import { MapHandlers } from './MapHandlers';
 import { Markers } from './Markers';
+import { Route } from './Route';
 
 export const Map: React.FC = () => {
   return (
@@ -40,6 +41,7 @@ export const Map: React.FC = () => {
       <ZoomControl position='bottomright' />
       <MapHandlers />
       <Markers />
+      <Route />
     </MapContainer>
   );
 };

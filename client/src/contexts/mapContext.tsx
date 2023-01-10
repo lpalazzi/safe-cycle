@@ -1,14 +1,21 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import L from 'leaflet';
+import { RouterApi } from 'api';
+import { showNotification } from '@mantine/notifications';
 
 type MapContextType =
   | {
       // states
-      markers: L.LatLng[];
       currentLocation: L.LatLng | null;
+      waypoints: L.LatLng[];
+      route: GeoJSON.FeatureCollection | null;
       // functions
-      addMarker: (newMarker: L.LatLng) => void;
       setCurrentLocation: (latlng: L.LatLng | null) => void;
+      addWaypoint: (newMarker: L.LatLng) => void;
+      updateWaypoint: (updatedWaypoint: L.LatLng, index: number) => void;
+      removeWaypoint: (index: number) => void;
+      clearWaypoints: () => void;
+      setRoute: (lnstr: GeoJSON.FeatureCollection) => void;
     }
   | undefined;
 
@@ -20,16 +27,57 @@ type MapContextProviderType = {
 };
 
 export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
-  const [markers, setMarkers] = useState<L.LatLng[]>([]);
   const [currentLocation, setCurrentLocation] = useState<L.LatLng | null>(null);
+  const [waypoints, setWaypoints] = useState<L.LatLng[]>([]);
+  const [route, setRoute] = useState<GeoJSON.FeatureCollection | null>(null);
 
-  const addMarker = (newMarker: L.LatLng) => {
-    setMarkers([...markers, newMarker]);
+  const addWaypoint = (newMarker: L.LatLng) => {
+    setWaypoints([...waypoints, newMarker]);
   };
+
+  const updateWaypoint = (updatedWaypoint: L.LatLng, index: number) => {
+    const newWaypoints = [...waypoints];
+    newWaypoints.splice(index, 1, updatedWaypoint);
+    setWaypoints(newWaypoints);
+  };
+
+  const removeWaypoint = (index: number) => {
+    const newWaypoints = [...waypoints];
+    newWaypoints.splice(index, 1);
+    setWaypoints(newWaypoints);
+  };
+
+  const clearWaypoints = () => {
+    setWaypoints([]);
+  };
+
+  useEffect(() => {
+    if (waypoints.length >= 2) {
+      RouterApi.generateRoute(waypoints, [], false)
+        .then((res) => {
+          setRoute(res.route);
+        })
+        .catch((err) => {
+          showNotification({ message: err.message, color: 'red' });
+        });
+    } else {
+      setRoute(null);
+    }
+  }, [waypoints]);
 
   return (
     <MapContext.Provider
-      value={{ markers, currentLocation, addMarker, setCurrentLocation }}
+      value={{
+        currentLocation,
+        waypoints,
+        route,
+        setCurrentLocation,
+        addWaypoint,
+        updateWaypoint,
+        removeWaypoint,
+        clearWaypoints,
+        setRoute,
+      }}
     >
       {props.children}
     </MapContext.Provider>
