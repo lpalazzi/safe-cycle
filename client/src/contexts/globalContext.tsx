@@ -15,7 +15,7 @@ type GlobalContextType =
     }
   | undefined;
 
-export const GlobalContext = createContext<GlobalContextType>(undefined);
+const GlobalContext = createContext<GlobalContextType>(undefined);
 GlobalContext.displayName = 'GlobalContext';
 
 type GlobalContextProviderType = {

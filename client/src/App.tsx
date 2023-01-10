@@ -3,6 +3,7 @@ import { ModalsProvider } from '@mantine/modals';
 import { NotificationsProvider } from '@mantine/notifications';
 import { Shell } from 'components/shell/Shell';
 import { GlobalContextProvider } from 'contexts/globalContext';
+import { MapContextProvider } from 'contexts/mapContext';
 import { Map } from 'views/map/Map';
 
 function App() {
@@ -12,7 +13,9 @@ function App() {
         <NotificationsProvider position='top-right'>
           <ModalsProvider>
             <Shell>
-              <Map />
+              <MapContextProvider>
+                <Map />
+              </MapContextProvider>
             </Shell>
           </ModalsProvider>
         </NotificationsProvider>

@@ -31,8 +31,6 @@ export const initMap = () => {
       });
     });
 
-  L.DomUtil.addClass(map.getContainer(), 'crosshair-cursor-enabled');
-
   L.control.scale().addTo(map);
   L.control
     .zoom({
