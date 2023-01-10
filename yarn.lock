@@ -1304,7 +1304,14 @@
   resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.10.tgz#6dfbf5ea17142f7f9a043809f1cd4c448cb68249"
   integrity sha512-Nmh0K3iWQJzniTuPRcJn5hxXkfB1T1pgB89SBig5PlJQU5yocazeu4jATJlaA0GYFKWMqDdvYemoSnF2pXgLVA==
 
-"@types/leaflet@^1.9.0":
+"@types/leaflet.awesome-markers@^2.0.25":
+  version "2.0.25"
+  resolved "https://registry.yarnpkg.com/@types/leaflet.awesome-markers/-/leaflet.awesome-markers-2.0.25.tgz#756a76144d1ab7394284161a08a3bd3ee0ae8339"
+  integrity sha512-0SADiCKwWgELjEz3OqaspnaJzD/Gud02+v8TaKThRCJrTaMH4yxVLY32rZmzwOpTmP6YEfc5Kt5LZ9KROTZq0Q==
+  dependencies:
+    "@types/leaflet" "*"
+
+"@types/leaflet@*", "@types/leaflet@^1.9.0":
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/@types/leaflet/-/leaflet-1.9.0.tgz#8caf452255e16cb15e0eabcb0d2a26793da0a6a2"
   integrity sha512-7LeOSj7EloC5UcyOMo+1kc3S1UT3MjJxwqsMT1d2PTyvQz53w0Y0oSSk9nwZnOZubCmBvpSNGceucxiq+ZPEUw==
@@ -2330,6 +2337,11 @@ leaflet-easybutton@^2.4.0:
   integrity sha512-O+qsQq4zTF6ds8VClnytobTH/MKalctlPpiA8L+bNKHP14J3lgJpvEd/jSpq9mHTI6qOzRAvbQX6wS6qNwThvg==
   dependencies:
     leaflet "^1.0.1"
+
+leaflet.awesome-markers@^2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/leaflet.awesome-markers/-/leaflet.awesome-markers-2.0.5.tgz#b7b0210d87e2566359bf478c1ab3ab07c7246f30"
+  integrity sha512-Ne/xDjkGyaujwNVVkv2tyXQUV0ZW7gZ0Mo0FuQY4jp2qWrvXi0hwDBvmZyF/8YOvybyMabTMM/mFWCTd1jZIQA==
 
 leaflet@^1.0.1, leaflet@^1.9.3:
   version "1.9.3"
