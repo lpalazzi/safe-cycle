@@ -5,10 +5,11 @@ import { useMapContext } from 'contexts/mapContext';
 import { showNotification } from '@mantine/notifications';
 
 export const MapHandlers: React.FC = () => {
-  const { addMarker, setCurrentLocation } = useMapContext();
+  const { setCurrentLocation, addWaypoint, clearWaypoints } = useMapContext();
+
   const map = useMapEvents({
     click: (e) => {
-      addMarker(e.latlng);
+      addWaypoint(e.latlng);
     },
     locationfound: (e) => {
       map.flyTo(e.latlng, 14);
@@ -24,6 +25,16 @@ export const MapHandlers: React.FC = () => {
   });
 
   const buildEasyButtons = () => {
+    L.easyButton(
+      'fa-eraser',
+      () => {
+        clearWaypoints();
+      },
+      'Clear all waypoints'
+    )
+      .addTo(map)
+      .setPosition('topright');
+
     L.easyButton('fa-location-crosshairs', () => {
       map.locate();
     })

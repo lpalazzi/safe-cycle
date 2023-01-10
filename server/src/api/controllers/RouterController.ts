@@ -29,9 +29,12 @@ export const router = (app: express.Router) => {
         );
       }
 
-      let route: GeoJSON.FeatureCollection;
+      let route: GeoJSON.LineString;
+      let properties: GeoJSON.GeoJsonProperties;
       if (isNogo) {
-        route = await routerService.getRouteForNewNogo(points);
+        const data = await routerService.getRouteForNewNogo(points);
+        route = data.route;
+        properties = data.properties;
       } else {
         const nogos = (
           await Promise.all(
@@ -40,10 +43,12 @@ export const router = (app: express.Router) => {
             )
           )
         ).flat();
-        route = await routerService.getRouteForUser(points, nogos);
+        const data = await routerService.getRouteForUser(points, nogos);
+        route = data.route;
+        properties = data.properties;
       }
 
-      return res.json({ route });
+      return res.json({ route, properties });
     } catch (err) {
       next(err);
     }

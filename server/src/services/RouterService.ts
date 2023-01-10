@@ -1,5 +1,6 @@
 import config from 'config';
 import { injectable } from 'tsyringe';
+import axios from 'axios';
 import { INogo, INogoReturnDTO } from 'interfaces';
 
 @injectable()
@@ -29,21 +30,33 @@ export class RouterService {
     nogos: INogoReturnDTO[],
     profile: 'safecycle' | 'all'
   ) {
-    const urlParams = new URLSearchParams({
-      lonlats: this.positionsToParamString(lonlats),
-      polylines: this.nogosToParamString(nogos),
-      profile,
-      format: 'geojson',
-    });
-    return fetch(this.brouterUrl + '?' + urlParams.toString())
-      .then(async (res) => {
-        if (!res.ok) {
-          const error = await res.json();
-          throw new Error(error.message || 'BRouter error');
-        }
-        return res;
+    const url = `${this.brouterUrl}?lonlats=${this.positionsToParamString(
+      lonlats
+    )}&polylines=${this.nogosToParamString(
+      nogos
+    )}&profile=${profile}&alternativeidx=0&format=geojson`;
+    return axios
+      .get(url, {
+        insecureHTTPParser: true,
       })
-      .then((res) => res.json() as any as GeoJSON.FeatureCollection);
+      .then((res) => {
+        const fc: GeoJSON.FeatureCollection = res.data;
+        const route = fc.features[0].geometry as GeoJSON.LineString;
+        const properties = fc.features[0].properties;
+        return { route, properties };
+      })
+      .catch((error) => {
+        if (
+          String(error.response?.data).includes(
+            'position not mapped in existing datafile'
+          )
+        ) {
+          throw new Error(
+            'One or more of your points are not close enough to a routable location. Please select another point.'
+          );
+        }
+        throw new Error(error.response?.data ?? 'BRouter error');
+      });
   }
 
   async getRouteForNewNogo(lonlats: GeoJSON.Position[]) {

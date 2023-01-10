@@ -1,4 +1,27 @@
 .leaflet-control .fa {
   font-size: 18px;
-  vertical-align: text-bottom;
+  vertical-align: middle;
+}
+
+.leaflet-touch .leaflet-control button {
+  line-height: 26px;
+}
+
+.number-icon {
+  background-size: 43px 50px;
+  background-repeat: no-repeat;
+  margin: 0 auto;
+  text-align: center;
+  color: white;
+  font-weight: bold;
+  line-height: 36px;
+  font-size: 20px;
+}
+
+.marker-blue {
+  background-image: url('assets/map/marker-blue.png');
+}
+
+.marker-orange {
+  background-image: url('assets/map/marker-orange.png');
 }

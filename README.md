@@ -12,7 +12,7 @@ Create a `.env` file at the root of the project with the following content:
 TEST=1
 PORT=8000
 MONGODB_URL=mongodb://127.0.0.1/safecycle
-BROUTER_URL=localhost:17777/brouter
+BROUTER_URL=http://localhost:17777/brouter
 SESSION_SECRET=your_secret
 ```
 
