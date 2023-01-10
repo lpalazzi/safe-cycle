@@ -67,12 +67,14 @@ const SignupForm: React.FC = () => {
             withAsterisk
             label='First Name'
             placeholder='John'
+            autoComplete='given-name'
             {...form.getInputProps('name.first')}
           />
           <TextInput
             withAsterisk
             label='Last Name'
             placeholder='Smith'
+            autoComplete='family-name'
             {...form.getInputProps('name.last')}
           />
         </Group>
@@ -80,6 +82,7 @@ const SignupForm: React.FC = () => {
           withAsterisk
           label='Email'
           placeholder='your@email.com'
+          autoComplete='email'
           {...form.getInputProps('email')}
         />
         <TextInput
@@ -87,6 +90,7 @@ const SignupForm: React.FC = () => {
           label='Password'
           placeholder='********'
           type='password'
+          autoComplete='new-password'
           {...form.getInputProps('password')}
         />
       </Stack>
