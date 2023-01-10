@@ -52,6 +52,7 @@ const LoginForm: React.FC = () => {
           withAsterisk
           label='Email'
           placeholder='your@email.com'
+          autoComplete='email'
           {...form.getInputProps('email')}
         />
         <TextInput
@@ -59,6 +60,7 @@ const LoginForm: React.FC = () => {
           label='Password'
           placeholder='********'
           type='password'
+          autoComplete='current-password'
           {...form.getInputProps('password')}
         />
       </Stack>
