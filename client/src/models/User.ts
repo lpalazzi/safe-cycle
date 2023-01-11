@@ -23,4 +23,8 @@ export class User {
   public getFullName() {
     return this.name.first + ' ' + this.name.last;
   }
+
+  public getInitials() {
+    return this.name.first[0] + this.name.last[0];
+  }
 }

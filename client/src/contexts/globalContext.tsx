@@ -2,16 +2,22 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { showNotification } from '@mantine/notifications';
 import { UserApi } from 'api';
 import { User } from 'models';
+import { ID } from 'types';
 
 type GlobalContextType =
   | {
       // states
       loggedInUser: User | null;
       isNavbarOpen: boolean;
+      selectedNogoLists: ID[];
+      editingNogoList: ID | null;
       // functions
       updateLoggedInUser: () => void;
       logoutUser: () => void;
       toggleNavbar: () => void;
+      selectNogoList: (id: ID) => void;
+      deselectNogoList: (id: ID) => void;
+      setEditingNogoList: (id: ID | null) => void;
     }
   | undefined;
 
@@ -27,6 +33,8 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
 ) => {
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
+  const [selectedNogoLists, setSelectedNogoLists] = useState<ID[]>([]);
+  const [editingNogoList, setEditingNogoList] = useState<ID | null>(null);
 
   useEffect(() => {
     updateLoggedInUser();
@@ -39,6 +47,22 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
 
   const toggleNavbar = () => {
     setIsNavbarOpen(!isNavbarOpen);
+  };
+
+  const selectNogoList = (id: ID) => {
+    if (selectedNogoLists.includes(id)) {
+      return;
+    }
+    const newSelectedNogoLists = [...selectedNogoLists];
+    newSelectedNogoLists.push(id);
+    setSelectedNogoLists(newSelectedNogoLists);
+  };
+
+  const deselectNogoList = (id: ID) => {
+    const newSelectedNogoLists = [...selectedNogoLists].filter(
+      (selectedNogoList) => selectedNogoList !== id
+    );
+    setSelectedNogoLists(newSelectedNogoLists);
   };
 
   const logoutUser = async () => {
@@ -64,9 +88,14 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
       value={{
         loggedInUser,
         isNavbarOpen,
+        selectedNogoLists,
+        editingNogoList,
         updateLoggedInUser,
         logoutUser,
         toggleNavbar,
+        selectNogoList,
+        deselectNogoList,
+        setEditingNogoList,
       }}
     >
       {props.children}
