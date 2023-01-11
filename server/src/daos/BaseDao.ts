@@ -38,18 +38,19 @@ export class BaseDao<Interface, ReturnInterface = Interface> {
     return this.getById(createdDocument._id);
   }
 
+  async updateById(id: mongoose.Types.ObjectId, update: Partial<Interface>) {
+    return this.model.updateOne({ _id: id }, update);
+  }
+
   async deleteById(id: mongoose.Types.ObjectId) {
-    const deleteResult = await this.model.deleteOne({ _id: id });
-    return deleteResult;
+    return this.model.deleteOne({ _id: id });
   }
 
   async deleteOne(query: mongoose.FilterQuery<Interface>) {
-    const deleteResult = await this.model.deleteOne(query);
-    return deleteResult;
+    return this.model.deleteOne(query);
   }
 
   async deleteMany(query: mongoose.FilterQuery<Interface>) {
-    const deleteResult = await this.model.deleteMany(query);
-    return deleteResult;
+    return this.model.deleteMany(query);
   }
 }

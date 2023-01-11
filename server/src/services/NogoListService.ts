@@ -1,7 +1,12 @@
 import joi from 'joi';
 import mongoose from 'mongoose';
 import { injectable } from 'tsyringe';
-import { INogoList, INogoListCreateDTO, INogoListReturnDTO } from 'interfaces';
+import {
+  INogoList,
+  INogoListCreateDTO,
+  INogoListReturnDTO,
+  INogoListUpdateDTO,
+} from 'interfaces';
 import { NogoListDao } from 'daos';
 import { NoID } from 'types';
 
@@ -63,6 +68,34 @@ export class NogoListService {
         error: err.message || 'Unhandled error',
       };
     }
+  }
+
+  async updateById(
+    nogoListId: mongoose.Types.ObjectId,
+    nogoListUpdate: INogoListUpdateDTO
+  ): Promise<{
+    updatedNogoList: INogoListReturnDTO | null;
+    error: string | null;
+  }> {
+    const updateResult = await this.nogoListDao.updateById(
+      nogoListId,
+      nogoListUpdate
+    );
+    if (!updateResult.acknowledged) {
+      return {
+        updatedNogoList: null,
+        error: 'Nogo List was not modified',
+      };
+    }
+    const updatedNogoList = await this.nogoListDao.getById(nogoListId);
+    return {
+      updatedNogoList,
+      error: null,
+    };
+  }
+
+  async deleteById(nogoListId: mongoose.Types.ObjectId) {
+    return this.nogoListDao.deleteById(nogoListId);
   }
 
   async doesUserOwnNogoList(

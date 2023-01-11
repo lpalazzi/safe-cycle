@@ -7,7 +7,7 @@ export class NogoListDao extends BaseDao<INogoList, INogoListReturnDTO> {
   constructor() {
     const populate = {
       path: 'user',
-      select: '-_id fullName',
+      select: '-_id name',
     };
     super(NogoListModel, populate);
   }

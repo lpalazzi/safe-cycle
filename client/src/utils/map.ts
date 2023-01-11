@@ -11,7 +11,7 @@ export const createMarker = (
     iconSize: [43, 50],
     iconAnchor: [20, 48],
     shadowAnchor: [4, 30],
-    popupAnchor: [0, -30],
+    popupAnchor: [0, -45],
     html: renderToStaticMarkup(content),
   });
 };
