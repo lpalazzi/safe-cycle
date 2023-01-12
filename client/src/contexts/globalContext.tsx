@@ -67,10 +67,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
 
   const logoutUser = async () => {
     try {
-      const success = await UserApi.logout();
-      if (success) {
-        return;
-      }
+      await UserApi.logout();
     } catch (error: any) {
       showNotification({
         title: 'Error signing out user',
