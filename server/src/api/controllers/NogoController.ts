@@ -38,7 +38,7 @@ export const nogo = (app: express.Router) => {
       if (error) {
         throw new BadRequestError(error);
       } else if (!nogo) {
-        throw new InternalServerError('Nogo could not be created');
+        throw new InternalServerError('NOGO could not be created');
       }
 
       return res.json({ nogo });
