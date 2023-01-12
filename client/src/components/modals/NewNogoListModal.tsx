@@ -28,8 +28,8 @@ const NewNogoListForm: React.FC = () => {
       closeAllModals();
     } catch (error: any) {
       showNotification({
-        title: 'Error',
-        message: error.message || 'Unknown error',
+        title: 'Error creating NOGO List',
+        message: error.message || 'Undefined error',
         color: 'red',
       });
     }

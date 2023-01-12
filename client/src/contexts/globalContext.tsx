@@ -69,14 +69,12 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     try {
       const success = await UserApi.logout();
       if (success) {
-        showNotification({
-          message: 'You have successfully signed out',
-        });
+        return;
       }
     } catch (error: any) {
       showNotification({
-        title: 'Logout error',
-        message: error.message || 'Unknown error',
+        title: 'Error signing out user',
+        message: error.message || 'Undefined error',
         color: 'red',
       });
     }

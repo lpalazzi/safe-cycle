@@ -15,47 +15,16 @@ export const nogo = (app: express.Router) => {
   app.use('/nogo', route);
   const nogoService = container.resolve(NogoService);
 
-  route.get('/getAllByList', async (req, res, next) => {
+  route.get('/getAllByList/:nogoListId', async (req, res, next) => {
     try {
-      const nogoListId = new mongoose.Types.ObjectId(req.body.nogoListId);
+      if (!mongoose.isValidObjectId(req.params.nogoListId)) {
+        throw new BadRequestError(
+          `${req.params.nogoListId} is not a valid ObjectId`
+        );
+      }
+      const nogoListId = new mongoose.Types.ObjectId(req.params.nogoListId);
       const nogos = await nogoService.getAllByList(nogoListId);
       return res.json({ nogos });
-    } catch (err) {
-      next(err);
-    }
-  });
-
-  route.delete('/deleteByIds', checkLoggedIn, async (req, res, next) => {
-    try {
-      const nogoIds = req.body.nogoIds;
-      const userId = new mongoose.Types.ObjectId(req.session.userId);
-
-      if (!nogoIds || !(nogoIds instanceof Array<string>)) {
-        throw new BadRequestError(
-          'Request incorrectly formatted: nogoIds must be an array of strings'
-        );
-      }
-      const nogoObjIds = nogoIds.map(
-        (nogoId) => new mongoose.Types.ObjectId(nogoId)
-      );
-
-      const userCanDelete = nogoObjIds.every((nogoId) => {
-        return nogoService.canUserUpdateNogo(nogoId, userId);
-      });
-      if (!userCanDelete) {
-        throw new UnauthorizedError(
-          'User is not authorized to delete these Nogos'
-        );
-      }
-
-      const deleteResult = await nogoService.deleteByIds(nogoObjIds);
-      if (!deleteResult.acknowledged) {
-        throw new InternalServerError('Delete request was not acknowledged');
-      }
-
-      return res.json({
-        deletedCount: deleteResult.deletedCount,
-      });
     } catch (err) {
       next(err);
     }
@@ -73,6 +42,34 @@ export const nogo = (app: express.Router) => {
       }
 
       return res.json({ nogo });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  route.delete('/delete/:id', checkLoggedIn, async (req, res, next) => {
+    try {
+      if (!mongoose.isValidObjectId(req.params.id)) {
+        throw new BadRequestError(`${req.params.id} is not a valid ObjectId`);
+      }
+      const nogoId = new mongoose.Types.ObjectId(req.params.id);
+      const userId = new mongoose.Types.ObjectId(req.session.userId);
+
+      const userCanDelete = await nogoService.canUserUpdateNogo(nogoId, userId);
+      if (!userCanDelete) {
+        throw new UnauthorizedError(
+          'User is not authorized to delete this NOGO'
+        );
+      }
+
+      const deleteResult = await nogoService.deleteById(nogoId);
+      if (!deleteResult.acknowledged) {
+        throw new InternalServerError('Delete request was not acknowledged');
+      }
+
+      return res.json({
+        deletedCount: deleteResult.deletedCount,
+      });
     } catch (err) {
       next(err);
     }

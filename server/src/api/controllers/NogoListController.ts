@@ -91,7 +91,7 @@ export const nogoList = (app: express.Router) => {
     }
   });
 
-  route.post('/delete/:id', checkLoggedIn, async (req, res, next) => {
+  route.delete('/delete/:id', checkLoggedIn, async (req, res, next) => {
     try {
       if (!mongoose.isValidObjectId(req.params.id)) {
         throw new BadRequestError(`${req.params.id} is not a valid ObjectId`);
@@ -109,13 +109,11 @@ export const nogoList = (app: express.Router) => {
       }
 
       const deleteResult = await nogoListService.deleteById(nogoListId);
-      if (!deleteResult.acknowledged) {
-        throw new InternalServerError('Delete request was not acknowledged');
+      if (!deleteResult.nogoListDeleted) {
+        throw new InternalServerError('Delete request was not completed');
       }
 
-      return res.json({
-        deletedCount: deleteResult.deletedCount,
-      });
+      return res.json({ deleteResult });
     } catch (err) {
       next(err);
     }

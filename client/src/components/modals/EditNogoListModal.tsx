@@ -33,8 +33,8 @@ const EditNogoListForm: React.FC<EditNogoListFormProps> = ({ nogoList }) => {
       closeAllModals();
     } catch (error: any) {
       showNotification({
-        title: 'Error',
-        message: error.message || 'Unknown error',
+        title: 'Error updating NOGO List',
+        message: error.message || 'Undefined error',
         color: 'red',
       });
     }

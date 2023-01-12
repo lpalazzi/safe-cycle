@@ -13,8 +13,11 @@ import './Map.css';
 import { MapHandlers } from './MapHandlers';
 import { Markers } from './Markers';
 import { Route } from './Route';
+import { Nogos } from './Nogos';
+import { useGlobalContext } from 'contexts/globalContext';
 
 export const Map: React.FC = () => {
+  const { editingNogoList } = useGlobalContext();
   return (
     <MapContainer
       style={{
@@ -40,8 +43,13 @@ export const Map: React.FC = () => {
       <ScaleControl />
       <ZoomControl position='bottomright' />
       <MapHandlers />
-      <Markers />
-      <Route />
+      {!editingNogoList ? (
+        <>
+          <Markers />
+          <Route />
+        </>
+      ) : null}
+      <Nogos />
     </MapContainer>
   );
 };

@@ -23,7 +23,7 @@ export class RouterApi {
         nogoListIds,
       }
     );
-    const route: GeoJSON.FeatureCollection = response.route;
+    const route: GeoJSON.LineString = response.route;
     const properties: BrouterProperties = response.properties;
     return { route, properties };
   }

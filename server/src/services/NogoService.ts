@@ -13,11 +13,11 @@ export class NogoService {
   ) {}
 
   async getAllByList(nogoListId: mongoose.Types.ObjectId) {
-    return await this.nogoDao.get({ nogoList: nogoListId });
+    return this.nogoDao.get({ nogoList: nogoListId });
   }
 
-  async deleteByIds(nogoIds: mongoose.Types.ObjectId[]) {
-    return await this.nogoDao.deleteMany({ _id: { $in: nogoIds } });
+  async deleteById(nogoId: mongoose.Types.ObjectId) {
+    return this.nogoDao.deleteById(nogoId);
   }
 
   async canUserUpdateNogo(
@@ -54,7 +54,7 @@ export class NogoService {
     const { error } = joi
       .object({
         nogoList: joi.objectId().required(),
-        lineString: joi.geojson.lineString().required(),
+        lineString: joi.geojson().lineString().required(),
       })
       .required()
       .validate(newNogo);
