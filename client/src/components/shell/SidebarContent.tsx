@@ -46,8 +46,10 @@ export const SidebarContent: React.FC = () => {
   const [userNogoLists, setUserNogoLists] = useState<NogoList[]>([]);
 
   useEffect(() => {
-    refreshData();
-  }, []);
+    if (loggedInUser) {
+      refreshData();
+    }
+  }, [loggedInUser]);
 
   const refreshData = () => {
     try {
