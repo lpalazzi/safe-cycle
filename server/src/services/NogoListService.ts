@@ -84,7 +84,7 @@ export class NogoListService {
     if (!updateResult.acknowledged) {
       return {
         updatedNogoList: null,
-        error: 'Nogo List was not modified',
+        error: 'NOGO List was not modified',
       };
     }
     const updatedNogoList = await this.nogoListDao.getById(nogoListId);

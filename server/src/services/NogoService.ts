@@ -26,7 +26,7 @@ export class NogoService {
   ) {
     const nogo = await this.nogoDao.getById(nogoId);
     if (!nogo) {
-      throw new Error('Nogo not found');
+      throw new Error('NOGO not found');
     }
     return this.nogoListService.doesUserOwnNogoList(nogo.nogoList, userId);
   }

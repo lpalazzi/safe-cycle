@@ -50,7 +50,7 @@ export const nogoList = (app: express.Router) => {
       if (error) {
         throw new BadRequestError(error);
       } else if (!nogoList) {
-        throw new InternalServerError('Nogo List could not be created');
+        throw new InternalServerError('NOGO List could not be created');
       }
 
       return res.json({ nogoList });

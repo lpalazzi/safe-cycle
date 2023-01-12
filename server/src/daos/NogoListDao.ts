@@ -18,7 +18,7 @@ export class NogoListDao extends BaseDao<INogoList, INogoListReturnDTO> {
       .select('user')
       .lean();
     if (!nogoList) {
-      throw new Error('Nogo List not found');
+      throw new Error('NOGO List not found');
     }
     return nogoList.user;
   }
