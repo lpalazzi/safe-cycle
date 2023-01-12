@@ -5,11 +5,19 @@ import { useMapContext } from 'contexts/mapContext';
 import { showNotification } from '@mantine/notifications';
 
 export const MapHandlers: React.FC = () => {
-  const { setCurrentLocation, addWaypoint, clearWaypoints } = useMapContext();
+  const {
+    refreshWaypointLineToCursor,
+    setCurrentLocation,
+    addWaypoint,
+    clearWaypoints,
+  } = useMapContext();
 
   const map = useMapEvents({
     click: (e) => {
       addWaypoint(e.latlng);
+    },
+    mousemove: (e) => {
+      refreshWaypointLineToCursor(e.latlng);
     },
     locationfound: (e) => {
       map.flyTo(e.latlng, 14);
@@ -18,7 +26,8 @@ export const MapHandlers: React.FC = () => {
     locationerror: (e) => {
       setCurrentLocation(null);
       showNotification({
-        message: e.message,
+        title: 'Error getting location',
+        message: e.message || 'Undefined error',
         color: 'red',
       });
     },

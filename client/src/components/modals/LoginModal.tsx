@@ -38,8 +38,8 @@ const LoginForm: React.FC = () => {
       closeAllModals();
     } catch (error: any) {
       showNotification({
-        title: 'Login error',
-        message: error.message || 'Unknown error',
+        title: 'Error signing in user',
+        message: error.message || 'Undefined error',
         color: 'red',
       });
     }

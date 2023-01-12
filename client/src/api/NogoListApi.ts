@@ -53,9 +53,13 @@ export class NogoListApi {
   static async delete(nogoListId: ID) {
     const response = await makeRequest(
       `${this.baseUrl}/delete/${nogoListId}`,
-      'POST'
+      'DELETE'
     );
-    const deletedCount: number = response.deletedCount;
-    return deletedCount;
+    const deleteResult: {
+      nogoListDeleted: boolean;
+      nogosDeleted: number;
+    } = response.deleteResult;
+
+    return deleteResult;
   }
 }

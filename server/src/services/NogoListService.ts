@@ -7,12 +7,12 @@ import {
   INogoListReturnDTO,
   INogoListUpdateDTO,
 } from 'interfaces';
-import { NogoListDao } from 'daos';
+import { NogoDao, NogoListDao } from 'daos';
 import { NoID } from 'types';
 
 @injectable()
 export class NogoListService {
-  constructor(private nogoListDao: NogoListDao) {}
+  constructor(private nogoListDao: NogoListDao, private nogoDao: NogoDao) {}
 
   async getById(id: mongoose.Types.ObjectId) {
     return await this.nogoListDao.getById(id);
@@ -94,8 +94,30 @@ export class NogoListService {
     };
   }
 
-  async deleteById(nogoListId: mongoose.Types.ObjectId) {
-    return this.nogoListDao.deleteById(nogoListId);
+  async deleteById(nogoListId: mongoose.Types.ObjectId): Promise<{
+    nogoListDeleted: boolean;
+    nogosDeleted: number;
+  }> {
+    const nogoListDeleteResult = await this.nogoListDao.deleteById(nogoListId);
+    if (
+      !nogoListDeleteResult.acknowledged ||
+      nogoListDeleteResult.deletedCount < 1
+    ) {
+      return {
+        nogoListDeleted: false,
+        nogosDeleted: 0,
+      };
+    }
+    const nogoDeleteResult = await this.nogoDao.deleteMany({
+      nogoList: nogoListId,
+    });
+
+    return {
+      nogoListDeleted: nogoListDeleteResult.deletedCount > 0,
+      nogosDeleted: nogoDeleteResult.acknowledged
+        ? nogoDeleteResult.deletedCount
+        : 0,
+    };
   }
 
   async doesUserOwnNogoList(

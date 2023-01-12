@@ -25,3 +25,7 @@
 .marker-orange {
   background-image: url('assets/map/marker-orange.png');
 }
+
+.cursor-polyline {
+  cursor: crosshair;
+}

@@ -49,15 +49,24 @@ export const SidebarContent: React.FC = () => {
     refreshData();
   }, []);
 
-  const fetchAllNogoLists = () => NogoListApi.getAll().then(setAllNogoLists);
-  const fetchUserNogoLists = () =>
-    NogoListApi.getAllForUser().then(setUserNogoLists);
-
   const refreshData = () => {
-    fetchAllNogoLists();
-    fetchUserNogoLists();
-    if (!userNogoLists.some((nogoList) => nogoList._id === editingNogoList)) {
-      setEditingNogoList(null);
+    try {
+      NogoListApi.getAll().then(setAllNogoLists);
+      NogoListApi.getAllForUser().then((fetchedUserNogoLists) => {
+        setUserNogoLists(fetchedUserNogoLists);
+        const editingNogoListWasDeleted = !fetchedUserNogoLists.some(
+          (nogoList) => nogoList._id === editingNogoList
+        );
+        if (editingNogoListWasDeleted) {
+          setEditingNogoList(null);
+        }
+      });
+    } catch (error: any) {
+      showNotification({
+        title: 'Error fetching NOGO List data',
+        message: error.message || 'Undefined error',
+        color: 'red',
+      });
     }
   };
 
@@ -87,18 +96,21 @@ export const SidebarContent: React.FC = () => {
       confirmProps: { color: 'red' },
       onConfirm: () => {
         NogoListApi.delete(nogoList._id)
-          .then((deletedCount) => {
+          .then((deleteResult) => {
             showNotification({
-              message: `${deletedCount} NOGO List${
-                deletedCount === 1 ? ' was' : 's were'
-              } deleted.`,
+              message: deleteResult.nogoListDeleted
+                ? `NOGO List with ${deleteResult.nogosDeleted} NOGO${
+                    deleteResult.nogosDeleted === 1 ? '' : 's'
+                  } was deleted.`
+                : 'NOGO List was not deleted.',
+              color: deleteResult.nogoListDeleted ? 'green' : 'red',
             });
             refreshData();
           })
-          .catch((err) => {
+          .catch((error) => {
             showNotification({
-              title: 'Could not delete NOGO List',
-              message: err.message,
+              title: 'Error deleting NOGO List',
+              message: error.message || 'Undefined error',
               color: 'red',
             });
             refreshData();

@@ -52,8 +52,8 @@ const SignupForm: React.FC = () => {
       closeAllModals();
     } catch (error: any) {
       showNotification({
-        title: 'Signup error',
-        message: error.message || 'Unknown error',
+        title: 'Error signing up user',
+        message: error.message || 'Undefined error',
         color: 'red',
       });
     }

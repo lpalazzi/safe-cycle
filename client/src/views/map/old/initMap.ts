@@ -26,7 +26,8 @@ export const initMap = () => {
     })
     .on('locationerror', (e) => {
       showNotification({
-        message: e.message,
+        title: 'Error getting location',
+        message: e.message || 'Undefined error',
         color: 'red',
       });
     });
