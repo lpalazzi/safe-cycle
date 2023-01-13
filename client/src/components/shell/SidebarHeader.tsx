@@ -24,8 +24,7 @@ export const SidebarHeader: React.FC = () => {
         </Tooltip>
       </Group>
       <Text size='sm'>
-        SafeCycle is a bicycle navigation application for cyclists looking to
-        discover safer routes.
+        Navigation for cyclists looking to discover safer routes
       </Text>
     </>
   );
