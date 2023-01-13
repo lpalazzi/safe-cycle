@@ -97,7 +97,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     } else {
       setRoute(null);
     }
-  }, [waypoints, selectedNogoGroups]);
+  }, [waypoints, selectedNogoGroups, editingNogoGroup]);
 
   useEffect(() => {
     if (nogoWaypoints.length >= 2 && editingNogoGroup) {
