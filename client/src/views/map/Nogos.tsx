@@ -19,7 +19,7 @@ export const Nogos: React.FC = () => {
       {nogoRoutes.map((nogo) => {
         return (
           <GeoJSON
-            key={nogo._id + editingNogoGroup}
+            key={nogo._id + editingNogoGroup?._id}
             data={nogo.lineString}
             style={{
               color: nogoColor,

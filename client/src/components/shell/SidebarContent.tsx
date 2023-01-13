@@ -16,6 +16,7 @@ import {
 import { openConfirmModal, openModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import {
+  IconCheck,
   IconDots,
   IconEdit,
   IconInfoCircle,
@@ -30,7 +31,6 @@ import { NewNogoGroupModal } from 'components/modals/NewNogoGroupModal';
 import { useGlobalContext } from 'contexts/globalContext';
 import { NogoGroup } from 'models';
 import React, { forwardRef, useEffect, useState } from 'react';
-import { ID } from 'types';
 
 export const SidebarContent: React.FC = () => {
   const {
@@ -57,7 +57,7 @@ export const SidebarContent: React.FC = () => {
       NogoGroupApi.getAllForUser().then((fetchedUserNogoGroups) => {
         setUserNogoGroups(fetchedUserNogoGroups);
         const editingNogoGroupWasDeleted = !fetchedUserNogoGroups.some(
-          (nogoGroup) => nogoGroup._id === editingNogoGroup
+          (nogoGroup) => nogoGroup._id === editingNogoGroup?._id
         );
         if (editingNogoGroupWasDeleted) {
           setEditingNogoGroup(null);
@@ -72,8 +72,8 @@ export const SidebarContent: React.FC = () => {
     }
   };
 
-  const handleEditNogos = (id: ID | null) => {
-    setEditingNogoGroup(id);
+  const handleEditNogoGroup = (nogoGroup: NogoGroup | null) => {
+    setEditingNogoGroup(nogoGroup);
   };
 
   const handleEditUserNogoGroup = (nogoGroup: NogoGroup) => {
@@ -193,29 +193,30 @@ export const SidebarContent: React.FC = () => {
         {!!loggedInUser ? (
           <>
             {userNogoGroups.map((nogoGroup) => {
-              const isEditing = editingNogoGroup === nogoGroup._id;
+              const isEditing = editingNogoGroup?._id === nogoGroup._id;
+              const alreadySelected = selectedNogoGroups.includes(
+                nogoGroup._id
+              );
               return (
                 <Paper>
                   <Group position='apart'>
-                    <Group align='center' position='left' spacing='xs'>
-                      {isEditing ? (
-                        <Tooltip label='Stop editing' withArrow>
-                          <ActionIcon
-                            color='green'
-                            onClick={() => handleEditNogos(null)}
-                          >
-                            <IconEdit size={18} />
-                          </ActionIcon>
-                        </Tooltip>
-                      ) : null}
-                      <Text size='sm'>{nogoGroup.name}</Text>
-                    </Group>
+                    <Text size='sm'>{nogoGroup.name}</Text>
                     <Group position='right'>
-                      <Tooltip label='Apply' withArrow>
+                      {alreadySelected || isEditing ? (
+                        <Text size='sm' c='dimmed' color='green'>
+                          {isEditing ? 'Editing' : 'Applied'}
+                        </Text>
+                      ) : null}
+                      <Tooltip label='Apply' withArrow hidden={alreadySelected}>
                         <ActionIcon
+                          disabled={alreadySelected}
                           onClick={() => selectNogoGroup(nogoGroup._id)}
                         >
-                          <IconPlus size={18} />
+                          {alreadySelected ? (
+                            <IconCheck size={18} />
+                          ) : (
+                            <IconPlus size={18} />
+                          )}
                         </ActionIcon>
                       </Tooltip>
                       <Menu position='right-end' offset={24}>
@@ -228,7 +229,7 @@ export const SidebarContent: React.FC = () => {
                           <Menu.Item
                             icon={<IconRoadOff size={14} />}
                             onClick={() =>
-                              handleEditNogos(isEditing ? null : nogoGroup._id)
+                              handleEditNogoGroup(isEditing ? null : nogoGroup)
                             }
                           >
                             {isEditing ? 'Stop editing Nogos' : 'Edit Nogos'}

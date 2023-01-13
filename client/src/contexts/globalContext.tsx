@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { showNotification } from '@mantine/notifications';
 import { UserApi } from 'api';
-import { User } from 'models';
+import { NogoGroup, User } from 'models';
 import { ID } from 'types';
 import { useMantineTheme } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
@@ -13,14 +13,14 @@ type GlobalContextType =
       isMobileSize: boolean;
       isNavbarOpen: boolean;
       selectedNogoGroups: ID[];
-      editingNogoGroup: ID | null;
+      editingNogoGroup: NogoGroup | null;
       // functions
       updateLoggedInUser: () => void;
       logoutUser: () => void;
       toggleNavbar: () => void;
       selectNogoGroup: (id: ID) => void;
       deselectNogoGroup: (id: ID) => void;
-      setEditingNogoGroup: (id: ID | null) => void;
+      setEditingNogoGroup: (nogoGroup: NogoGroup | null) => void;
     }
   | undefined;
 
@@ -41,7 +41,9 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [isNavbarOpen, setIsNavbarOpen] = useState(!isMobileSize);
   const [selectedNogoGroups, setSelectedNogoGroups] = useState<ID[]>([]);
-  const [editingNogoGroup, setEditingNogoGroup] = useState<ID | null>(null);
+  const [editingNogoGroup, setEditingNogoGroup] = useState<NogoGroup | null>(
+    null
+  );
 
   useEffect(() => {
     updateLoggedInUser();
@@ -63,6 +65,13 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     const newSelectedNogoGroups = [...selectedNogoGroups];
     newSelectedNogoGroups.push(id);
     setSelectedNogoGroups(newSelectedNogoGroups);
+  };
+
+  const handleSetEditingNogoGroup = (nogoGroup: NogoGroup | null) => {
+    setEditingNogoGroup(nogoGroup);
+    if (isMobileSize && nogoGroup) {
+      setIsNavbarOpen(false);
+    }
   };
 
   const deselectNogoGroup = (id: ID) => {
@@ -98,7 +107,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         toggleNavbar,
         selectNogoGroup,
         deselectNogoGroup,
-        setEditingNogoGroup,
+        setEditingNogoGroup: handleSetEditingNogoGroup,
       }}
     >
       {props.children}

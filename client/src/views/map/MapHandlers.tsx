@@ -10,6 +10,7 @@ export const MapHandlers: React.FC = () => {
     setCurrentLocation,
     addWaypoint,
     clearWaypoints,
+    clearNogoWaypoints,
   } = useMapContext();
 
   const map = useMapEvents({
@@ -18,6 +19,12 @@ export const MapHandlers: React.FC = () => {
     },
     mousemove: (e) => {
       refreshWaypointLineToCursor(e.latlng);
+    },
+    keyup: (e) => {
+      if (e.originalEvent.key === 'Escape') {
+        clearNogoWaypoints();
+        refreshWaypointLineToCursor(null);
+      }
     },
     locationfound: (e) => {
       map.flyTo(e.latlng, 14);
