@@ -15,7 +15,7 @@ export const EditingNogoIndicator: React.FC = () => {
         top: 25,
         right: isMobileSize ? '50%' : 10,
         transform: isMobileSize ? 'translate(50%, 0)' : 'none',
-        zIndex: 1000,
+        zIndex: 10,
       }}
       onClick={(e) => {
         e.stopPropagation();
