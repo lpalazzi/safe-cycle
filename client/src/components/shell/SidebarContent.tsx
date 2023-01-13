@@ -186,6 +186,10 @@ export const SidebarContent: React.FC = () => {
       <Divider my='sm' />
       <Stack spacing='xs'>
         <Title order={4}>Your Nogo Groups</Title>
+        <Text size='xs' opacity={0.8}>
+          Add and edit custom Nogo Groups. Nogo Groups added here are available
+          to all users to use with their cycling routes.
+        </Text>
         {!!loggedInUser ? (
           <>
             {userNogoGroups.map((nogoGroup) => {

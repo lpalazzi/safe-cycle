@@ -3,11 +3,14 @@ import { showNotification } from '@mantine/notifications';
 import { UserApi } from 'api';
 import { User } from 'models';
 import { ID } from 'types';
+import { useMantineTheme } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 
 type GlobalContextType =
   | {
       // states
       loggedInUser: User | null;
+      isMobileSize: boolean;
       isNavbarOpen: boolean;
       selectedNogoGroups: ID[];
       editingNogoGroup: ID | null;
@@ -31,8 +34,12 @@ type GlobalContextProviderType = {
 export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   props
 ) => {
+  const theme = useMantineTheme();
+  const isMobileSize = useMediaQuery(
+    `(max-width: ${theme.breakpoints.sm - 1}px)`
+  );
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
-  const [isNavbarOpen, setIsNavbarOpen] = useState(true);
+  const [isNavbarOpen, setIsNavbarOpen] = useState(!isMobileSize);
   const [selectedNogoGroups, setSelectedNogoGroups] = useState<ID[]>([]);
   const [editingNogoGroup, setEditingNogoGroup] = useState<ID | null>(null);
 
@@ -82,6 +89,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     <GlobalContext.Provider
       value={{
         loggedInUser,
+        isMobileSize,
         isNavbarOpen,
         selectedNogoGroups,
         editingNogoGroup,

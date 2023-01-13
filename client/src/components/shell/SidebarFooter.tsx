@@ -13,14 +13,19 @@ import { openModal } from '@mantine/modals';
 import { useGlobalContext } from 'contexts/globalContext';
 import { LoginModal } from 'components/modals/LoginModal';
 import { SignupModal } from 'components/modals/SignupModal';
-import { IconChevronRight, IconLogout, IconSettings } from '@tabler/icons';
+import {
+  IconChevronRight,
+  IconDots,
+  IconLogout,
+  IconSettings,
+} from '@tabler/icons';
 
 export const SidebarFooter: React.FC = () => {
-  const { loggedInUser, logoutUser } = useGlobalContext();
+  const { loggedInUser, isMobileSize, logoutUser } = useGlobalContext();
   const theme = useMantineTheme();
 
   return !!loggedInUser ? (
-    <Menu position='right-end' offset={24}>
+    <Menu position={isMobileSize ? 'top-end' : 'right-end'} offset={24}>
       <Menu.Target>
         <UnstyledButton
           sx={{
@@ -47,7 +52,11 @@ export const SidebarFooter: React.FC = () => {
                 {loggedInUser.email}
               </Text>
             </Box>
-            <IconChevronRight size={18} />
+            {isMobileSize ? (
+              <IconDots size={18} />
+            ) : (
+              <IconChevronRight size={18} />
+            )}
           </Group>
         </UnstyledButton>
       </Menu.Target>

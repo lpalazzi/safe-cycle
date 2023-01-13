@@ -7,14 +7,14 @@ import { SidebarFooter } from './SidebarFooter';
 import { IconMenu2 } from '@tabler/icons';
 
 export const Sidebar: React.FC = () => {
-  const { isNavbarOpen, toggleNavbar } = useGlobalContext();
+  const { isMobileSize, isNavbarOpen, toggleNavbar } = useGlobalContext();
   return isNavbarOpen ? (
     <Navbar
       p='md'
-      translate='yes'
       hiddenBreakpoint='sm'
       hidden={!isNavbarOpen}
       width={{ sm: 400 }}
+      height={'100%'}
     >
       <Navbar.Section>
         <SidebarHeader />
@@ -33,12 +33,21 @@ export const Sidebar: React.FC = () => {
       onClick={() => toggleNavbar()}
       size='xl'
       variant='default'
-      style={{
-        position: 'absolute',
-        top: 20,
-        left: 20,
-        zIndex: 10,
-      }}
+      style={
+        isMobileSize
+          ? {
+              position: 'absolute',
+              top: 10,
+              right: 10,
+              zIndex: 10,
+            }
+          : {
+              position: 'absolute',
+              top: 20,
+              left: 20,
+              zIndex: 10,
+            }
+      }
     >
       <IconMenu2 color='black' size={32} />
     </ActionIcon>
