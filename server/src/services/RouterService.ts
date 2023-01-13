@@ -55,6 +55,7 @@ export class RouterService {
             'One or more of your points are not close enough to a routable location. Please select another point.'
           );
         }
+        console.log(error); // Log undandled BRouter errors to console
         throw new Error(error.response?.data ?? 'BRouter error');
       });
   }

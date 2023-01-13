@@ -35,6 +35,15 @@ export const MapHandlers: React.FC = () => {
 
   const buildEasyButtons = () => {
     L.easyButton(
+      'fa-location-crosshairs',
+      () => {
+        map.locate();
+      },
+      'Current location'
+    )
+      .addTo(map)
+      .setPosition('bottomright');
+    L.easyButton(
       'fa-eraser',
       () => {
         clearWaypoints();
@@ -42,17 +51,10 @@ export const MapHandlers: React.FC = () => {
       'Clear all waypoints'
     )
       .addTo(map)
-      .setPosition('topright');
-
-    L.easyButton('fa-location-crosshairs', () => {
-      map.locate();
-    })
-      .addTo(map)
       .setPosition('bottomright');
   };
 
   useEffect(() => {
-    map.locate();
     buildEasyButtons();
   }, []);
 
