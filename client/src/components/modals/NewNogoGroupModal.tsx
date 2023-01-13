@@ -42,6 +42,7 @@ const NewNogoGroupForm: React.FC = () => {
           withAsterisk
           label='Name'
           placeholder='Enter a name for this Nogo Group'
+          autoComplete='off'
           {...form.getInputProps('name')}
         />
       </Stack>

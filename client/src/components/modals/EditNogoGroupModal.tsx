@@ -46,6 +46,7 @@ const EditNogoGroupForm: React.FC<EditNogoGroupFormProps> = ({ nogoGroup }) => {
         <TextInput
           label='Name'
           placeholder='Enter a name for this Nogo Group'
+          autoComplete='off'
           {...form.getInputProps('name')}
         />
       </Stack>
