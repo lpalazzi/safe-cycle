@@ -2,7 +2,7 @@ import { ID } from 'types';
 
 export interface INogoReturnDTO {
   _id: ID;
-  nogoList: ID;
+  nogoGroup: ID;
   lineString: GeoJSON.LineString;
 }
 

@@ -1,6 +1,6 @@
 import { ID, Name } from 'types';
 
-interface NogoListParams {
+interface NogoGroupParams {
   _id: ID;
   name: string;
   user: {
@@ -8,12 +8,12 @@ interface NogoListParams {
   };
 }
 
-export class NogoList {
+export class NogoGroup {
   public _id;
   public name;
   public creator;
 
-  constructor(params: NogoListParams) {
+  constructor(params: NogoGroupParams) {
     this._id = params._id;
     this.name = params.name;
     this.creator = params.user.name.first + ' ' + params.user.name.last;

@@ -24,26 +24,26 @@ import {
   IconTrash,
   IconX,
 } from '@tabler/icons';
-import { NogoListApi } from 'api';
-import { EditNogoListModal } from 'components/modals/EditNogoListModal';
-import { NewNogoListModal } from 'components/modals/NewNogoListModal';
+import { NogoGroupApi } from 'api';
+import { EditNogoGroupModal } from 'components/modals/EditNogoGroupModal';
+import { NewNogoGroupModal } from 'components/modals/NewNogoGroupModal';
 import { useGlobalContext } from 'contexts/globalContext';
-import { NogoList } from 'models';
+import { NogoGroup } from 'models';
 import React, { forwardRef, useEffect, useState } from 'react';
 import { ID } from 'types';
 
 export const SidebarContent: React.FC = () => {
   const {
     loggedInUser,
-    selectedNogoLists,
-    editingNogoList,
-    selectNogoList,
-    deselectNogoList,
-    setEditingNogoList,
+    selectedNogoGroups,
+    editingNogoGroup,
+    selectNogoGroup,
+    deselectNogoGroup,
+    setEditingNogoGroup,
   } = useGlobalContext();
 
-  const [allNogoLists, setAllNogoLists] = useState<NogoList[]>([]);
-  const [userNogoLists, setUserNogoLists] = useState<NogoList[]>([]);
+  const [allNogoGroups, setAllNogoGroups] = useState<NogoGroup[]>([]);
+  const [userNogoGroups, setUserNogoGroups] = useState<NogoGroup[]>([]);
 
   useEffect(() => {
     if (loggedInUser) {
@@ -53,19 +53,19 @@ export const SidebarContent: React.FC = () => {
 
   const refreshData = () => {
     try {
-      NogoListApi.getAll().then(setAllNogoLists);
-      NogoListApi.getAllForUser().then((fetchedUserNogoLists) => {
-        setUserNogoLists(fetchedUserNogoLists);
-        const editingNogoListWasDeleted = !fetchedUserNogoLists.some(
-          (nogoList) => nogoList._id === editingNogoList
+      NogoGroupApi.getAll().then(setAllNogoGroups);
+      NogoGroupApi.getAllForUser().then((fetchedUserNogoGroups) => {
+        setUserNogoGroups(fetchedUserNogoGroups);
+        const editingNogoGroupWasDeleted = !fetchedUserNogoGroups.some(
+          (nogoGroup) => nogoGroup._id === editingNogoGroup
         );
-        if (editingNogoListWasDeleted) {
-          setEditingNogoList(null);
+        if (editingNogoGroupWasDeleted) {
+          setEditingNogoGroup(null);
         }
       });
     } catch (error: any) {
       showNotification({
-        title: 'Error fetching NOGO List data',
+        title: 'Error fetching Nogo Group data',
         message: error.message || 'Undefined error',
         color: 'red',
       });
@@ -73,45 +73,45 @@ export const SidebarContent: React.FC = () => {
   };
 
   const handleEditNogos = (id: ID | null) => {
-    setEditingNogoList(id);
+    setEditingNogoGroup(id);
   };
 
-  const handleEditUserNogoList = (nogoList: NogoList) => {
-    openModal(EditNogoListModal(nogoList, refreshData));
+  const handleEditUserNogoGroup = (nogoGroup: NogoGroup) => {
+    openModal(EditNogoGroupModal(nogoGroup, refreshData));
   };
 
-  const handleCreateUserNogoList = () => {
+  const handleCreateUserNogoGroup = () => {
     // open modal
-    openModal({ ...NewNogoListModal, onClose: refreshData });
+    openModal({ ...NewNogoGroupModal, onClose: refreshData });
   };
 
-  const handleDeleteUserNogoList = (nogoList: NogoList) => {
+  const handleDeleteUserNogoGroup = (nogoGroup: NogoGroup) => {
     openConfirmModal({
-      title: `Delete ${nogoList.name}`,
+      title: `Delete ${nogoGroup.name}`,
       children: (
         <Text size='sm'>
-          Are you sure you want to delete this NOGO List? All NOGOs saved in
+          Are you sure you want to delete this Nogo Group? All Nogos saved in
           this list will be deleted.
         </Text>
       ),
-      labels: { confirm: 'Delete NOGO List', cancel: "No don't delete it" },
+      labels: { confirm: 'Delete Nogo Group', cancel: "No don't delete it" },
       confirmProps: { color: 'red' },
       onConfirm: () => {
-        NogoListApi.delete(nogoList._id)
+        NogoGroupApi.delete(nogoGroup._id)
           .then((deleteResult) => {
             showNotification({
-              message: deleteResult.nogoListDeleted
-                ? `NOGO List with ${deleteResult.nogosDeleted} NOGO${
+              message: deleteResult.nogoGroupDeleted
+                ? `Nogo Group with ${deleteResult.nogosDeleted} Nogo${
                     deleteResult.nogosDeleted === 1 ? '' : 's'
                   } was deleted.`
-                : 'NOGO List was not deleted.',
-              color: deleteResult.nogoListDeleted ? 'green' : 'red',
+                : 'Nogo Group was not deleted.',
+              color: deleteResult.nogoGroupDeleted ? 'green' : 'red',
             });
             refreshData();
           })
           .catch((error) => {
             showNotification({
-              title: 'Error deleting NOGO List',
+              title: 'Error deleting Nogo Group',
               message: error.message || 'Undefined error',
               color: 'red',
             });
@@ -121,61 +121,61 @@ export const SidebarContent: React.FC = () => {
     });
   };
 
-  const allNogoListOptions: SelectItem[] = allNogoLists
-    .filter((nogoList) => !selectedNogoLists.includes(nogoList._id))
-    .map((nogoList) => {
+  const allNogoGroupOptions: SelectItem[] = allNogoGroups
+    .filter((nogoGroup) => !selectedNogoGroups.includes(nogoGroup._id))
+    .map((nogoGroup) => {
       return {
-        value: nogoList._id,
-        label: nogoList.name,
-        description: 'Contributed by ' + nogoList.creator,
+        value: nogoGroup._id,
+        label: nogoGroup.name,
+        description: 'Contributed by ' + nogoGroup.creator,
       };
     });
 
   return (
     <>
       <Stack spacing='xs'>
-        <Title order={4}>Applied NOGOs</Title>
+        <Title order={4}>Applied Nogos</Title>
         <Text size='xs' opacity={0.8}>
-          Select NOGO Lists to apply to your routes. Routes will avoid the paths
-          defined in each NOGO List that is applied.
+          Select Nogo Groups to apply to your routes. Routes will avoid the
+          paths defined in each Nogo Group that is applied.
         </Text>
         <Select
           data={
-            allNogoListOptions.length
-              ? allNogoListOptions
+            allNogoGroupOptions.length
+              ? allNogoGroupOptions
               : [
                   {
                     value: '-1',
-                    label: "You've applied all available NOGO Lists",
+                    label: "You've applied all available Nogo Groups",
                     disabled: true,
                   },
                 ]
           }
           value={null}
-          onChange={selectNogoList}
+          onChange={selectNogoGroup}
           placeholder={
-            allNogoLists.length > 0
-              ? 'Select a NOGO List to apply'
-              : 'No NOGO Lists available'
+            allNogoGroups.length > 0
+              ? 'Select a Nogo Group to apply'
+              : 'No Nogo Groups available'
           }
-          disabled={allNogoLists.length === 0}
+          disabled={allNogoGroups.length === 0}
           itemComponent={SelectItem}
         />
-        {selectedNogoLists.map((nogoListId) => {
-          const nogoList = allNogoLists.find(
-            (nogoList) => nogoList._id === nogoListId
+        {selectedNogoGroups.map((nogoGroupId) => {
+          const nogoGroup = allNogoGroups.find(
+            (nogoGroup) => nogoGroup._id === nogoGroupId
           );
 
-          return !!nogoList ? (
+          return !!nogoGroup ? (
             <Paper>
               <Group position='apart'>
                 <Stack spacing={0}>
-                  <Text size='sm'>{nogoList.name}</Text>
+                  <Text size='sm'>{nogoGroup.name}</Text>
                   <Text size='xs' opacity={0.65}>
-                    {'Contributed by ' + nogoList.creator}
+                    {'Contributed by ' + nogoGroup.creator}
                   </Text>
                 </Stack>
-                <ActionIcon onClick={() => deselectNogoList(nogoList._id)}>
+                <ActionIcon onClick={() => deselectNogoGroup(nogoGroup._id)}>
                   <IconX size={18} />
                 </ActionIcon>
               </Group>
@@ -185,11 +185,11 @@ export const SidebarContent: React.FC = () => {
       </Stack>
       <Divider my='sm' />
       <Stack spacing='xs'>
-        <Title order={4}>Your NOGO Lists</Title>
+        <Title order={4}>Your Nogo Groups</Title>
         {!!loggedInUser ? (
           <>
-            {userNogoLists.map((nogoList) => {
-              const isEditing = editingNogoList === nogoList._id;
+            {userNogoGroups.map((nogoGroup) => {
+              const isEditing = editingNogoGroup === nogoGroup._id;
               return (
                 <Paper>
                   <Group position='apart'>
@@ -204,12 +204,12 @@ export const SidebarContent: React.FC = () => {
                           </ActionIcon>
                         </Tooltip>
                       ) : null}
-                      <Text size='sm'>{nogoList.name}</Text>
+                      <Text size='sm'>{nogoGroup.name}</Text>
                     </Group>
                     <Group position='right'>
                       <Tooltip label='Apply' withArrow>
                         <ActionIcon
-                          onClick={() => selectNogoList(nogoList._id)}
+                          onClick={() => selectNogoGroup(nogoGroup._id)}
                         >
                           <IconPlus size={18} />
                         </ActionIcon>
@@ -224,23 +224,23 @@ export const SidebarContent: React.FC = () => {
                           <Menu.Item
                             icon={<IconRoadOff size={14} />}
                             onClick={() =>
-                              handleEditNogos(isEditing ? null : nogoList._id)
+                              handleEditNogos(isEditing ? null : nogoGroup._id)
                             }
                           >
-                            {isEditing ? 'Stop editing NOGOs' : 'Edit NOGOs'}
+                            {isEditing ? 'Stop editing Nogos' : 'Edit Nogos'}
                           </Menu.Item>
                           <Menu.Item
                             icon={<IconEdit size={14} />}
-                            onClick={() => handleEditUserNogoList(nogoList)}
+                            onClick={() => handleEditUserNogoGroup(nogoGroup)}
                           >
                             Edit list properties
                           </Menu.Item>
                           <Menu.Item
                             icon={<IconTrash size={14} />}
                             color='red'
-                            onClick={() => handleDeleteUserNogoList(nogoList)}
+                            onClick={() => handleDeleteUserNogoGroup(nogoGroup)}
                           >
-                            Delete NOGO List
+                            Delete Nogo Group
                           </Menu.Item>
                         </Menu.Dropdown>
                       </Menu>
@@ -252,14 +252,14 @@ export const SidebarContent: React.FC = () => {
             <Button
               variant='light'
               leftIcon={<IconPlus size={18} />}
-              onClick={handleCreateUserNogoList}
+              onClick={handleCreateUserNogoGroup}
             >
-              Create new NOGO List
+              Create new Nogo Group
             </Button>
           </>
         ) : (
           <Alert icon={<IconInfoCircle size={16} />} color='gray'>
-            Please sign in to add your own NOGOs
+            Please sign in to add your own Nogos
           </Alert>
         )}
       </Stack>

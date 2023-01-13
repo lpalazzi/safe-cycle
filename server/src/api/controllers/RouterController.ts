@@ -13,19 +13,19 @@ export const router = (app: express.Router) => {
   route.post('/generateRoute', async (req, res, next) => {
     try {
       const points: GeoJSON.Position[] = req.body.points ?? [];
-      const nogoListIds: string[] = req.body.nogoListIds ?? [];
+      const nogoGroupIds: string[] = req.body.nogoGroupIds ?? [];
       const isNogo = req.query.isNogo === 'true';
 
       if (points.length < 2) {
         throw new BadRequestError('Route request must have at least 2 points');
       }
 
-      const invalidNogoListId = nogoListIds.find(
-        (nogoListId) => !mongoose.isValidObjectId(nogoListId)
+      const invalidNogoGroupId = nogoGroupIds.find(
+        (nogoGroupId) => !mongoose.isValidObjectId(nogoGroupId)
       );
-      if (invalidNogoListId) {
+      if (invalidNogoGroupId) {
         throw new BadRequestError(
-          `nogoListId=${invalidNogoListId} is not a valid ObjectId`
+          `nogoGroupId=${invalidNogoGroupId} is not a valid ObjectId`
         );
       }
 
@@ -38,8 +38,8 @@ export const router = (app: express.Router) => {
       } else {
         const nogos = (
           await Promise.all(
-            nogoListIds.map((nogoListId) =>
-              nogoService.getAllByList(new mongoose.Types.ObjectId(nogoListId))
+            nogoGroupIds.map((nogoGroupId) =>
+              nogoService.getAllByList(new mongoose.Types.ObjectId(nogoGroupId))
             )
           )
         ).flat();

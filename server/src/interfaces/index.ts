@@ -1,3 +1,3 @@
 export * from './IUser';
 export * from './INogo';
-export * from './INogoList';
+export * from './INogoGroup';

@@ -6,14 +6,14 @@ import { closeAllModals } from '@mantine/modals';
 import { ModalSettings } from '@mantine/modals/lib/context';
 import { showNotification } from '@mantine/notifications';
 
-import { NogoListApi } from 'api';
-import { INogoListCreateDTO as NewNogoListFormValues } from 'api/interfaces/NogoList';
+import { NogoGroupApi } from 'api';
+import { INogoGroupCreateDTO as NewNogoGroupFormValues } from 'api/interfaces/NogoGroup';
 
-const NewNogoListForm: React.FC = () => {
+const NewNogoGroupForm: React.FC = () => {
   const form = useForm({
     initialValues: {
       name: '',
-    } as NewNogoListFormValues,
+    } as NewNogoGroupFormValues,
     validate: {
       name: (value) => {
         if (!value) return 'A name is required';
@@ -22,13 +22,13 @@ const NewNogoListForm: React.FC = () => {
     },
   });
 
-  const handleSubmit = async (values: NewNogoListFormValues) => {
+  const handleSubmit = async (values: NewNogoGroupFormValues) => {
     try {
-      await NogoListApi.create(values);
+      await NogoGroupApi.create(values);
       closeAllModals();
     } catch (error: any) {
       showNotification({
-        title: 'Error creating NOGO List',
+        title: 'Error creating Nogo Group',
         message: error.message || 'Undefined error',
         color: 'red',
       });
@@ -41,7 +41,7 @@ const NewNogoListForm: React.FC = () => {
         <TextInput
           withAsterisk
           label='Name'
-          placeholder='Enter a name for this NOGO List'
+          placeholder='Enter a name for this Nogo Group'
           {...form.getInputProps('name')}
         />
       </Stack>
@@ -52,7 +52,7 @@ const NewNogoListForm: React.FC = () => {
   );
 };
 
-export const NewNogoListModal: ModalSettings = {
-  title: 'New NOGO List',
-  children: <NewNogoListForm />,
+export const NewNogoGroupModal: ModalSettings = {
+  title: 'New Nogo Group',
+  children: <NewNogoGroupForm />,
 };

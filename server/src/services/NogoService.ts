@@ -3,17 +3,17 @@ import mongoose from 'mongoose';
 import { injectable, inject } from 'tsyringe';
 import { INogoCreateDTO, INogoReturnDTO } from 'interfaces';
 import { NogoDao } from 'daos';
-import { NogoListService } from 'services';
+import { NogoGroupService } from 'services';
 
 @injectable()
 export class NogoService {
   constructor(
     private nogoDao: NogoDao,
-    @inject('NogoListService') private nogoListService: NogoListService
+    @inject('NogoGroupService') private nogoGroupService: NogoGroupService
   ) {}
 
-  async getAllByList(nogoListId: mongoose.Types.ObjectId) {
-    return this.nogoDao.get({ nogoList: nogoListId });
+  async getAllByList(nogoGroupId: mongoose.Types.ObjectId) {
+    return this.nogoDao.get({ nogoGroup: nogoGroupId });
   }
 
   async deleteById(nogoId: mongoose.Types.ObjectId) {
@@ -26,9 +26,9 @@ export class NogoService {
   ) {
     const nogo = await this.nogoDao.getById(nogoId);
     if (!nogo) {
-      throw new Error('NOGO not found');
+      throw new Error('Nogo not found');
     }
-    return this.nogoListService.doesUserOwnNogoList(nogo.nogoList, userId);
+    return this.nogoGroupService.doesUserOwnNogoGroup(nogo.nogoGroup, userId);
   }
 
   async create(
@@ -53,7 +53,7 @@ export class NogoService {
   private validateNewNogo(newNogo: INogoCreateDTO) {
     const { error } = joi
       .object({
-        nogoList: joi.objectId().required(),
+        nogoGroup: joi.objectId().required(),
         lineString: joi.geojson().lineString().required(),
       })
       .required()

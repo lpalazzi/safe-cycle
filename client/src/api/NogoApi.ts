@@ -7,9 +7,9 @@ import { RouterApi } from './RouterApi';
 export class NogoApi {
   private static baseUrl = '/nogo';
 
-  static async getAllByList(nogoListId: ID) {
+  static async getAllByList(nogoGroupId: ID) {
     const response = await makeRequest(
-      `${this.baseUrl}/getAllByList/${nogoListId}`
+      `${this.baseUrl}/getAllByList/${nogoGroupId}`
     );
     const nogosReturn: INogoReturnDTO[] = response.nogos;
     if (!nogosReturn) return [];
@@ -17,10 +17,10 @@ export class NogoApi {
     return nogos;
   }
 
-  static async create(waypoints: L.LatLng[], nogoListId: ID) {
+  static async create(waypoints: L.LatLng[], nogoGroupId: ID) {
     const nogoRoute = await RouterApi.generateRoute(waypoints, [], true);
     const nogo: INogoCreateDTO = {
-      nogoList: nogoListId,
+      nogoGroup: nogoGroupId,
       lineString: nogoRoute.route,
     };
     const response = await makeRequest(`${this.baseUrl}/create`, 'POST', {

@@ -2,18 +2,18 @@ import { ID } from 'types';
 
 interface NogoParams {
   _id: ID;
-  nogoList: ID;
+  nogoGroup: ID;
   lineString: GeoJSON.LineString;
 }
 
 export class Nogo {
   public _id;
-  public nogoList;
+  public nogoGroup;
   public lineString;
 
   constructor(params: NogoParams) {
     this._id = params._id;
-    this.nogoList = params.nogoList;
+    this.nogoGroup = params.nogoGroup;
     this.lineString = params.lineString;
   }
 }

@@ -6,7 +6,7 @@ import { GeoJSON, Polyline, Popup, useMap } from 'react-leaflet';
 import { useMapContext } from '../../contexts/mapContext';
 
 export const Nogos: React.FC = () => {
-  const { editingNogoList } = useGlobalContext();
+  const { editingNogoGroup } = useGlobalContext();
   const { nogoRoutes, lineToCursor, deleteNogo } = useMapContext();
   const theme = useMantineTheme();
   const map = useMap();
@@ -19,12 +19,12 @@ export const Nogos: React.FC = () => {
       {nogoRoutes.map((nogo) => {
         return (
           <GeoJSON
-            key={nogo._id + editingNogoList}
+            key={nogo._id + editingNogoGroup}
             data={nogo.lineString}
             style={{
               color: nogoColor,
-              weight: editingNogoList ? 4 : 2,
-              opacity: editingNogoList ? 1.0 : 0.8,
+              weight: editingNogoGroup ? 4 : 2,
+              opacity: editingNogoGroup ? 1.0 : 0.8,
             }}
           >
             <Popup>
@@ -39,7 +39,7 @@ export const Nogos: React.FC = () => {
               >
                 <Group position='center' spacing='xs' noWrap>
                   <IconTrash />
-                  <>Delete NOGO</>
+                  <>Delete Nogo</>
                 </Group>
               </Button>
             </Popup>
