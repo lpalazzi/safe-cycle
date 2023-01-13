@@ -203,22 +203,26 @@ export const SidebarContent: React.FC = () => {
                     <Text size='sm'>{nogoGroup.name}</Text>
                     <Group position='right'>
                       {alreadySelected || isEditing ? (
-                        <Text size='sm' c='dimmed' color='green'>
+                        <Text size='sm' c='dimmed'>
                           {isEditing ? 'Editing' : 'Applied'}
                         </Text>
                       ) : null}
-                      <Tooltip label='Apply' withArrow hidden={alreadySelected}>
-                        <ActionIcon
-                          disabled={alreadySelected}
-                          onClick={() => selectNogoGroup(nogoGroup._id)}
+                      {alreadySelected ? (
+                        <IconCheck size={18} color='grey' />
+                      ) : (
+                        <Tooltip
+                          label='Apply'
+                          withArrow
+                          hidden={alreadySelected}
                         >
-                          {alreadySelected ? (
-                            <IconCheck size={18} />
-                          ) : (
+                          <ActionIcon
+                            disabled={alreadySelected}
+                            onClick={() => selectNogoGroup(nogoGroup._id)}
+                          >
                             <IconPlus size={18} />
-                          )}
-                        </ActionIcon>
-                      </Tooltip>
+                          </ActionIcon>
+                        </Tooltip>
+                      )}
                       <Menu position='right-end' offset={24}>
                         <Menu.Target>
                           <ActionIcon>
