@@ -21,7 +21,7 @@ export class UserService {
     userDTO: IUserSignupDTO
   ): Promise<{ user: IUserReturnDTO | null; error: string | null }> {
     try {
-      this.validateUserSignup(userDTO);
+      await this.validateUserSignup(userDTO);
       const { password, ...userToCreate } = userDTO;
       const passwordHash = await argon2.hash(password);
       const user = await this.userDao.create({
@@ -87,7 +87,7 @@ export class UserService {
     }
   }
 
-  private validateUserSignup(userDTO: IUserSignupDTO) {
+  private async validateUserSignup(userDTO: IUserSignupDTO) {
     const { error } = joi
       .object({
         email: joi.string().email().required(),
@@ -104,6 +104,13 @@ export class UserService {
 
     if (error) {
       throw new Error(error.message);
+    }
+
+    const userExistsWithEmail = await this.userDao.exists({
+      email: userDTO.email,
+    });
+    if (userExistsWithEmail) {
+      throw new Error('A user already exists with this email');
     }
   }
 }

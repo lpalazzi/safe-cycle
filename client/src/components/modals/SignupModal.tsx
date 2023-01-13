@@ -1,6 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-import { Button, Group, Stack, TextInput } from '@mantine/core';
+import {
+  Box,
+  Button,
+  Group,
+  PasswordInput,
+  Popover,
+  Progress,
+  Stack,
+  Text,
+  TextInput,
+} from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { closeAllModals } from '@mantine/modals';
 import { ModalSettings } from '@mantine/modals/lib/context';
@@ -8,11 +18,18 @@ import { showNotification } from '@mantine/notifications';
 
 import { UserApi } from 'api';
 import { IUserSignupDTO as SignupFormValues } from 'api/interfaces/User';
-import { validateEmail, validatePassword } from 'utils/validation';
+import {
+  getPasswordStrength,
+  passwordRequirements,
+  validateEmail,
+  validatePassword,
+} from 'utils/validation';
 import { useGlobalContext } from 'contexts/globalContext';
+import { IconCheck, IconX } from '@tabler/icons';
 
 const SignupForm: React.FC = () => {
   const { updateLoggedInUser } = useGlobalContext();
+  const [passwordPopoverOpened, setPasswordPopoverOpened] = useState(false);
 
   const form = useForm({
     initialValues: {
@@ -30,7 +47,9 @@ const SignupForm: React.FC = () => {
       },
       password: (value) => {
         if (!value) return 'Password is required';
-        return validatePassword(value) ? null : 'Invalid email';
+        return validatePassword(value)
+          ? null
+          : 'Password does not match requirements';
       },
       name: {
         first: (value) => {
@@ -59,6 +78,18 @@ const SignupForm: React.FC = () => {
     }
   };
 
+  const strength = getPasswordStrength(form.values.password);
+  const color = strength === 100 ? 'teal' : strength > 50 ? 'yellow' : 'red';
+  const passwordChecks = passwordRequirements.map((requirement, index) => (
+    <PasswordRequirement
+      key={index}
+      label={requirement.label}
+      meets={requirement.re.test(form.values.password)}
+    />
+  ));
+
+  console.log(validatePassword(form.values.password));
+
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack spacing='xs'>
@@ -85,14 +116,40 @@ const SignupForm: React.FC = () => {
           autoComplete='email'
           {...form.getInputProps('email')}
         />
-        <TextInput
-          withAsterisk
-          label='Password'
-          placeholder='********'
-          type='password'
-          autoComplete='new-password'
-          {...form.getInputProps('password')}
-        />
+        <Popover
+          opened={passwordPopoverOpened}
+          position='bottom'
+          width='target'
+          transition='pop'
+        >
+          <Popover.Target>
+            <div
+              onFocusCapture={() => setPasswordPopoverOpened(true)}
+              onBlurCapture={() => setPasswordPopoverOpened(false)}
+            >
+              <PasswordInput
+                withAsterisk
+                label='Password'
+                placeholder='Password'
+                autoComplete='new-password'
+                {...form.getInputProps('password')}
+              />
+            </div>
+          </Popover.Target>
+          <Popover.Dropdown>
+            <Progress
+              color={color}
+              value={strength}
+              size={5}
+              style={{ marginBottom: 10 }}
+            />
+            <PasswordRequirement
+              label='Includes at least 8 characters'
+              meets={form.values.password.length > 5}
+            />
+            {passwordChecks}
+          </Popover.Dropdown>
+        </Popover>
       </Stack>
       <Group position='right' mt='md'>
         <Button type='submit'>Submit</Button>
@@ -104,4 +161,24 @@ const SignupForm: React.FC = () => {
 export const SignupModal: ModalSettings = {
   title: 'Create account',
   children: <SignupForm />,
+};
+
+const PasswordRequirement = ({
+  meets,
+  label,
+}: {
+  meets: boolean;
+  label: string;
+}) => {
+  return (
+    <Text
+      color={meets ? 'teal' : 'red'}
+      sx={{ display: 'flex', alignItems: 'center' }}
+      mt={7}
+      size='sm'
+    >
+      {meets ? <IconCheck size={14} /> : <IconX size={14} />}{' '}
+      <Box ml={10}>{label}</Box>
+    </Text>
+  );
 };
