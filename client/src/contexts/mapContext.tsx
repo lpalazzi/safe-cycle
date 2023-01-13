@@ -22,7 +22,8 @@ type MapContextType =
       clearWaypoints: () => void;
       setRoute: (lnstr: GeoJSON.LineString) => void;
       deleteNogo: (nogoId: ID) => void;
-      refreshWaypointLineToCursor: (mousePosition: L.LatLng) => void;
+      clearNogoWaypoints: () => void;
+      refreshWaypointLineToCursor: (mousePosition: L.LatLng | null) => void;
     }
   | undefined;
 
@@ -68,8 +69,12 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     setWaypoints([]);
   };
 
-  const refreshWaypointLineToCursor = (mousePosition: L.LatLng) => {
-    if (editingNogoGroup && nogoWaypoints.length === 1) {
+  const clearNogoWaypoints = () => {
+    setNogoWaypoints([]);
+  };
+
+  const refreshWaypointLineToCursor = (mousePosition: L.LatLng | null) => {
+    if (mousePosition && editingNogoGroup && nogoWaypoints.length === 1) {
       setLineToCursor([nogoWaypoints[0], mousePosition]);
     } else {
       setLineToCursor(null);
@@ -96,12 +101,13 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
 
   useEffect(() => {
     if (nogoWaypoints.length >= 2 && editingNogoGroup) {
-      NogoApi.create(nogoWaypoints, editingNogoGroup)
+      NogoApi.create(nogoWaypoints, editingNogoGroup._id)
         .then(() => {
           refreshNogoRoutes();
-          setNogoWaypoints([]);
+          clearNogoWaypoints();
         })
         .catch((err) => {
+          clearNogoWaypoints();
           showNotification({
             title: 'Error creating Nogo',
             message: err.message || 'Undefined error',
@@ -114,7 +120,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   const refreshNogoRoutes = async () => {
     try {
       if (editingNogoGroup) {
-        NogoApi.getAllByList(editingNogoGroup).then(setNogoRoutes);
+        NogoApi.getAllByList(editingNogoGroup._id).then(setNogoRoutes);
       } else {
         const fetchedNogos: Nogo[] = (
           await Promise.all(
@@ -136,6 +142,9 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
 
   useEffect(() => {
     refreshNogoRoutes();
+    if (!editingNogoGroup) {
+      clearNogoWaypoints();
+    }
   }, [editingNogoGroup, selectedNogoGroups]);
 
   const deleteNogo = async (nogoId: ID) => {
@@ -171,6 +180,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         clearWaypoints,
         setRoute,
         deleteNogo,
+        clearNogoWaypoints,
         refreshWaypointLineToCursor,
       }}
     >
