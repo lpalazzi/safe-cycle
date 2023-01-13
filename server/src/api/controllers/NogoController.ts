@@ -15,15 +15,15 @@ export const nogo = (app: express.Router) => {
   app.use('/nogo', route);
   const nogoService = container.resolve(NogoService);
 
-  route.get('/getAllByList/:nogoListId', async (req, res, next) => {
+  route.get('/getAllByList/:nogoGroupId', async (req, res, next) => {
     try {
-      if (!mongoose.isValidObjectId(req.params.nogoListId)) {
+      if (!mongoose.isValidObjectId(req.params.nogoGroupId)) {
         throw new BadRequestError(
-          `${req.params.nogoListId} is not a valid ObjectId`
+          `${req.params.nogoGroupId} is not a valid ObjectId`
         );
       }
-      const nogoListId = new mongoose.Types.ObjectId(req.params.nogoListId);
-      const nogos = await nogoService.getAllByList(nogoListId);
+      const nogoGroupId = new mongoose.Types.ObjectId(req.params.nogoGroupId);
+      const nogos = await nogoService.getAllByList(nogoGroupId);
       return res.json({ nogos });
     } catch (err) {
       next(err);
@@ -38,7 +38,7 @@ export const nogo = (app: express.Router) => {
       if (error) {
         throw new BadRequestError(error);
       } else if (!nogo) {
-        throw new InternalServerError('NOGO could not be created');
+        throw new InternalServerError('Nogo could not be created');
       }
 
       return res.json({ nogo });
@@ -58,7 +58,7 @@ export const nogo = (app: express.Router) => {
       const userCanDelete = await nogoService.canUserUpdateNogo(nogoId, userId);
       if (!userCanDelete) {
         throw new UnauthorizedError(
-          'User is not authorized to delete this NOGO'
+          'User is not authorized to delete this Nogo'
         );
       }
 

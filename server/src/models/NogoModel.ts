@@ -3,10 +3,10 @@ import { INogo } from 'interfaces';
 import { LineStringSchema } from './subschemas';
 
 const NogoSchema = new mongoose.Schema<INogo>({
-  nogoList: {
+  nogoGroup: {
     type: mongoose.SchemaTypes.ObjectId,
     required: true,
-    ref: 'NogoList',
+    ref: 'NogoGroup',
   },
   lineString: {
     type: LineStringSchema,

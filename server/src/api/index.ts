@@ -5,7 +5,7 @@ const app = express.Router();
 
 controllers.user(app);
 controllers.nogo(app);
-controllers.nogoList(app);
+controllers.nogoGroup(app);
 controllers.router(app);
 
 export default app;

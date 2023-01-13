@@ -6,19 +6,19 @@ import { closeAllModals } from '@mantine/modals';
 import { ModalSettings } from '@mantine/modals/lib/context';
 import { showNotification } from '@mantine/notifications';
 
-import { NogoListApi } from 'api';
-import { INogoListUpdateDTO as EditNogoListFormValues } from 'api/interfaces/NogoList';
-import { NogoList } from 'models';
+import { NogoGroupApi } from 'api';
+import { INogoGroupUpdateDTO as EditNogoGroupFormValues } from 'api/interfaces/NogoGroup';
+import { NogoGroup } from 'models';
 
-type EditNogoListFormProps = {
-  nogoList: NogoList;
+type EditNogoGroupFormProps = {
+  nogoGroup: NogoGroup;
 };
 
-const EditNogoListForm: React.FC<EditNogoListFormProps> = ({ nogoList }) => {
+const EditNogoGroupForm: React.FC<EditNogoGroupFormProps> = ({ nogoGroup }) => {
   const form = useForm({
     initialValues: {
-      name: nogoList.name,
-    } as EditNogoListFormValues,
+      name: nogoGroup.name,
+    } as EditNogoGroupFormValues,
     validate: {
       name: (value) => {
         if (!value) return 'A name is required';
@@ -27,13 +27,13 @@ const EditNogoListForm: React.FC<EditNogoListFormProps> = ({ nogoList }) => {
     },
   });
 
-  const handleSubmit = async (values: EditNogoListFormValues) => {
+  const handleSubmit = async (values: EditNogoGroupFormValues) => {
     try {
-      await NogoListApi.update(nogoList._id, values);
+      await NogoGroupApi.update(nogoGroup._id, values);
       closeAllModals();
     } catch (error: any) {
       showNotification({
-        title: 'Error updating NOGO List',
+        title: 'Error updating Nogo Group',
         message: error.message || 'Undefined error',
         color: 'red',
       });
@@ -45,7 +45,7 @@ const EditNogoListForm: React.FC<EditNogoListFormProps> = ({ nogoList }) => {
       <Stack spacing='xs'>
         <TextInput
           label='Name'
-          placeholder='Enter a name for this NOGO List'
+          placeholder='Enter a name for this Nogo Group'
           {...form.getInputProps('name')}
         />
       </Stack>
@@ -56,10 +56,13 @@ const EditNogoListForm: React.FC<EditNogoListFormProps> = ({ nogoList }) => {
   );
 };
 
-export const EditNogoListModal = (nogoList: NogoList, onClose: () => void) => {
+export const EditNogoGroupModal = (
+  nogoGroup: NogoGroup,
+  onClose: () => void
+) => {
   const modalSettings: ModalSettings = {
-    title: 'Edit NOGO List',
-    children: <EditNogoListForm nogoList={nogoList} />,
+    title: 'Edit Nogo Group',
+    children: <EditNogoGroupForm nogoGroup={nogoGroup} />,
     onClose: onClose,
   };
   return modalSettings;

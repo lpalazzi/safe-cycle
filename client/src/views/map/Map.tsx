@@ -17,7 +17,7 @@ import { Nogos } from './Nogos';
 import { useGlobalContext } from 'contexts/globalContext';
 
 export const Map: React.FC = () => {
-  const { editingNogoList } = useGlobalContext();
+  const { editingNogoGroup } = useGlobalContext();
   return (
     <MapContainer
       style={{
@@ -43,7 +43,7 @@ export const Map: React.FC = () => {
       <ScaleControl />
       <ZoomControl position='bottomright' />
       <MapHandlers />
-      {!editingNogoList ? (
+      {!editingNogoGroup ? (
         <>
           <Markers />
           <Route />

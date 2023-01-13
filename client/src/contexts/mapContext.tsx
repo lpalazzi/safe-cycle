@@ -34,7 +34,7 @@ type MapContextProviderType = {
 };
 
 export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
-  const { editingNogoList, selectedNogoLists } = useGlobalContext();
+  const { editingNogoGroup, selectedNogoGroups } = useGlobalContext();
   const [currentLocation, setCurrentLocation] = useState<L.LatLng | null>(null);
   const [waypoints, setWaypoints] = useState<L.LatLng[]>([]);
   const [nogoWaypoints, setNogoWaypoints] = useState<L.LatLng[]>([]);
@@ -45,7 +45,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   const [nogoRoutes, setNogoRoutes] = useState<Nogo[]>([]);
 
   const addWaypoint = (newWaypoint: L.LatLng) => {
-    if (!editingNogoList) {
+    if (!editingNogoGroup) {
       setWaypoints([...waypoints, newWaypoint]);
     } else {
       setNogoWaypoints([...nogoWaypoints, newWaypoint]);
@@ -69,7 +69,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   };
 
   const refreshWaypointLineToCursor = (mousePosition: L.LatLng) => {
-    if (editingNogoList && nogoWaypoints.length === 1) {
+    if (editingNogoGroup && nogoWaypoints.length === 1) {
       setLineToCursor([nogoWaypoints[0], mousePosition]);
     } else {
       setLineToCursor(null);
@@ -78,7 +78,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
 
   useEffect(() => {
     if (waypoints.length >= 2) {
-      RouterApi.generateRoute(waypoints, selectedNogoLists, false)
+      RouterApi.generateRoute(waypoints, selectedNogoGroups, false)
         .then((res) => {
           setRoute(res.route);
         })
@@ -92,18 +92,18 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     } else {
       setRoute(null);
     }
-  }, [waypoints, selectedNogoLists]);
+  }, [waypoints, selectedNogoGroups]);
 
   useEffect(() => {
-    if (nogoWaypoints.length >= 2 && editingNogoList) {
-      NogoApi.create(nogoWaypoints, editingNogoList)
+    if (nogoWaypoints.length >= 2 && editingNogoGroup) {
+      NogoApi.create(nogoWaypoints, editingNogoGroup)
         .then(() => {
           refreshNogoRoutes();
           setNogoWaypoints([]);
         })
         .catch((err) => {
           showNotification({
-            title: 'Error creating NOGO',
+            title: 'Error creating Nogo',
             message: err.message || 'Undefined error',
             color: 'red',
           });
@@ -113,13 +113,13 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
 
   const refreshNogoRoutes = async () => {
     try {
-      if (editingNogoList) {
-        NogoApi.getAllByList(editingNogoList).then(setNogoRoutes);
+      if (editingNogoGroup) {
+        NogoApi.getAllByList(editingNogoGroup).then(setNogoRoutes);
       } else {
         const fetchedNogos: Nogo[] = (
           await Promise.all(
-            selectedNogoLists.map(async (selectedNogoList) => {
-              return NogoApi.getAllByList(selectedNogoList);
+            selectedNogoGroups.map(async (selectedNogoGroup) => {
+              return NogoApi.getAllByList(selectedNogoGroup);
             })
           )
         ).flat();
@@ -127,7 +127,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
       }
     } catch (error: any) {
       showNotification({
-        title: 'Error fetching NOGOs',
+        title: 'Error fetching Nogos',
         message: error.message || 'Undefined error',
         color: 'red',
       });
@@ -136,20 +136,20 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
 
   useEffect(() => {
     refreshNogoRoutes();
-  }, [editingNogoList, selectedNogoLists]);
+  }, [editingNogoGroup, selectedNogoGroups]);
 
   const deleteNogo = async (nogoId: ID) => {
     try {
       const deletedCount = await NogoApi.delete(nogoId);
       showNotification({
         message:
-          deletedCount > 0 ? '1 NOGO was deleted' : 'NOGO was not deleted',
+          deletedCount > 0 ? '1 Nogo was deleted' : 'Nogo was not deleted',
         color: deletedCount > 0 ? 'green' : 'red',
       });
       refreshNogoRoutes();
     } catch (error: any) {
       showNotification({
-        title: 'Error deleting NOGO',
+        title: 'Error deleting Nogo',
         message: error.message || 'Undefined error',
         color: 'red',
       });
