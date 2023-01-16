@@ -42,28 +42,31 @@ export const SidebarContent: React.FC = () => {
     setEditingNogoGroup,
   } = useGlobalContext();
 
-  const [allNogoGroups, setAllNogoGroups] = useState<NogoGroup[]>([]);
+  const [allPublicNogoGroups, setAllPublicNogoGroups] = useState<NogoGroup[]>(
+    []
+  );
   const [userNogoGroups, setUserNogoGroups] = useState<NogoGroup[]>([]);
 
   useEffect(() => {
-    if (loggedInUser) {
-      refreshData();
-    }
+    refreshData();
   }, [loggedInUser]);
 
-  const refreshData = () => {
+  const refreshData = async () => {
     try {
-      NogoGroupApi.getAll().then(setAllNogoGroups);
-      NogoGroupApi.getAllForUser().then((fetchedUserNogoGroups) => {
-        setUserNogoGroups(fetchedUserNogoGroups);
-        const editingNogoGroupWasDeleted = !fetchedUserNogoGroups.some(
-          (nogoGroup) => nogoGroup._id === editingNogoGroup?._id
-        );
-        if (editingNogoGroupWasDeleted) {
-          setEditingNogoGroup(null);
-        }
-      });
+      setAllPublicNogoGroups(await NogoGroupApi.getAllPublic());
+      const fetchedUserNogoGroups = await NogoGroupApi.getAllForUser();
+      setUserNogoGroups(fetchedUserNogoGroups);
+      const editingNogoGroupWasDeleted = !fetchedUserNogoGroups.some(
+        (nogoGroup) => nogoGroup._id === editingNogoGroup?._id
+      );
+      if (editingNogoGroupWasDeleted) {
+        setEditingNogoGroup(null);
+      }
     } catch (error: any) {
+      if (error.message === 'User is not logged in') {
+        setUserNogoGroups([]);
+        return;
+      }
       showNotification({
         title: 'Error fetching Nogo Group data',
         message: error.message || 'Undefined error',
@@ -121,7 +124,7 @@ export const SidebarContent: React.FC = () => {
     });
   };
 
-  const allNogoGroupOptions: SelectItem[] = allNogoGroups
+  const allNogoGroupOptions: SelectItem[] = allPublicNogoGroups
     .filter((nogoGroup) => !selectedNogoGroups.includes(nogoGroup._id))
     .map((nogoGroup) => {
       return {
@@ -140,6 +143,7 @@ export const SidebarContent: React.FC = () => {
           paths defined in each Nogo Group that is applied.
         </Text>
         <Select
+          label='Publicly available Nogo Groups'
           data={
             allNogoGroupOptions.length
               ? allNogoGroupOptions
@@ -154,15 +158,15 @@ export const SidebarContent: React.FC = () => {
           value={null}
           onChange={selectNogoGroup}
           placeholder={
-            allNogoGroups.length > 0
+            allPublicNogoGroups.length > 0
               ? 'Select a Nogo Group to apply'
               : 'No Nogo Groups available'
           }
-          disabled={allNogoGroups.length === 0}
+          disabled={allPublicNogoGroups.length === 0}
           itemComponent={SelectItem}
         />
         {selectedNogoGroups.map((nogoGroupId) => {
-          const nogoGroup = allNogoGroups.find(
+          const nogoGroup = [...allPublicNogoGroups, ...userNogoGroups].find(
             (nogoGroup) => nogoGroup._id === nogoGroupId
           );
 

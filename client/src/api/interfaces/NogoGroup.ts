@@ -6,10 +6,10 @@ export interface INogoGroupReturnDTO {
   user: {
     name: Name;
   };
+  isPublic?: boolean;
 }
 
-export interface INogoGroupCreateDTO {
-  name: string;
-}
+export interface INogoGroupCreateDTO
+  extends Omit<INogoGroupReturnDTO, '_id user'> {}
 
 export interface INogoGroupUpdateDTO extends INogoGroupCreateDTO {}

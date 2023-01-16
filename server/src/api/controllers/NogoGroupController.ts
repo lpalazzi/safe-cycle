@@ -15,9 +15,9 @@ export const nogoGroup = (app: express.Router) => {
   app.use('/nogoGroup', route);
   const nogoGroupService = container.resolve(NogoGroupService);
 
-  route.get('/getAll', async (req, res, next) => {
+  route.get('/getAllPublic', async (req, res, next) => {
     try {
-      const nogoGroups = await nogoGroupService.getAll();
+      const nogoGroups = await nogoGroupService.getAllPublic();
       return res.json({
         nogoGroups,
       });
