@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActionIcon, Button, Divider, Navbar } from '@mantine/core';
+import { ActionIcon, Button, Divider, Navbar, ScrollArea } from '@mantine/core';
 import { useGlobalContext } from 'contexts/globalContext';
 import { SidebarContent } from './SidebarContent';
 import { SidebarHeader } from './SidebarHeader';
@@ -20,7 +20,7 @@ export const Sidebar: React.FC = () => {
         <SidebarHeader />
       </Navbar.Section>
       <Divider my='sm' />
-      <Navbar.Section grow>
+      <Navbar.Section grow component={ScrollArea}>
         <SidebarContent />
       </Navbar.Section>
       {isMobileSize ? (
