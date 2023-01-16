@@ -29,6 +29,7 @@ export const Sidebar: React.FC = () => {
           size='lg'
           leftIcon={<IconMap2 size={18} />}
           onClick={toggleNavbar}
+          mt='sm'
         >
           View map
         </Button>
