@@ -1,10 +1,10 @@
 import React from 'react';
-import { ActionIcon, Divider, Navbar } from '@mantine/core';
+import { ActionIcon, Button, Divider, Navbar } from '@mantine/core';
 import { useGlobalContext } from 'contexts/globalContext';
 import { SidebarContent } from './SidebarContent';
 import { SidebarHeader } from './SidebarHeader';
 import { SidebarFooter } from './SidebarFooter';
-import { IconMenu2 } from '@tabler/icons';
+import { IconMap2, IconMenu2 } from '@tabler/icons';
 
 export const Sidebar: React.FC = () => {
   const { isMobileSize, isNavbarOpen, toggleNavbar } = useGlobalContext();
@@ -23,6 +23,16 @@ export const Sidebar: React.FC = () => {
       <Navbar.Section grow>
         <SidebarContent />
       </Navbar.Section>
+      {isMobileSize ? (
+        <Button
+          fullWidth
+          size='lg'
+          leftIcon={<IconMap2 size={18} />}
+          onClick={toggleNavbar}
+        >
+          View map
+        </Button>
+      ) : null}
       <Divider my='sm' />
       <Navbar.Section>
         <SidebarFooter />
