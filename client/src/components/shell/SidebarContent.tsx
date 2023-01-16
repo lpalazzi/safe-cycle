@@ -139,11 +139,44 @@ export const SidebarContent: React.FC = () => {
       <Stack spacing='xs'>
         <Title order={4}>Applied Nogos</Title>
         <Text size='xs' opacity={0.8}>
-          Select Nogo Groups to apply to your routes. Routes will avoid the
-          paths defined in each Nogo Group that is applied.
+          These Nogo Groups are currently applied to your routes. Routes will
+          avoid the paths defined in each Nogo Group that is applied.
+        </Text>
+        {selectedNogoGroups.length > 0 ? (
+          selectedNogoGroups.map((nogoGroupId) => {
+            const nogoGroup = [...allPublicNogoGroups, ...userNogoGroups].find(
+              (nogoGroup) => nogoGroup._id === nogoGroupId
+            );
+
+            return !!nogoGroup ? (
+              <Paper>
+                <Group position='apart'>
+                  <Stack spacing={0}>
+                    <Text size='sm'>{nogoGroup.name}</Text>
+                    <Text size='xs' opacity={0.65}>
+                      {'Contributed by ' + nogoGroup.creator}
+                    </Text>
+                  </Stack>
+                  <ActionIcon onClick={() => deselectNogoGroup(nogoGroup._id)}>
+                    <IconX size={18} />
+                  </ActionIcon>
+                </Group>
+              </Paper>
+            ) : null;
+          })
+        ) : (
+          <Paper>
+            <Text size='sm'>You have no Nogo Groups applied.</Text>
+          </Paper>
+        )}
+      </Stack>
+      <Divider my='sm' />
+      <Stack spacing='xs'>
+        <Title order={4}>Publicly Available Nogos</Title>
+        <Text size='xs' opacity={0.8}>
+          Add public Nogos contributed by other users.
         </Text>
         <Select
-          label='Publicly available Nogo Groups'
           data={
             allNogoGroupOptions.length
               ? allNogoGroupOptions
@@ -165,27 +198,6 @@ export const SidebarContent: React.FC = () => {
           disabled={allPublicNogoGroups.length === 0}
           itemComponent={SelectItem}
         />
-        {selectedNogoGroups.map((nogoGroupId) => {
-          const nogoGroup = [...allPublicNogoGroups, ...userNogoGroups].find(
-            (nogoGroup) => nogoGroup._id === nogoGroupId
-          );
-
-          return !!nogoGroup ? (
-            <Paper>
-              <Group position='apart'>
-                <Stack spacing={0}>
-                  <Text size='sm'>{nogoGroup.name}</Text>
-                  <Text size='xs' opacity={0.65}>
-                    {'Contributed by ' + nogoGroup.creator}
-                  </Text>
-                </Stack>
-                <ActionIcon onClick={() => deselectNogoGroup(nogoGroup._id)}>
-                  <IconX size={18} />
-                </ActionIcon>
-              </Group>
-            </Paper>
-          ) : null;
-        })}
       </Stack>
       <Divider my='sm' />
       <Stack spacing='xs'>
