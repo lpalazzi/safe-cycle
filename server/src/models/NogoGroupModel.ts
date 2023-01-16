@@ -11,6 +11,10 @@ const NogoGroupSchema = new mongoose.Schema<INogoGroup>({
     type: String,
     required: true,
   },
+  isPublic: {
+    type: Boolean,
+    required: false,
+  },
 });
 
 export const NogoGroupModel = mongoose.model<INogoGroup>(

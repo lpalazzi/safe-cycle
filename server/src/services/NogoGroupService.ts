@@ -22,8 +22,8 @@ export class NogoGroupService {
     return await this.nogoGroupDao.get({ user: userId });
   }
 
-  async getAll() {
-    return await this.nogoGroupDao.get({});
+  async getAllPublic() {
+    return await this.nogoGroupDao.get({ isPublic: true });
   }
 
   async create(
@@ -34,6 +34,7 @@ export class NogoGroupService {
       const { error } = joi
         .object({
           name: joi.string().required(),
+          isPublic: joi.boolean(),
         })
         .required()
         .validate(newNogoGroup);

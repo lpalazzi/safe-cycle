@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Button, Group, Stack, TextInput } from '@mantine/core';
+import { Button, Checkbox, Group, Stack, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { closeAllModals } from '@mantine/modals';
 import { ModalSettings } from '@mantine/modals/lib/context';
@@ -18,6 +18,7 @@ const EditNogoGroupForm: React.FC<EditNogoGroupFormProps> = ({ nogoGroup }) => {
   const form = useForm({
     initialValues: {
       name: nogoGroup.name,
+      isPublic: nogoGroup.isPublic,
     } as EditNogoGroupFormValues,
     validate: {
       name: (value) => {
@@ -48,6 +49,10 @@ const EditNogoGroupForm: React.FC<EditNogoGroupFormProps> = ({ nogoGroup }) => {
           placeholder='Enter a name for this Nogo Group'
           autoComplete='off'
           {...form.getInputProps('name')}
+        />
+        <Checkbox
+          label='Make public'
+          {...form.getInputProps('isPublic', { type: 'checkbox' })}
         />
       </Stack>
       <Group position='right' mt='md'>

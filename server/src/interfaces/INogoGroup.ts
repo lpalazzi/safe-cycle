@@ -5,6 +5,7 @@ export interface INogoGroup {
   _id: mongoose.Types.ObjectId;
   user: mongoose.Types.ObjectId;
   name: string;
+  isPublic?: boolean;
 }
 
 export interface INogoGroupCreateDTO extends Omit<INogoGroup, '_id' | 'user'> {}
