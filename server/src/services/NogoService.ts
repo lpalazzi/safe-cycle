@@ -55,13 +55,13 @@ export class NogoService {
 
   private fixStraightLineString(lineString: GeoJSON.LineString) {
     // If a LineString is only 2 points (i.e., straight) it will not behave properly as a Nogo; BRouter won't avoid it if the route travels directly through the Nogo LineString end-to-end
-    // This function adds a third point in the middle to create a slight bend in the line, which will trigger BRouter to properly avoid
+    // This function adds a third point in the middle to create a slight bend in the line, which will trigger BRouter to properly avoid it
     if (lineString.coordinates.length === 2) {
       const newCoord: GeoJSON.Position = [
         (lineString.coordinates[0][0] + lineString.coordinates[1][0]) / 2 +
-          10e-7,
+          10e-6,
         (lineString.coordinates[0][1] + lineString.coordinates[1][1]) / 2 +
-          10e-7,
+          10e-6,
         (lineString.coordinates[0][2] + lineString.coordinates[1][2]) / 2,
       ];
       lineString.coordinates = [
