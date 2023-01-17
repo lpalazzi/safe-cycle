@@ -27,22 +27,24 @@ export const Nogos: React.FC = () => {
               opacity: editingNogoGroup ? 1.0 : 0.8,
             }}
           >
-            <Popup>
-              <Button
-                fullWidth
-                color='red'
-                onClick={(e) => {
-                  e.stopPropagation();
-                  map.closePopup();
-                  deleteNogo(nogo._id);
-                }}
-              >
-                <Group position='center' spacing='xs' noWrap>
-                  <IconTrash />
-                  <>Delete Nogo</>
-                </Group>
-              </Button>
-            </Popup>
+            {editingNogoGroup ? (
+              <Popup>
+                <Button
+                  fullWidth
+                  color='red'
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    map.closePopup();
+                    deleteNogo(nogo._id);
+                  }}
+                >
+                  <Group position='center' spacing='xs' noWrap>
+                    <IconTrash />
+                    <>Delete Nogo</>
+                  </Group>
+                </Button>
+              </Popup>
+            ) : null}
           </GeoJSON>
         );
       })}
