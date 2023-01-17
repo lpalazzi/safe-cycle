@@ -34,6 +34,10 @@ To run the BRouter server: `yarn brouter`
 
 This starts the server on `localhost` on port `17777`.
 
+#### Using Docker
+
+A `Dockerfile` is included in the brouter repository. Build the docker image using `docker build --tag brouter ./brouter` and start the container with `docker run -d -p 17777:17777 --name brouter brouter`.
+
 ### Build and run app
 
 To build the app: `yarn build`
