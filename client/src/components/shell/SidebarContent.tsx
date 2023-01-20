@@ -142,7 +142,7 @@ export const SidebarContent: React.FC = () => {
   return (
     <>
       <Stack spacing='xs'>
-        <Title order={4}>Route Options</Title>
+        <SidebarTitle title='Route Options' />
         <Input.Wrapper label='Use an alternative route'>
           <SegmentedControl
             fullWidth
@@ -170,11 +170,10 @@ export const SidebarContent: React.FC = () => {
       </Stack>
       <Divider my='sm' />
       <Stack spacing='xs'>
-        <Title order={4}>Applied Nogos</Title>
-        <Text size='xs' opacity={0.8}>
-          These Nogo Groups are currently applied to your routes. Routes will
-          avoid the paths defined in each Nogo Group that is applied.
-        </Text>
+        <SidebarTitle
+          title='Applied Nogos'
+          tooltipLabel='These Nogo Groups are currently applied to your routes. Routes will avoid the paths defined in each Nogo Group that is applied.'
+        />
         {selectedNogoGroups.length > 0 ? (
           selectedNogoGroups.map((nogoGroupId) => {
             const nogoGroup = [...allPublicNogoGroups, ...userNogoGroups].find(
@@ -205,10 +204,10 @@ export const SidebarContent: React.FC = () => {
       </Stack>
       <Divider my='sm' />
       <Stack spacing='xs'>
-        <Title order={4}>Publicly Available Nogos</Title>
-        <Text size='xs' opacity={0.8}>
-          Add public Nogos contributed by other users.
-        </Text>
+        <SidebarTitle
+          title='Publicly Available Nogos'
+          tooltipLabel='Add public Nogos contributed by other users.'
+        />
         <Select
           data={
             allNogoGroupOptions.length
@@ -234,11 +233,10 @@ export const SidebarContent: React.FC = () => {
       </Stack>
       <Divider my='sm' />
       <Stack spacing='xs'>
-        <Title order={4}>Your Nogo Groups</Title>
-        <Text size='xs' opacity={0.8}>
-          Add and edit custom Nogo Groups. Nogo Groups added here are available
-          to all users to use with their cycling routes.
-        </Text>
+        <SidebarTitle
+          title='Your Nogo Groups'
+          tooltipLabel='Add and edit custom Nogo Groups. Nogo Groups added here are available to all users to use with their cycling routes.'
+        />
         {!!loggedInUser ? (
           <>
             {userNogoGroups.map((nogoGroup) => {
@@ -341,3 +339,29 @@ const SelectItem = forwardRef<HTMLDivElement, ItemProps>(
     </div>
   )
 );
+
+const SidebarTitle: React.FC<{ title: string; tooltipLabel?: string }> = ({
+  title,
+  tooltipLabel,
+}) => {
+  return (
+    <Group spacing='xs' align='center'>
+      <Title order={4}>{title}</Title>
+      {tooltipLabel ? (
+        <Tooltip
+          multiline
+          width={300}
+          withArrow
+          transition='fade'
+          transitionDuration={200}
+          events={{ hover: true, focus: false, touch: true }}
+          label={tooltipLabel}
+        >
+          <div style={{ height: '18px' }}>
+            <IconInfoCircle size={18} />
+          </div>
+        </Tooltip>
+      ) : null}
+    </Group>
+  );
+};
