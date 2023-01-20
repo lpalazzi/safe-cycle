@@ -15,19 +15,25 @@ export const router = (app: express.Router) => {
       const points: GeoJSON.Position[] = req.body.points ?? [];
       const nogoGroupIds: string[] = req.body.nogoGroupIds ?? [];
       const isNogo = req.query.isNogo === 'true';
+      const avoidUnpaved = req.query.avoidUnpaved === 'true' ?? false;
+      const alternativeidx =
+        (Number(req.query.alternativeidx) as 0 | 1 | 2 | 3) ?? 0;
 
-      if (points.length < 2) {
+      if (points.length < 2)
         throw new BadRequestError('Route request must have at least 2 points');
-      }
+
+      if (![0, 1, 2, 3].includes(alternativeidx))
+        throw new BadRequestError(
+          'alternativeidx must be a valid integer from 0 to 3'
+        );
 
       const invalidNogoGroupId = nogoGroupIds.find(
         (nogoGroupId) => !mongoose.isValidObjectId(nogoGroupId)
       );
-      if (invalidNogoGroupId) {
+      if (invalidNogoGroupId)
         throw new BadRequestError(
           `nogoGroupId=${invalidNogoGroupId} is not a valid ObjectId`
         );
-      }
 
       let route: GeoJSON.LineString;
       let properties: GeoJSON.GeoJsonProperties;
@@ -43,7 +49,10 @@ export const router = (app: express.Router) => {
             )
           )
         ).flat();
-        const data = await routerService.getRouteForUser(points, nogos);
+        const data = await routerService.getRouteForUser(points, nogos, {
+          avoidUnpaved,
+          alternativeidx,
+        });
         route = data.route;
         properties = data.properties;
       }

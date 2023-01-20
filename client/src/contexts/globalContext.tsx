@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { showNotification } from '@mantine/notifications';
 import { UserApi } from 'api';
 import { NogoGroup, User } from 'models';
-import { ID } from 'types';
+import { ID, RouteOptions } from 'types';
 import { useMantineTheme } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 
@@ -14,6 +14,7 @@ type GlobalContextType =
       isNavbarOpen: boolean;
       selectedNogoGroups: ID[];
       editingNogoGroup: NogoGroup | null;
+      routeOptions: RouteOptions;
       // functions
       updateLoggedInUser: () => void;
       logoutUser: () => void;
@@ -21,6 +22,7 @@ type GlobalContextType =
       selectNogoGroup: (id: ID) => void;
       deselectNogoGroup: (id: ID) => void;
       setEditingNogoGroup: (nogoGroup: NogoGroup | null) => void;
+      updateRouteOptions: (update: Partial<RouteOptions>) => void;
     }
   | undefined;
 
@@ -44,6 +46,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   const [editingNogoGroup, setEditingNogoGroup] = useState<NogoGroup | null>(
     null
   );
+  const [routeOptions, setRouteOptions] = useState<RouteOptions>({});
 
   useEffect(() => {
     updateLoggedInUser();
@@ -56,6 +59,13 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
 
   const toggleNavbar = () => {
     setIsNavbarOpen(!isNavbarOpen);
+  };
+
+  const updateRouteOptions = (update: Partial<RouteOptions>) => {
+    setRouteOptions({
+      ...routeOptions,
+      ...update,
+    });
   };
 
   const selectNogoGroup = (id: ID) => {
@@ -102,12 +112,14 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         isNavbarOpen,
         selectedNogoGroups,
         editingNogoGroup,
+        routeOptions,
         updateLoggedInUser,
         logoutUser,
         toggleNavbar,
         selectNogoGroup,
         deselectNogoGroup,
         setEditingNogoGroup: handleSetEditingNogoGroup,
+        updateRouteOptions,
       }}
     >
       {props.children}

@@ -35,7 +35,8 @@ type MapContextProviderType = {
 };
 
 export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
-  const { editingNogoGroup, selectedNogoGroups } = useGlobalContext();
+  const { editingNogoGroup, selectedNogoGroups, routeOptions } =
+    useGlobalContext();
   const [currentLocation, setCurrentLocation] = useState<L.LatLng | null>(null);
   const [waypoints, setWaypoints] = useState<L.LatLng[]>([]);
   const [nogoWaypoints, setNogoWaypoints] = useState<L.LatLng[]>([]);
@@ -83,7 +84,12 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
 
   useEffect(() => {
     if (waypoints.length >= 2) {
-      RouterApi.generateRoute(waypoints, selectedNogoGroups, false)
+      RouterApi.generateRoute(
+        waypoints,
+        selectedNogoGroups,
+        false,
+        routeOptions
+      )
         .then((res) => {
           setRoute(res.route);
         })
@@ -97,7 +103,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     } else {
       setRoute(null);
     }
-  }, [waypoints, selectedNogoGroups, editingNogoGroup]);
+  }, [waypoints, selectedNogoGroups, editingNogoGroup, routeOptions]);
 
   useEffect(() => {
     if (nogoWaypoints.length >= 2 && editingNogoGroup) {

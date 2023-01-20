@@ -28,13 +28,14 @@ export class RouterService {
   private async fetchRoute(
     lonlats: GeoJSON.Position[],
     nogos: INogoReturnDTO[],
-    profile: 'safecycle' | 'all'
+    profile: 'safecycle' | 'safecycle-paved' | 'all',
+    alternativeidx: 0 | 1 | 2 | 3 = 0
   ) {
     const url = `${this.brouterUrl}?lonlats=${this.positionsToParamString(
       lonlats
     )}&polylines=${this.nogosToParamString(
       nogos
-    )}&profile=${profile}&alternativeidx=0&format=geojson`;
+    )}&profile=${profile}&alternativeidx=${alternativeidx}&format=geojson`;
     return axios
       .get(url, {
         insecureHTTPParser: true,
@@ -65,8 +66,17 @@ export class RouterService {
     return route;
   }
 
-  async getRouteForUser(lonlats: GeoJSON.Position[], nogos: INogoReturnDTO[]) {
-    const route = await this.fetchRoute(lonlats, nogos, 'safecycle');
+  async getRouteForUser(
+    lonlats: GeoJSON.Position[],
+    nogos: INogoReturnDTO[],
+    routeOptions?: { avoidUnpaved?: boolean; alternativeidx?: 0 | 1 | 2 | 3 }
+  ) {
+    const route = await this.fetchRoute(
+      lonlats,
+      nogos,
+      routeOptions?.avoidUnpaved ? 'safecycle-paved' : 'safecycle',
+      routeOptions?.alternativeidx
+    );
     return route;
   }
 }
