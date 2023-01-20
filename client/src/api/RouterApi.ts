@@ -1,5 +1,5 @@
 import L from 'leaflet';
-import { ID } from 'types';
+import { ID, RouteOptions } from 'types';
 import { BrouterProperties } from './interfaces/Router';
 import { makeRequest } from './reqHelpers';
 
@@ -9,14 +9,19 @@ export class RouterApi {
   static async generateRoute(
     waypoints: L.LatLng[],
     nogoGroupIds: ID[] = [],
-    isNogo: boolean = false
+    isNogo: boolean = false,
+    routeOptions?: RouteOptions
   ) {
     const points: GeoJSON.Position[] = waypoints.map((waypoint) => [
       waypoint.lng,
       waypoint.lat,
     ]);
     const response = await makeRequest(
-      `${this.baseUrl}/generateRoute${isNogo ? '?isNogo=true' : ''}`,
+      `${this.baseUrl}/generateRoute?alternativeidx=${
+        routeOptions?.alternativeidx ?? 0
+      }${isNogo ? '&isNogo=true' : ''}${
+        routeOptions?.avoidUnpaved ? '&avoidUnpaved=true' : ''
+      }`,
       'POST',
       {
         points,
