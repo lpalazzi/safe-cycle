@@ -3,19 +3,14 @@
 FROM node:18.12.1
 WORKDIR /app
 ENV NODE_ENV=production
-RUN apt-get update && apt-get install default-jdk screen -y
 
 COPY package.json .
 COPY yarn.lock .
 COPY ./client/package.json ./client/
 COPY ./server/package.json ./server/
-RUN yarn install
-
-COPY brouter brouter
-RUN yarn build-brouter
-RUN bash ./brouter/scripts/update_segments.sh
+RUN yarn install 
 
 COPY . .
 RUN yarn build
 
-CMD screen -dm yarn brouter && yarn start
+CMD yarn start
