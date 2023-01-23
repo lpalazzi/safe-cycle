@@ -11,6 +11,8 @@ COPY ./client/package.json ./client/
 COPY ./server/package.json ./server/
 RUN yarn install
 
+RUN git submodule update --init
+
 COPY brouter brouter
 RUN yarn build-brouter
 RUN bash ./brouter/scripts/update_segments.sh
