@@ -6,7 +6,7 @@ ENV NODE_ENV=production
 RUN apt-get update && apt-get install -y default-jdk screen && rm -rf /var/lib/apt/lists/*
 
 COPY brouter brouter
-RUN bash ./brouter/scripts/update_segments.sh
+RUN bash ./brouter/scripts/update_segments.sh; exit 0
 
 COPY package.json .
 COPY yarn.lock .
