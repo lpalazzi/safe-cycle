@@ -1,7 +1,6 @@
 import config from 'config';
 import { injectable } from 'tsyringe';
 import axios from 'axios';
-import { INogo, INogoReturnDTO } from 'interfaces';
 
 @injectable()
 export class RouterService {
@@ -17,24 +16,24 @@ export class RouterService {
     return positions.map(this.positionToString).join('|');
   }
 
-  private nogosToParamString(nogos: INogo[]) {
-    return nogos.reduce((accumulated, nogo, index) => {
-      const trail = nogos.length - 1 === index ? '' : '|';
-      return (accumulated +=
-        nogo.lineString.coordinates.map(this.positionToString) + trail);
-    }, '');
-  }
+  // private nogosToParamString(nogos: INogo[]) {
+  //   return nogos.reduce((accumulated, nogo, index) => {
+  //     const trail = nogos.length - 1 === index ? '' : '|';
+  //     return (accumulated +=
+  //       nogo.lineString.coordinates.map(this.positionToString) + trail);
+  //   }, '');
+  // }
 
   private async fetchRoute(
     lonlats: GeoJSON.Position[],
-    nogos: INogoReturnDTO[],
+    nogoGroupIds: string[],
     profile: 'safecycle' | 'safecycle-paved' | 'all',
     alternativeidx: 0 | 1 | 2 | 3 = 0
   ) {
     const url = `${this.brouterUrl}?lonlats=${this.positionsToParamString(
       lonlats
-    )}&polylines=${this.nogosToParamString(
-      nogos
+    )}&nogoGroupIds=${nogoGroupIds.join(
+      '|'
     )}&profile=${profile}&alternativeidx=${alternativeidx}&format=geojson`;
     return axios
       .get(url, {
@@ -68,12 +67,12 @@ export class RouterService {
 
   async getRouteForUser(
     lonlats: GeoJSON.Position[],
-    nogos: INogoReturnDTO[],
+    nogoGroupIds: string[],
     routeOptions?: { avoidUnpaved?: boolean; alternativeidx?: 0 | 1 | 2 | 3 }
   ) {
     const route = await this.fetchRoute(
       lonlats,
-      nogos,
+      nogoGroupIds,
       routeOptions?.avoidUnpaved ? 'safecycle-paved' : 'safecycle',
       routeOptions?.alternativeidx
     );

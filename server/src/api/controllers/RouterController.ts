@@ -1,14 +1,13 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import { container } from 'tsyringe';
-import { NogoService, RouterService } from 'services';
+import { RouterService } from 'services';
 import { BadRequestError } from 'api/errors';
 
 export const router = (app: express.Router) => {
   const route = express.Router();
   app.use('/router', route);
   const routerService = container.resolve(RouterService);
-  const nogoService = container.resolve(NogoService);
 
   route.post('/generateRoute', async (req, res, next) => {
     try {
@@ -42,14 +41,7 @@ export const router = (app: express.Router) => {
         route = data.route;
         properties = data.properties;
       } else {
-        const nogos = (
-          await Promise.all(
-            nogoGroupIds.map((nogoGroupId) =>
-              nogoService.getAllByList(new mongoose.Types.ObjectId(nogoGroupId))
-            )
-          )
-        ).flat();
-        const data = await routerService.getRouteForUser(points, nogos, {
+        const data = await routerService.getRouteForUser(points, nogoGroupIds, {
           avoidUnpaved,
           alternativeidx,
         });
