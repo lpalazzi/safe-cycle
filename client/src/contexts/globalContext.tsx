@@ -12,6 +12,7 @@ type GlobalContextType =
       loggedInUser: User | null;
       isMobileSize: boolean;
       isNavbarOpen: boolean;
+      isNavModeOn: boolean;
       selectedNogoGroups: ID[];
       editingNogoGroup: NogoGroup | null;
       routeOptions: RouteOptions;
@@ -19,6 +20,7 @@ type GlobalContextType =
       updateLoggedInUser: () => void;
       logoutUser: () => void;
       toggleNavbar: () => void;
+      toggleNavMode: () => void;
       selectNogoGroup: (id: ID) => void;
       deselectNogoGroup: (id: ID) => void;
       setEditingNogoGroup: (nogoGroup: NogoGroup | null) => void;
@@ -42,6 +44,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   );
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [isNavbarOpen, setIsNavbarOpen] = useState(!isMobileSize);
+  const [isNavModeOn, setIsNavModeOn] = useState(false);
   const [selectedNogoGroups, setSelectedNogoGroups] = useState<ID[]>([]);
   const [editingNogoGroup, setEditingNogoGroup] = useState<NogoGroup | null>(
     null
@@ -59,6 +62,10 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
 
   const toggleNavbar = () => {
     setIsNavbarOpen(!isNavbarOpen);
+  };
+
+  const toggleNavMode = () => {
+    setIsNavModeOn(!isNavModeOn);
   };
 
   const updateRouteOptions = (update: Partial<RouteOptions>) => {
@@ -110,12 +117,14 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         loggedInUser,
         isMobileSize,
         isNavbarOpen,
+        isNavModeOn,
         selectedNogoGroups,
         editingNogoGroup,
         routeOptions,
         updateLoggedInUser,
         logoutUser,
         toggleNavbar,
+        toggleNavMode,
         selectNogoGroup,
         deselectNogoGroup,
         setEditingNogoGroup: handleSetEditingNogoGroup,

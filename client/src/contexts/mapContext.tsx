@@ -4,18 +4,18 @@ import { NogoApi, RouterApi } from 'api';
 import { showNotification } from '@mantine/notifications';
 import { useGlobalContext } from './globalContext';
 import { Nogo } from 'models';
-import { ID } from 'types';
+import { ID, Location } from 'types';
 
 type MapContextType =
   | {
       // states
-      currentLocation: L.LatLng | null;
+      currentLocation: Location | null;
       waypoints: L.LatLng[];
       route: GeoJSON.LineString | null;
       nogoRoutes: Nogo[];
       lineToCursor: [L.LatLng, L.LatLng] | null;
       // functions
-      setCurrentLocation: (latlng: L.LatLng | null) => void;
+      setCurrentLocation: (location: Location | null) => void;
       addWaypoint: (newMarker: L.LatLng) => void;
       updateWaypoint: (updatedWaypoint: L.LatLng, index: number) => void;
       removeWaypoint: (index: number) => void;
@@ -37,7 +37,7 @@ type MapContextProviderType = {
 export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   const { editingNogoGroup, selectedNogoGroups, routeOptions } =
     useGlobalContext();
-  const [currentLocation, setCurrentLocation] = useState<L.LatLng | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
   const [waypoints, setWaypoints] = useState<L.LatLng[]>([]);
   const [nogoWaypoints, setNogoWaypoints] = useState<L.LatLng[]>([]);
   const [route, setRoute] = useState<GeoJSON.LineString | null>(null);
