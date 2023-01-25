@@ -38,9 +38,10 @@ export const Map: React.FC = () => {
       >
         <TileLayer
           attribution='Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
-          url='https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png'
+          // url='https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png'
+          url='https://tile.openstreetmap.org/{z}/{x}/{y}.png'
           minZoom={0}
-          maxZoom={20}
+          maxZoom={19}
         />
         <ScaleControl />
         <ZoomControl position='bottomright' />
