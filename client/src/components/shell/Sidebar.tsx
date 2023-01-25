@@ -5,6 +5,7 @@ import { SidebarContent } from './SidebarContent';
 import { SidebarHeader } from './SidebarHeader';
 import { SidebarFooter } from './SidebarFooter';
 import { IconMap2, IconMenu2 } from '@tabler/icons-react';
+import { TopRightButtons } from './TopRightButtons';
 
 export const Sidebar: React.FC = () => {
   const { isMobileSize, isNavbarOpen, toggleNavbar } = useGlobalContext();
@@ -41,30 +42,22 @@ export const Sidebar: React.FC = () => {
           <SidebarFooter />
         </Navbar.Section>
       </Navbar>
-      {isNavbarOpen ? null : (
+      {isNavbarOpen || isMobileSize ? null : (
         <ActionIcon
           onClick={() => toggleNavbar()}
           size='xl'
           variant='default'
-          style={
-            isMobileSize
-              ? {
-                  position: 'absolute',
-                  top: 10,
-                  right: 10,
-                  zIndex: 10,
-                }
-              : {
-                  position: 'absolute',
-                  top: 20,
-                  left: 20,
-                  zIndex: 10,
-                }
-          }
+          style={{
+            position: 'absolute',
+            top: 20,
+            left: 20,
+            zIndex: 10,
+          }}
         >
           <IconMenu2 color='black' size={32} />
         </ActionIcon>
       )}
+      <TopRightButtons />
     </>
   );
 };

@@ -2,6 +2,7 @@ import React, { ReactElement, useState } from 'react';
 import { Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useMapContext } from '../../contexts/mapContext';
+import { useGlobalContext } from 'contexts/globalContext';
 import {
   IconArrowsMove,
   IconPlus,
@@ -20,6 +21,7 @@ export const Markers: React.FC = () => {
     updateWaypoint,
     removeWaypoint,
   } = useMapContext();
+  const { isNavModeOn } = useGlobalContext();
 
   const [draggableWaypointIndex, setDraggableWaypointIndex] = useState<
     number | null
@@ -106,17 +108,35 @@ export const Markers: React.FC = () => {
       })}
       {currentLocation ? (
         <Marker
-          position={currentLocation}
-          icon={createMarker(
-            <IconUser color='black' style={{ verticalAlign: 'middle' }} />,
-            'orange'
-          )}
+          key={
+            currentLocation.latlng.lat +
+            currentLocation.latlng.lng +
+            currentLocation.heading +
+            (isNavModeOn ? 1 : 0)
+          }
+          position={currentLocation.latlng}
+          icon={
+            isNavModeOn
+              ? L.divIcon({
+                  className: `nav-icon marker-nav`,
+                  iconSize: [40, 40],
+                })
+              : createMarker(
+                  <IconUser
+                    color='black'
+                    style={{ verticalAlign: 'middle' }}
+                  />,
+                  'orange'
+                )
+          }
         >
-          <Popup>
-            {PopupButton('Add as waypoint', <IconPlus />, 'blue', () => {
-              addWaypoint(currentLocation);
-            })}
-          </Popup>
+          {isNavModeOn ? null : (
+            <Popup>
+              {PopupButton('Add as waypoint', <IconPlus />, 'blue', () => {
+                addWaypoint(currentLocation.latlng);
+              })}
+            </Popup>
+          )}
         </Marker>
       ) : null}
     </>

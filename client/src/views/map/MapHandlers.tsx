@@ -3,6 +3,7 @@ import L from 'leaflet';
 import { useMapEvents } from 'react-leaflet';
 import { useMapContext } from 'contexts/mapContext';
 import { showNotification } from '@mantine/notifications';
+import { useGlobalContext } from 'contexts/globalContext';
 
 export const MapHandlers: React.FC = () => {
   const {
@@ -12,6 +13,7 @@ export const MapHandlers: React.FC = () => {
     clearWaypoints,
     clearNogoWaypoints,
   } = useMapContext();
+  const { isNavModeOn } = useGlobalContext();
 
   const map = useMapEvents({
     click: (e) => {
@@ -27,8 +29,9 @@ export const MapHandlers: React.FC = () => {
       }
     },
     locationfound: (e) => {
-      map.flyTo(e.latlng, 14);
-      setCurrentLocation(e.latlng);
+      const { latlng, heading } = e;
+      map.flyTo(latlng, isNavModeOn ? 19 : 14);
+      setCurrentLocation({ latlng, heading });
     },
     locationerror: (e) => {
       setCurrentLocation(null);
@@ -39,6 +42,15 @@ export const MapHandlers: React.FC = () => {
       });
     },
   });
+
+  useEffect(() => {
+    if (isNavModeOn) {
+      map.locate({ watch: true, enableHighAccuracy: true, maximumAge: 5000 });
+    } else {
+      map.stopLocate();
+      map.setZoom(14);
+    }
+  }, [isNavModeOn]);
 
   const buildEasyButtons = () => {
     L.easyButton(
