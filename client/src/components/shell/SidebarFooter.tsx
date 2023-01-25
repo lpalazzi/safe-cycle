@@ -18,7 +18,7 @@ import {
   IconDots,
   IconLogout,
   IconSettings,
-} from '@tabler/icons';
+} from '@tabler/icons-react';
 
 export const SidebarFooter: React.FC = () => {
   const { loggedInUser, isMobileSize, logoutUser } = useGlobalContext();

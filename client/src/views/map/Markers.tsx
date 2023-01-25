@@ -2,7 +2,12 @@ import React, { ReactElement, useState } from 'react';
 import { Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useMapContext } from '../../contexts/mapContext';
-import { IconArrowsMove, IconPlus, IconTrash, IconUser } from '@tabler/icons';
+import {
+  IconArrowsMove,
+  IconPlus,
+  IconTrash,
+  IconUser,
+} from '@tabler/icons-react';
 import { createMarker } from 'utils/map';
 import { Button, Flex, Group, MantineColor } from '@mantine/core';
 

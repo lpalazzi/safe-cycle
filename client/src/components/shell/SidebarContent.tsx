@@ -27,7 +27,7 @@ import {
   IconRoadOff,
   IconTrash,
   IconX,
-} from '@tabler/icons';
+} from '@tabler/icons-react';
 import { NogoGroupApi } from 'api';
 import { EditNogoGroupModal } from 'components/modals/EditNogoGroupModal';
 import { NewNogoGroupModal } from 'components/modals/NewNogoGroupModal';

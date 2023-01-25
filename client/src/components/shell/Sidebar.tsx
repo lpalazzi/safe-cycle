@@ -4,7 +4,7 @@ import { useGlobalContext } from 'contexts/globalContext';
 import { SidebarContent } from './SidebarContent';
 import { SidebarHeader } from './SidebarHeader';
 import { SidebarFooter } from './SidebarFooter';
-import { IconMap2, IconMenu2 } from '@tabler/icons';
+import { IconMap2, IconMenu2 } from '@tabler/icons-react';
 
 export const Sidebar: React.FC = () => {
   const { isMobileSize, isNavbarOpen, toggleNavbar } = useGlobalContext();
