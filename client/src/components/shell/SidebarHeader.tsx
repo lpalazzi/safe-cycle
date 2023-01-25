@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActionIcon, Text, Group, Tooltip } from '@mantine/core';
-import { IconChevronsLeft, IconMap2 } from '@tabler/icons';
+import { IconChevronsLeft, IconMap2 } from '@tabler/icons-react';
 import { useGlobalContext } from 'contexts/globalContext';
 import LogoSvg from 'assets/brand/logo-name.svg';
 

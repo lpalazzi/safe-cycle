@@ -1,5 +1,5 @@
 import { Button, Group, useMantineTheme } from '@mantine/core';
-import { IconTrash } from '@tabler/icons';
+import { IconTrash } from '@tabler/icons-react';
 import { useGlobalContext } from 'contexts/globalContext';
 import React from 'react';
 import { GeoJSON, Polyline, Popup, useMap } from 'react-leaflet';

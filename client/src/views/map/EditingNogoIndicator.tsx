@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paper, Group, Stack, Text, Button } from '@mantine/core';
-import { IconEditOff } from '@tabler/icons';
+import { IconEditOff } from '@tabler/icons-react';
 import { useGlobalContext } from 'contexts/globalContext';
 
 export const EditingNogoIndicator: React.FC = () => {

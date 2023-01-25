@@ -25,7 +25,7 @@ import {
   validatePassword,
 } from 'utils/validation';
 import { useGlobalContext } from 'contexts/globalContext';
-import { IconCheck, IconX } from '@tabler/icons';
+import { IconCheck, IconX } from '@tabler/icons-react';
 
 const SignupForm: React.FC = () => {
   const { updateLoggedInUser } = useGlobalContext();
