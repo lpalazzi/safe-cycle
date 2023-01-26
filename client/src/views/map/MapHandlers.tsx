@@ -57,7 +57,7 @@ export const MapHandlers: React.FC = () => {
 
   useEffect(() => {
     if (isNavModeOn) {
-      map.locate({ watch: true, enableHighAccuracy: true, maximumAge: 5000 });
+      map.locate({ watch: true, enableHighAccuracy: true });
       setNavMarker(
         new L.RotatedMarker(currentLocation?.latlng || [0, 0], {
           rotationAngle: currentLocation?.heading ?? 0,
