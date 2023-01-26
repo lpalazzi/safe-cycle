@@ -65,6 +65,12 @@ export const MapHandlers: React.FC = () => {
   }, [currentLocation]);
 
   useEffect(() => {
+    return () => {
+      debouncedNavMarkerUpdate.cancel();
+    };
+  }, []);
+
+  useEffect(() => {
     if (isNavModeOn) {
       map.locate({ watch: true });
       setNavMarker(
@@ -80,6 +86,7 @@ export const MapHandlers: React.FC = () => {
       );
     } else {
       navMarker && map.removeLayer(navMarker);
+      debouncedNavMarkerUpdate.cancel();
       map.stopLocate();
       map.setZoom(14);
     }
