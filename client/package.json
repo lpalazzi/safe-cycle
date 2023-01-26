@@ -24,6 +24,7 @@
     "esbuild-plugin-inline-image": "^0.0.9",
     "leaflet": "^1.9.3",
     "leaflet-easybutton": "^2.4.0",
+    "leaflet-marker-rotation": "^0.4.0",
     "leaflet.awesome-markers": "^2.0.5",
     "prop-types": "^15.7.2",
     "react": "^18.2.0",

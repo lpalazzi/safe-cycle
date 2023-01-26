@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import L from 'leaflet';
+import 'leaflet-marker-rotation';
 import { useMapEvents } from 'react-leaflet';
 import { useMapContext } from 'contexts/mapContext';
 import { showNotification } from '@mantine/notifications';
@@ -7,6 +8,7 @@ import { useGlobalContext } from 'contexts/globalContext';
 
 export const MapHandlers: React.FC = () => {
   const {
+    currentLocation,
     refreshWaypointLineToCursor,
     setCurrentLocation,
     addWaypoint,
@@ -14,6 +16,7 @@ export const MapHandlers: React.FC = () => {
     clearNogoWaypoints,
   } = useMapContext();
   const { isNavModeOn } = useGlobalContext();
+  const [navMarker, setNavMarker] = useState<L.RotatedMarker | null>(null);
 
   const map = useMapEvents({
     click: (e) => {
@@ -44,9 +47,30 @@ export const MapHandlers: React.FC = () => {
   });
 
   useEffect(() => {
+    if (currentLocation && isNavModeOn && navMarker) {
+      navMarker.setLatLng(currentLocation.latlng);
+      if (currentLocation.heading) {
+        navMarker.setRotationAngle(currentLocation.heading);
+      }
+    }
+  }, [currentLocation]);
+
+  useEffect(() => {
     if (isNavModeOn) {
       map.locate({ watch: true, enableHighAccuracy: true, maximumAge: 5000 });
+      setNavMarker(
+        new L.RotatedMarker(currentLocation?.latlng || [0, 0], {
+          rotationAngle: currentLocation?.heading ?? 0,
+          rotationOrigin: 'center center',
+          icon: L.divIcon({
+            className: `nav-icon marker-nav`,
+            iconSize: [40, 40],
+            iconAnchor: [20, 20],
+          }),
+        }).addTo(map)
+      );
     } else {
+      navMarker && map.removeLayer(navMarker);
       map.stopLocate();
       map.setZoom(14);
     }
