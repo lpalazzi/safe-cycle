@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import L from 'leaflet';
 import 'leaflet-marker-rotation';
-import debounce from 'lodash.debounce';
 import { useMapEvents } from 'react-leaflet';
 import { useMapContext } from 'contexts/mapContext';
 import { showNotification } from '@mantine/notifications';
@@ -47,26 +46,18 @@ export const MapHandlers: React.FC = () => {
     },
   });
 
-  const debouncedNavMarkerUpdate = useMemo(
-    () =>
-      debounce(() => {
-        if (currentLocation && isNavModeOn && navMarker) {
-          navMarker.setLatLng(currentLocation.latlng);
-          if (currentLocation.heading) {
-            navMarker.setRotationAngle(currentLocation.heading);
-          }
-        }
-      }, 300),
-    [currentLocation, isNavModeOn, navMarker]
-  );
-
   useEffect(() => {
-    debouncedNavMarkerUpdate();
+    if (currentLocation && isNavModeOn && navMarker) {
+      navMarker.setLatLng(currentLocation.latlng);
+      if (currentLocation.heading) {
+        navMarker.setRotationAngle(currentLocation.heading);
+      }
+    }
   }, [currentLocation]);
 
   useEffect(() => {
     if (isNavModeOn) {
-      map.locate({ watch: true });
+      map.locate({ watch: true, enableHighAccuracy: true, maximumAge: 5000 });
       setNavMarker(
         new L.RotatedMarker(currentLocation?.latlng || [0, 0], {
           rotationAngle: currentLocation?.heading ?? 0,
