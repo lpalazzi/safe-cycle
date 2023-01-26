@@ -1,1 +1,1 @@
-export type Location = { latlng: L.LatLng; heading: number };
+export type Location = { latlng: L.LatLng; heading: number | undefined };

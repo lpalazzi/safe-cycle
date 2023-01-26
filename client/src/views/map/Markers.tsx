@@ -106,37 +106,20 @@ export const Markers: React.FC = () => {
           </Marker>
         );
       })}
-      {currentLocation ? (
+      {currentLocation && !isNavModeOn ? (
         <Marker
-          key={
-            currentLocation.latlng.lat +
-            currentLocation.latlng.lng +
-            currentLocation.heading +
-            (isNavModeOn ? 1 : 0)
-          }
+          key={currentLocation.latlng.lat + currentLocation.latlng.lng}
           position={currentLocation.latlng}
-          icon={
-            isNavModeOn
-              ? L.divIcon({
-                  className: `nav-icon marker-nav`,
-                  iconSize: [40, 40],
-                })
-              : createMarker(
-                  <IconUser
-                    color='black'
-                    style={{ verticalAlign: 'middle' }}
-                  />,
-                  'orange'
-                )
-          }
-        >
-          {isNavModeOn ? null : (
-            <Popup>
-              {PopupButton('Add as waypoint', <IconPlus />, 'blue', () => {
-                addWaypoint(currentLocation.latlng);
-              })}
-            </Popup>
+          icon={createMarker(
+            <IconUser color='black' style={{ verticalAlign: 'middle' }} />,
+            'orange'
           )}
+        >
+          <Popup>
+            {PopupButton('Add as waypoint', <IconPlus />, 'blue', () => {
+              addWaypoint(currentLocation.latlng);
+            })}
+          </Popup>
         </Marker>
       ) : null}
     </>
