@@ -69,8 +69,8 @@ export const MapHandlers: React.FC = () => {
           }),
         }).addTo(map)
       );
-    } else {
-      navMarker && map.removeLayer(navMarker);
+    } else if (navMarker) {
+      map.removeLayer(navMarker);
       map.stopLocate();
       map.setZoom(14);
     }
