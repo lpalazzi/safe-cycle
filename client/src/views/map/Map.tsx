@@ -16,9 +16,12 @@ import { Route } from './Route';
 import { Nogos } from './Nogos';
 import { useGlobalContext } from 'contexts/globalContext';
 import { EditingNogoIndicator } from './EditingNogoIndicator';
+import { useMapContext } from 'contexts/mapContext';
+import { RecenterButton } from './RecenterButton';
 
 export const Map: React.FC = () => {
-  const { editingNogoGroup } = useGlobalContext();
+  const { editingNogoGroup, isNavModeOn } = useGlobalContext();
+  const { followUser } = useMapContext();
   return (
     <>
       <MapContainer
@@ -55,6 +58,7 @@ export const Map: React.FC = () => {
         <Nogos />
       </MapContainer>
       {editingNogoGroup ? <EditingNogoIndicator /> : null}
+      {isNavModeOn && !followUser ? <RecenterButton /> : null}
     </>
   );
 };

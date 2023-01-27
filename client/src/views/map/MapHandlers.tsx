@@ -9,8 +9,10 @@ import { useGlobalContext } from 'contexts/globalContext';
 export const MapHandlers: React.FC = () => {
   const {
     currentLocation,
+    followUser,
     refreshWaypointLineToCursor,
     setCurrentLocation,
+    setFollowUser,
     addWaypoint,
     clearWaypoints,
     clearNogoWaypoints,
@@ -31,10 +33,13 @@ export const MapHandlers: React.FC = () => {
         refreshWaypointLineToCursor(null);
       }
     },
+    dragstart: (e) => {
+      setFollowUser(false);
+    },
     locationfound: (e) => {
       const { latlng, heading } = e;
-      map.flyTo(latlng, isNavModeOn ? 19 : 14);
       setCurrentLocation({ latlng, heading });
+      if (followUser) map.flyTo(latlng, isNavModeOn ? 19 : 14);
     },
     locationerror: (e) => {
       setCurrentLocation(null);
@@ -56,8 +61,15 @@ export const MapHandlers: React.FC = () => {
   }, [currentLocation]);
 
   useEffect(() => {
+    if (followUser && isNavModeOn && currentLocation?.latlng) {
+      map.flyTo(currentLocation.latlng, 19);
+    }
+  }, [followUser]);
+
+  useEffect(() => {
     if (isNavModeOn) {
       map.locate({ watch: true, enableHighAccuracy: true });
+      setFollowUser(true);
       setNavMarker(
         new L.RotatedMarker(currentLocation?.latlng || [0, 0], {
           rotationAngle: currentLocation?.heading ?? 0,
@@ -73,6 +85,7 @@ export const MapHandlers: React.FC = () => {
       map.removeLayer(navMarker);
       map.stopLocate();
       map.setZoom(14);
+      setFollowUser(false);
     }
   }, [isNavModeOn]);
 

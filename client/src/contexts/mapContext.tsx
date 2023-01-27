@@ -10,12 +10,14 @@ type MapContextType =
   | {
       // states
       currentLocation: Location | null;
+      followUser: boolean;
       waypoints: L.LatLng[];
       route: GeoJSON.LineString | null;
       nogoRoutes: Nogo[];
       lineToCursor: [L.LatLng, L.LatLng] | null;
       // functions
       setCurrentLocation: (location: Location | null) => void;
+      setFollowUser: (val: boolean) => void;
       addWaypoint: (newMarker: L.LatLng) => void;
       updateWaypoint: (updatedWaypoint: L.LatLng, index: number) => void;
       removeWaypoint: (index: number) => void;
@@ -38,6 +40,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   const { editingNogoGroup, selectedNogoGroups, routeOptions } =
     useGlobalContext();
   const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
+  const [followUser, setFollowUser] = useState(false);
   const [waypoints, setWaypoints] = useState<L.LatLng[]>([]);
   const [nogoWaypoints, setNogoWaypoints] = useState<L.LatLng[]>([]);
   const [route, setRoute] = useState<GeoJSON.LineString | null>(null);
@@ -175,11 +178,13 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     <MapContext.Provider
       value={{
         currentLocation,
+        followUser,
         waypoints,
         route,
         nogoRoutes,
         lineToCursor,
         setCurrentLocation,
+        setFollowUser,
         addWaypoint,
         updateWaypoint,
         removeWaypoint,
