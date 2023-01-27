@@ -36,6 +36,9 @@ export const MapHandlers: React.FC = () => {
     dragstart: (e) => {
       setFollowUser(false);
     },
+    zoomanim: (e) => {
+      setFollowUser(false);
+    },
     locationfound: (e) => {
       const { latlng, heading } = e;
       setCurrentLocation({ latlng, heading });
