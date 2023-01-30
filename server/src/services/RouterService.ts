@@ -27,7 +27,12 @@ export class RouterService {
   private async fetchRoute(
     lonlats: GeoJSON.Position[],
     nogoGroupIds: string[],
-    profile: 'safecycle' | 'safecycle-paved' | 'all',
+    profile:
+      | 'safecycle'
+      | 'safecycle-avoidUnsafe'
+      | 'safecycle-avoidUnpaved'
+      | 'safecycle-avoidUnsafe-avoidUnpaved'
+      | 'all',
     alternativeidx: 0 | 1 | 2 | 3 = 0
   ) {
     const url = `${this.brouterUrl}?lonlats=${this.positionsToParamString(
@@ -68,12 +73,23 @@ export class RouterService {
   async getRouteForUser(
     lonlats: GeoJSON.Position[],
     nogoGroupIds: string[],
-    routeOptions?: { avoidUnpaved?: boolean; alternativeidx?: 0 | 1 | 2 | 3 }
+    routeOptions?: {
+      avoidUnsafe?: boolean;
+      avoidUnpaved?: boolean;
+      alternativeidx?: 0 | 1 | 2 | 3;
+    }
   ) {
+    const profile = (avoidUnsafe = false, avoidUnpaved = false) => {
+      if (avoidUnsafe && avoidUnpaved)
+        return 'safecycle-avoidUnsafe-avoidUnpaved';
+      if (avoidUnsafe && !avoidUnpaved) return 'safecycle-avoidUnsafe';
+      if (!avoidUnsafe && avoidUnpaved) return 'safecycle-avoidUnpaved';
+      return 'safecycle';
+    };
     const route = await this.fetchRoute(
       lonlats,
       nogoGroupIds,
-      routeOptions?.avoidUnpaved ? 'safecycle-paved' : 'safecycle',
+      profile(routeOptions?.avoidUnsafe, routeOptions?.avoidUnpaved),
       routeOptions?.alternativeidx
     );
     return route;

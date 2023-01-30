@@ -14,6 +14,7 @@ export const router = (app: express.Router) => {
       const points: GeoJSON.Position[] = req.body.points ?? [];
       const nogoGroupIds: string[] = req.body.nogoGroupIds ?? [];
       const isNogo = req.query.isNogo === 'true';
+      const avoidUnsafe = req.query.avoidUnsafe === 'true' ?? false;
       const avoidUnpaved = req.query.avoidUnpaved === 'true' ?? false;
       const alternativeidx =
         (Number(req.query.alternativeidx) as 0 | 1 | 2 | 3) ?? 0;
@@ -42,6 +43,7 @@ export const router = (app: express.Router) => {
         properties = data.properties;
       } else {
         const data = await routerService.getRouteForUser(points, nogoGroupIds, {
+          avoidUnsafe,
           avoidUnpaved,
           alternativeidx,
         });

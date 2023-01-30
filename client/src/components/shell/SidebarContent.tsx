@@ -161,6 +161,13 @@ export const SidebarContent: React.FC = () => {
           />
         </Input.Wrapper>
         <Checkbox
+          label='Avoid unsafe roads'
+          checked={routeOptions.avoidUnsafe}
+          onChange={(e) =>
+            updateRouteOptions({ avoidUnsafe: e.currentTarget.checked })
+          }
+        />
+        <Checkbox
           label='Avoid unpaved roads'
           checked={routeOptions.avoidUnpaved}
           onChange={(e) =>
