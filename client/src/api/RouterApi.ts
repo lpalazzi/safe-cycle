@@ -21,7 +21,7 @@ export class RouterApi {
         routeOptions?.alternativeidx ?? 0
       }${isNogo ? '&isNogo=true' : ''}${
         routeOptions?.avoidUnpaved ? '&avoidUnpaved=true' : ''
-      }`,
+      }${routeOptions?.avoidUnsafe ? '&avoidUnsafe=true' : ''}`,
       'POST',
       {
         points,
