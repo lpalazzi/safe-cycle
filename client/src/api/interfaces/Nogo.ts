@@ -5,5 +5,3 @@ export interface INogoReturnDTO {
   nogoGroup: ID;
   lineString: GeoJSON.LineString;
 }
-
-export interface INogoCreateDTO extends Omit<INogoReturnDTO, '_id'> {}
