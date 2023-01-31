@@ -9,7 +9,6 @@ export class RouterApi {
   static async generateRoute(
     waypoints: L.LatLng[],
     nogoGroupIds: ID[] = [],
-    isNogo: boolean = false,
     routeOptions?: RouteOptions
   ) {
     const points: GeoJSON.Position[] = waypoints.map((waypoint) => [
@@ -19,9 +18,9 @@ export class RouterApi {
     const response = await makeRequest(
       `${this.baseUrl}/generateRoute?alternativeidx=${
         routeOptions?.alternativeidx ?? 0
-      }${isNogo ? '&isNogo=true' : ''}${
-        routeOptions?.avoidUnpaved ? '&avoidUnpaved=true' : ''
-      }${routeOptions?.avoidUnsafe ? '&avoidUnsafe=true' : ''}`,
+      }${routeOptions?.avoidUnpaved ? '&avoidUnpaved=true' : ''}${
+        routeOptions?.avoidUnsafe ? '&avoidUnsafe=true' : ''
+      }`,
       'POST',
       {
         points,

@@ -91,12 +91,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   useEffect(() => {
     if (!editingNogoGroup && waypoints.length >= 2) {
       setFetchingCount((prev) => prev + 1);
-      RouterApi.generateRoute(
-        waypoints,
-        selectedNogoGroups,
-        false,
-        routeOptions
-      )
+      RouterApi.generateRoute(waypoints, selectedNogoGroups, routeOptions)
         .then((res) => {
           setRoute(res.route);
           setFetchingCount((prev) => prev - 1);
