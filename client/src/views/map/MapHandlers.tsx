@@ -10,6 +10,7 @@ export const MapHandlers: React.FC = () => {
   const {
     currentLocation,
     followUser,
+    loadingRoute,
     refreshWaypointLineToCursor,
     setCurrentLocation,
     setFollowUser,
@@ -22,7 +23,7 @@ export const MapHandlers: React.FC = () => {
 
   const map = useMapEvents({
     click: (e) => {
-      addWaypoint(e.latlng);
+      if (!loadingRoute) addWaypoint(e.latlng);
     },
     mousemove: (e) => {
       refreshWaypointLineToCursor(e.latlng);
