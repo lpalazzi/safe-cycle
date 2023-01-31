@@ -15,6 +15,7 @@ type MapContextType =
       route: GeoJSON.LineString | null;
       nogoRoutes: Nogo[];
       lineToCursor: [L.LatLng, L.LatLng] | null;
+      loadingRoute: boolean;
       // functions
       setCurrentLocation: (location: Location | null) => void;
       setFollowUser: (val: boolean) => void;
@@ -48,6 +49,8 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     null
   );
   const [nogoRoutes, setNogoRoutes] = useState<Nogo[]>([]);
+  const [fetchingCount, setFetchingCount] = useState(0);
+  const loadingRoute = fetchingCount > 0;
 
   const addWaypoint = (newWaypoint: L.LatLng) => {
     if (!editingNogoGroup) {
@@ -86,7 +89,8 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   };
 
   useEffect(() => {
-    if (waypoints.length >= 2) {
+    if (!editingNogoGroup && waypoints.length >= 2) {
+      setFetchingCount((prev) => prev + 1);
       RouterApi.generateRoute(
         waypoints,
         selectedNogoGroups,
@@ -95,13 +99,21 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
       )
         .then((res) => {
           setRoute(res.route);
+          setFetchingCount((prev) => prev - 1);
         })
         .catch((err) => {
-          showNotification({
-            title: 'Error fetching route',
-            message: err.message || 'Undefined error',
-            color: 'red',
-          });
+          setFetchingCount((prev) => prev - 1);
+          if (
+            !String(err.message).includes(
+              'operation killed by thread-priority-watchdog'
+            )
+          ) {
+            showNotification({
+              title: 'Error fetching route',
+              message: err.message || 'Undefined error',
+              color: 'red',
+            });
+          }
         });
     } else {
       setRoute(null);
@@ -183,6 +195,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         route,
         nogoRoutes,
         lineToCursor,
+        loadingRoute,
         setCurrentLocation,
         setFollowUser,
         addWaypoint,

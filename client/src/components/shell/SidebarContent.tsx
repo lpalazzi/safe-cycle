@@ -143,6 +143,20 @@ export const SidebarContent: React.FC = () => {
     <>
       <Stack spacing='xs'>
         <SidebarTitle title='Route Options' />
+        <Checkbox
+          label='Avoid unsafe roads'
+          checked={routeOptions.avoidUnsafe}
+          onChange={(e) =>
+            updateRouteOptions({ avoidUnsafe: e.currentTarget.checked })
+          }
+        />
+        <Checkbox
+          label='Avoid unpaved roads'
+          checked={routeOptions.avoidUnpaved}
+          onChange={(e) =>
+            updateRouteOptions({ avoidUnpaved: e.currentTarget.checked })
+          }
+        />
         <Input.Wrapper label='Use an alternative route'>
           <SegmentedControl
             fullWidth
@@ -160,20 +174,6 @@ export const SidebarContent: React.FC = () => {
             ]}
           />
         </Input.Wrapper>
-        <Checkbox
-          label='Avoid unsafe roads'
-          checked={routeOptions.avoidUnsafe}
-          onChange={(e) =>
-            updateRouteOptions({ avoidUnsafe: e.currentTarget.checked })
-          }
-        />
-        <Checkbox
-          label='Avoid unpaved roads'
-          checked={routeOptions.avoidUnpaved}
-          onChange={(e) =>
-            updateRouteOptions({ avoidUnpaved: e.currentTarget.checked })
-          }
-        />
       </Stack>
       <Divider my='sm' />
       <Stack spacing='xs'>

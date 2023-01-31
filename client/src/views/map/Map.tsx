@@ -10,17 +10,18 @@ import 'leaflet-easybutton/src/easy-button.css';
 import 'leaflet.awesome-markers';
 import 'leaflet.awesome-markers/dist/leaflet.awesome-markers.css';
 import './Map.css';
+import { useGlobalContext } from 'contexts/globalContext';
+import { useMapContext } from 'contexts/mapContext';
 import { MapHandlers } from './MapHandlers';
 import { Markers } from './Markers';
 import { Route } from './Route';
 import { Nogos } from './Nogos';
-import { useGlobalContext } from 'contexts/globalContext';
 import { EditingNogoIndicator } from './EditingNogoIndicator';
-import { useMapContext } from 'contexts/mapContext';
 import { RecenterButton } from './RecenterButton';
+import { LoadingIndicator } from './LoadingIndicator';
 
 export const Map: React.FC = () => {
-  const { editingNogoGroup, isNavModeOn } = useGlobalContext();
+  const { editingNogoGroup, isNavModeOn, isNavbarOpen } = useGlobalContext();
   const { followUser } = useMapContext();
   return (
     <>
@@ -56,7 +57,9 @@ export const Map: React.FC = () => {
           </>
         ) : null}
         <Nogos />
+        {!isNavbarOpen ? <LoadingIndicator /> : null}
       </MapContainer>
+      {isNavbarOpen ? <LoadingIndicator /> : null}
       {editingNogoGroup ? <EditingNogoIndicator /> : null}
       {isNavModeOn && !followUser ? <RecenterButton /> : null}
     </>
