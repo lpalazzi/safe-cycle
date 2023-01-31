@@ -88,8 +88,6 @@ const SignupForm: React.FC = () => {
     />
   ));
 
-  console.log(validatePassword(form.values.password));
-
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack spacing='xs'>
