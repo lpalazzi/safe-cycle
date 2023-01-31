@@ -1,5 +1,6 @@
 import joi from 'joi';
 import geojson from './geojson';
+import objectid from './objectid';
 
 declare module 'joi/lib' {
   export interface Root {
@@ -12,6 +13,6 @@ declare module 'joi/lib' {
 }
 
 export default () => {
-  joi.objectId = require('joi-objectid')(joi);
+  joi.objectId = objectid;
   joi.geojson = geojson;
 };
