@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { showNotification } from '@mantine/notifications';
-import { UserApi } from 'api';
+import { NogoGroupApi, UserApi } from 'api';
 import { NogoGroup, User } from 'models';
 import { ID, RouteOptions } from 'types';
 import { useMantineTheme } from '@mantine/core';
@@ -45,7 +45,9 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [isNavbarOpen, setIsNavbarOpen] = useState(!isMobileSize);
   const [isNavModeOn, setIsNavModeOn] = useState(false);
-  const [selectedNogoGroups, setSelectedNogoGroups] = useState<ID[]>([]);
+  const [selectedNogoGroups, setSelectedNogoGroups] = useState<ID[]>(
+    window.localStorage.getItem('selectedNogoGroups')?.split(',') ?? []
+  );
   const [editingNogoGroup, setEditingNogoGroup] = useState<NogoGroup | null>(
     null
   );
@@ -53,7 +55,21 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
 
   useEffect(() => {
     updateLoggedInUser();
+    filterStoredSelectedNogoGroups();
   }, []);
+
+  const filterStoredSelectedNogoGroups = async () => {
+    const publicNogoGroups = await NogoGroupApi.getAllPublic();
+    const userNogoGroups = await NogoGroupApi.getAllForUser();
+    const filteredStoredSelectedNogoGroups = selectedNogoGroups.filter(
+      (selectedNogoGroup) => {
+        return !![...publicNogoGroups, ...userNogoGroups].find(
+          (nogoGroup) => nogoGroup._id === selectedNogoGroup
+        );
+      }
+    );
+    setSelectedNogoGroups(filteredStoredSelectedNogoGroups);
+  };
 
   const updateLoggedInUser = async () => {
     const user = await UserApi.getActiveUser();
@@ -75,6 +91,13 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     });
   };
 
+  useEffect(() => {
+    window.localStorage.setItem(
+      'selectedNogoGroups',
+      selectedNogoGroups.join()
+    );
+  }, [selectedNogoGroups]);
+
   const selectNogoGroup = (id: ID) => {
     if (selectedNogoGroups.includes(id)) {
       return;
@@ -84,18 +107,18 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     setSelectedNogoGroups(newSelectedNogoGroups);
   };
 
-  const handleSetEditingNogoGroup = (nogoGroup: NogoGroup | null) => {
-    setEditingNogoGroup(nogoGroup);
-    if (isMobileSize && nogoGroup) {
-      setIsNavbarOpen(false);
-    }
-  };
-
   const deselectNogoGroup = (id: ID) => {
     const newSelectedNogoGroups = [...selectedNogoGroups].filter(
       (selectedNogoGroup) => selectedNogoGroup !== id
     );
     setSelectedNogoGroups(newSelectedNogoGroups);
+  };
+
+  const handleSetEditingNogoGroup = (nogoGroup: NogoGroup | null) => {
+    setEditingNogoGroup(nogoGroup);
+    if (isMobileSize && nogoGroup) {
+      setIsNavbarOpen(false);
+    }
   };
 
   const logoutUser = async () => {
