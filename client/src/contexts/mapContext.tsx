@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import L from 'leaflet';
-import { NogoApi, RouterApi } from 'api';
-import { showNotification } from '@mantine/notifications';
 import { useGlobalContext } from './globalContext';
-import { Nogo } from 'models';
 import { ID, Location } from 'types';
+import { Nogo } from 'models';
+import { NogoApi, RouterApi } from 'api';
+import { BrouterProperties } from 'api/interfaces/Router';
+import { showNotification } from '@mantine/notifications';
 
 type MapContextType =
   | {
@@ -13,6 +14,7 @@ type MapContextType =
       followUser: boolean;
       waypoints: L.LatLng[];
       route: GeoJSON.LineString | null;
+      routeProperties: BrouterProperties | null;
       nogoRoutes: Nogo[];
       lineToCursor: [L.LatLng, L.LatLng] | null;
       loadingRoute: boolean;
@@ -23,7 +25,6 @@ type MapContextType =
       updateWaypoint: (updatedWaypoint: L.LatLng, index: number) => void;
       removeWaypoint: (index: number) => void;
       clearWaypoints: () => void;
-      setRoute: (lnstr: GeoJSON.LineString) => void;
       deleteNogo: (nogoId: ID) => void;
       clearNogoWaypoints: () => void;
       refreshWaypointLineToCursor: (mousePosition: L.LatLng | null) => void;
@@ -45,6 +46,8 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   const [waypoints, setWaypoints] = useState<L.LatLng[]>([]);
   const [nogoWaypoints, setNogoWaypoints] = useState<L.LatLng[]>([]);
   const [route, setRoute] = useState<GeoJSON.LineString | null>(null);
+  const [routeProperties, setRouteProperties] =
+    useState<BrouterProperties | null>(null);
   const [lineToCursor, setLineToCursor] = useState<[L.LatLng, L.LatLng] | null>(
     null
   );
@@ -94,6 +97,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
       RouterApi.generateRoute(waypoints, selectedNogoGroups, routeOptions)
         .then((res) => {
           setRoute(res.route);
+          setRouteProperties(res.properties);
           setFetchingCount((prev) => prev - 1);
         })
         .catch((err) => {
@@ -112,6 +116,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         });
     } else {
       setRoute(null);
+      setRouteProperties(null);
     }
   }, [waypoints, selectedNogoGroups, editingNogoGroup, routeOptions]);
 
@@ -188,6 +193,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         followUser,
         waypoints,
         route,
+        routeProperties,
         nogoRoutes,
         lineToCursor,
         loadingRoute,
@@ -197,7 +203,6 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         updateWaypoint,
         removeWaypoint,
         clearWaypoints,
-        setRoute,
         deleteNogo,
         clearNogoWaypoints,
         refreshWaypointLineToCursor,
