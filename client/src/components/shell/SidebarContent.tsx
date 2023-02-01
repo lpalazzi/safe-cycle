@@ -142,9 +142,9 @@ export const SidebarContent: React.FC = () => {
   return (
     <>
       <Stack spacing='xs'>
-        <SidebarTitle title='Route Options' />
+        <SidebarTitle title='Route Preferences' />
         <Checkbox
-          label='Avoid unsafe roads'
+          label='Avoid low comfort roads'
           checked={routeOptions.avoidUnsafe}
           onChange={(e) =>
             updateRouteOptions({ avoidUnsafe: e.currentTarget.checked })
