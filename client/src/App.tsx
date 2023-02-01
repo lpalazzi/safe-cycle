@@ -12,11 +12,11 @@ function App() {
       <MantineProvider withGlobalStyles withNormalizeCSS>
         <NotificationsProvider position='top-right'>
           <ModalsProvider>
-            <Shell>
-              <MapContextProvider>
+            <MapContextProvider>
+              <Shell>
                 <Map />
-              </MapContextProvider>
-            </Shell>
+              </Shell>
+            </MapContextProvider>
           </ModalsProvider>
         </NotificationsProvider>
       </MantineProvider>
