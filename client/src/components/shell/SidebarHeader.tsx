@@ -23,9 +23,6 @@ export const SidebarHeader: React.FC = () => {
           </ActionIcon>
         </Tooltip>
       </Group>
-      <Text size='sm'>
-        Navigation for cyclists looking to discover safer routes
-      </Text>
     </>
   );
 };
