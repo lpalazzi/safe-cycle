@@ -45,9 +45,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [isNavbarOpen, setIsNavbarOpen] = useState(!isMobileSize);
   const [isNavModeOn, setIsNavModeOn] = useState(false);
-  const [selectedNogoGroups, setSelectedNogoGroups] = useState<ID[]>(
-    window.localStorage.getItem('selectedNogoGroups')?.split(',') ?? []
-  );
+  const [selectedNogoGroups, setSelectedNogoGroups] = useState<ID[]>([]);
   const [editingNogoGroup, setEditingNogoGroup] = useState<NogoGroup | null>(
     null
   );
@@ -55,19 +53,21 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
 
   useEffect(() => {
     updateLoggedInUser();
-    filterStoredSelectedNogoGroups();
+    getStoredSelectedNogoGroups();
   }, []);
 
-  const filterStoredSelectedNogoGroups = async () => {
+  const getStoredSelectedNogoGroups = async () => {
+    const stored = window.localStorage.getItem('selectedNogoGroups');
+    if (!stored || stored === '') return;
     const publicNogoGroups = await NogoGroupApi.getAllPublic();
     const userNogoGroups = await NogoGroupApi.getAllForUser();
-    const filteredStoredSelectedNogoGroups = selectedNogoGroups.filter(
-      (selectedNogoGroup) => {
+    const filteredStoredSelectedNogoGroups = stored
+      .split(',')
+      .filter((selectedNogoGroup) => {
         return !![...publicNogoGroups, ...userNogoGroups].find(
           (nogoGroup) => nogoGroup._id === selectedNogoGroup
         );
-      }
-    );
+      });
     setSelectedNogoGroups(filteredStoredSelectedNogoGroups);
   };
 
