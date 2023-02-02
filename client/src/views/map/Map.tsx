@@ -23,10 +23,11 @@ import { RouteProperties } from './RouteProperties';
 
 export const Map: React.FC = () => {
   const { editingNogoGroup, isNavModeOn, isNavbarOpen } = useGlobalContext();
-  const { followUser, route, routeProperties } = useMapContext();
+  const { followUser, route, routeProperties, setMap } = useMapContext();
   return (
     <>
       <MapContainer
+        ref={setMap}
         style={{
           position: 'absolute',
           top: 0,

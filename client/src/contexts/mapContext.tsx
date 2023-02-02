@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import L from 'leaflet';
 import { useGlobalContext } from './globalContext';
-import { ID, Location } from 'types';
+import { ID, Location, Waypoint } from 'types';
 import { Nogo } from 'models';
 import { NogoApi, RouterApi } from 'api';
 import { BrouterProperties } from 'api/interfaces/Router';
@@ -10,19 +10,21 @@ import { showNotification } from '@mantine/notifications';
 type MapContextType =
   | {
       // states
+      map: L.Map | null;
       currentLocation: Location | null;
       followUser: boolean;
-      waypoints: L.LatLng[];
+      waypoints: Waypoint[];
       route: GeoJSON.LineString | null;
       routeProperties: BrouterProperties | null;
       nogoRoutes: Nogo[];
       lineToCursor: [L.LatLng, L.LatLng] | null;
       loadingRoute: boolean;
       // functions
+      setMap: (map: L.Map) => void;
       setCurrentLocation: (location: Location | null) => void;
       setFollowUser: (val: boolean) => void;
-      addWaypoint: (newMarker: L.LatLng) => void;
-      updateWaypoint: (updatedWaypoint: L.LatLng, index: number) => void;
+      addWaypoint: (latlng: L.LatLng, label?: string) => void;
+      updateWaypoint: (index: number, latlng: L.LatLng, label?: string) => void;
       removeWaypoint: (index: number) => void;
       clearWaypoints: () => void;
       deleteNogo: (nogoId: ID) => void;
@@ -39,11 +41,12 @@ type MapContextProviderType = {
 };
 
 export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
+  const [map, setMap] = useState<L.Map | null>(null);
   const { editingNogoGroup, selectedNogoGroups, routeOptions } =
     useGlobalContext();
   const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
   const [followUser, setFollowUser] = useState(false);
-  const [waypoints, setWaypoints] = useState<L.LatLng[]>([]);
+  const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
   const [nogoWaypoints, setNogoWaypoints] = useState<L.LatLng[]>([]);
   const [route, setRoute] = useState<GeoJSON.LineString | null>(null);
   const [routeProperties, setRouteProperties] =
@@ -55,15 +58,23 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   const [fetchingCount, setFetchingCount] = useState(0);
   const loadingRoute = fetchingCount > 0;
 
-  const addWaypoint = (newWaypoint: L.LatLng) => {
+  const addWaypoint = (latlng: L.LatLng, label?: string) => {
+    const newWaypoint = {
+      latlng,
+      label,
+    };
     if (!editingNogoGroup) {
       setWaypoints([...waypoints, newWaypoint]);
     } else {
-      setNogoWaypoints([...nogoWaypoints, newWaypoint]);
+      setNogoWaypoints([...nogoWaypoints, latlng]);
     }
   };
 
-  const updateWaypoint = (updatedWaypoint: L.LatLng, index: number) => {
+  const updateWaypoint = (index: number, latlng: L.LatLng, label?: string) => {
+    const updatedWaypoint = {
+      latlng,
+      label,
+    };
     const newWaypoints = [...waypoints];
     newWaypoints.splice(index, 1, updatedWaypoint);
     setWaypoints(newWaypoints);
@@ -94,7 +105,11 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   useEffect(() => {
     if (!editingNogoGroup && waypoints.length >= 2) {
       setFetchingCount((prev) => prev + 1);
-      RouterApi.generateRoute(waypoints, selectedNogoGroups, routeOptions)
+      RouterApi.generateRoute(
+        waypoints.map((waypoint) => waypoint.latlng),
+        selectedNogoGroups,
+        routeOptions
+      )
         .then((res) => {
           setRoute(res.route);
           setRouteProperties(res.properties);
@@ -189,6 +204,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   return (
     <MapContext.Provider
       value={{
+        map,
         currentLocation,
         followUser,
         waypoints,
@@ -197,6 +213,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         nogoRoutes,
         lineToCursor,
         loadingRoute,
+        setMap,
         setCurrentLocation,
         setFollowUser,
         addWaypoint,

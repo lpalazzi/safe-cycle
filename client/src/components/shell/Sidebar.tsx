@@ -23,7 +23,12 @@ export const Sidebar: React.FC = () => {
           <SidebarHeader />
         </Navbar.Section>
         <Divider my='sm' />
-        <Navbar.Section grow component={ScrollArea}>
+        <Navbar.Section
+          grow
+          component={ScrollArea}
+          type='scroll'
+          styles={{ scrollbar: { zIndex: 10000 } }}
+        >
           <SidebarContent />
         </Navbar.Section>
         {isMobileSize ? (
