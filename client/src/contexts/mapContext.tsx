@@ -23,8 +23,10 @@ type MapContextType =
       setMap: (map: L.Map) => void;
       setCurrentLocation: (location: Location | null) => void;
       setFollowUser: (val: boolean) => void;
+      setWaypoints: (waypoints: Waypoint[]) => void;
       addWaypoint: (latlng: L.LatLng, label?: string) => void;
       updateWaypoint: (index: number, latlng: L.LatLng, label?: string) => void;
+      reorderWaypoint: (sourceIndex: number, destIndex: number) => void;
       removeWaypoint: (index: number) => void;
       clearWaypoints: () => void;
       deleteNogo: (nogoId: ID) => void;
@@ -46,7 +48,24 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     useGlobalContext();
   const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
   const [followUser, setFollowUser] = useState(false);
-  const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
+  const [waypoints, setWaypoints] = useState<Waypoint[]>([
+    {
+      latlng: new L.LatLng(42.2425451, -82.9843214),
+      label: 'Current location',
+    },
+    {
+      latlng: new L.LatLng(42.27273618224211, -82.98179626464844),
+    },
+    {
+      latlng: new L.LatLng(42.297373449020185, -83.00634384155275),
+    },
+    {
+      latlng: new L.LatLng(42.31806638425365, -82.98025131225587),
+    },
+    {
+      latlng: new L.LatLng(42.29584977392906, -83.05372238159181),
+    },
+  ]);
   const [nogoWaypoints, setNogoWaypoints] = useState<L.LatLng[]>([]);
   const [route, setRoute] = useState<GeoJSON.LineString | null>(null);
   const [routeProperties, setRouteProperties] =
@@ -77,6 +96,13 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     };
     const newWaypoints = [...waypoints];
     newWaypoints.splice(index, 1, updatedWaypoint);
+    setWaypoints(newWaypoints);
+  };
+
+  const reorderWaypoint = (srcIndex: number, destIndex: number) => {
+    const newWaypoints = [...waypoints];
+    const [reorderedWaypoint] = newWaypoints.splice(srcIndex, 1);
+    newWaypoints.splice(destIndex, 0, reorderedWaypoint);
     setWaypoints(newWaypoints);
   };
 
@@ -216,8 +242,10 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         setMap,
         setCurrentLocation,
         setFollowUser,
+        setWaypoints,
         addWaypoint,
         updateWaypoint,
+        reorderWaypoint,
         removeWaypoint,
         clearWaypoints,
         deleteNogo,
