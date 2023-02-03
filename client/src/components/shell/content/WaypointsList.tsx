@@ -1,4 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
+import { useDrag, useDrop } from 'react-dnd';
+import type { Identifier, XYCoord } from 'dnd-core';
 import { LatLng } from 'leaflet';
 import debounce from 'lodash.debounce';
 import {
@@ -12,19 +14,31 @@ import {
   Button,
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { IconLocation, IconX } from '@tabler/icons-react';
+import { IconLocation, IconX, IconGripHorizontal } from '@tabler/icons-react';
 
 import { GeocodingApi } from 'api';
 import { GeocodeSearchResult } from 'api/interfaces/Geocoding';
 import { useMapContext } from 'contexts/mapContext';
+import { Waypoint } from 'types';
 
 export const WaypointsList: React.FC = () => {
-  const { map, waypoints, addWaypoint, removeWaypoint } = useMapContext();
+  const { map, waypoints, addWaypoint, setWaypoints, removeWaypoint } =
+    useMapContext();
 
+  const [draggableWaypoints, setDraggableWaypoints] = useState(waypoints);
   const [geoSearchValue, setGeoSearchValue] = useState<string>('');
   const [geoSearchResults, setGeoSearchResults] = useState<
     GeocodeSearchResult[]
   >([]);
+
+  useEffect(() => setDraggableWaypoints(waypoints), [waypoints]);
+
+  const reorderDraggableWaypoint = (srcIndex: number, destIndex: number) => {
+    const newWaypoints = [...draggableWaypoints];
+    const [reorderedWaypoint] = newWaypoints.splice(srcIndex, 1);
+    newWaypoints.splice(destIndex, 0, reorderedWaypoint);
+    setDraggableWaypoints(newWaypoints);
+  };
 
   const executeGeoSearch = async (query: string) => {
     if (query === '') {
@@ -97,14 +111,14 @@ export const WaypointsList: React.FC = () => {
       </Text>
       <Timeline
         style={{ zIndex: 100 }}
-        active={waypoints.length - 1}
+        active={draggableWaypoints.length - 1}
         bulletSize={20}
         styles={{
           item: { ':not(:first-of-type)': { marginTop: '18px !important' } },
           itemContent: { transform: 'translateY(-8px)' },
         }}
       >
-        {waypoints.length === 0 ? (
+        {draggableWaypoints.length === 0 ? (
           <Timeline.Item lineVariant='dotted'>
             <Button
               leftIcon={<IconLocation size={18} />}
@@ -115,31 +129,55 @@ export const WaypointsList: React.FC = () => {
             </Button>
           </Timeline.Item>
         ) : null}
-        {waypoints.map((waypoint, index) => {
-          const label =
-            waypoint.label ??
-            waypoint.latlng.lat.toFixed(6) +
-              ', ' +
-              waypoint.latlng.lng.toFixed(6);
+        {draggableWaypoints.map((waypoint, index) => {
+          const ref = useRef(null);
+          const [{ handlerId, isOver }, drop] = useDrop<
+            DragItem,
+            void,
+            { handlerId: Identifier | null; isOver: boolean }
+          >({
+            accept: 'waypoint',
+            collect(monitor) {
+              return {
+                handlerId: monitor.getHandlerId(),
+                isOver: monitor.isOver(),
+              };
+            },
+            drop() {
+              setWaypoints(draggableWaypoints);
+            },
+            hover(item: DragItem) {
+              if (!ref.current) return;
+              const dragIndex = item.index;
+              const hoverIndex = index;
+              if (dragIndex === hoverIndex) {
+                return;
+              }
+              reorderDraggableWaypoint(dragIndex, hoverIndex);
+              item.index = hoverIndex;
+            },
+          });
+          drop(ref);
           return (
             <Timeline.Item
+              ref={ref}
+              data-handler-id={handlerId}
               bullet={<Text size={12}>{index + 1}</Text>}
               lineVariant='dotted'
             >
-              <Group position='apart' pt={4} pb={4} noWrap>
-                <Text lineClamp={1} size='sm'>
-                  {label}
-                </Text>
-                <ActionIcon onClick={() => removeWaypoint(index)}>
-                  <IconX size={18} />
-                </ActionIcon>
-              </Group>
+              <DraggableWaypointItem
+                id={index}
+                index={index}
+                waypoint={waypoint}
+                isHoveredOver={isOver}
+                removeWaypoint={removeWaypoint}
+              />
             </Timeline.Item>
           );
         })}
         <Timeline.Item lineVariant='dotted'>
           <Select
-            key={waypoints.length}
+            key={draggableWaypoints.length}
             searchable
             placeholder='Search for a location'
             data={geoSearchResultOptions}
@@ -153,5 +191,66 @@ export const WaypointsList: React.FC = () => {
         </Timeline.Item>
       </Timeline>
     </Stack>
+  );
+};
+
+type DraggableWaypointItemProps = {
+  id: number;
+  index: number;
+  waypoint: Waypoint;
+  isHoveredOver: boolean;
+  removeWaypoint: (index: number) => void;
+};
+
+type DragItem = {
+  index: number;
+  id: string;
+  type: string;
+};
+
+const DraggableWaypointItem: React.FC<DraggableWaypointItemProps> = ({
+  id,
+  index,
+  waypoint,
+  isHoveredOver,
+  removeWaypoint,
+}) => {
+  const [{ isDragging }, drag, preview] = useDrag({
+    type: 'waypoint',
+    item: () => {
+      return { id, index };
+    },
+    collect: (monitor: any) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
+
+  const opacity = isHoveredOver ? 0 : 1;
+
+  const label =
+    waypoint.label ??
+    waypoint.latlng.lat.toFixed(6) + ', ' + waypoint.latlng.lng.toFixed(6);
+
+  return (
+    <Group
+      ref={preview}
+      position='apart'
+      pt={4}
+      pb={4}
+      noWrap
+      style={{ opacity }}
+    >
+      <Text lineClamp={1} size='sm'>
+        {label}
+      </Text>
+      <Group position='right' spacing='xs'>
+        <ActionIcon ref={drag}>
+          <IconGripHorizontal size={18} />
+        </ActionIcon>
+        <ActionIcon onClick={() => removeWaypoint(index)}>
+          <IconX size={18} />
+        </ActionIcon>
+      </Group>
+    </Group>
   );
 };
