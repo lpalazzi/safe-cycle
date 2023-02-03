@@ -48,24 +48,25 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     useGlobalContext();
   const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
   const [followUser, setFollowUser] = useState(false);
-  const [waypoints, setWaypoints] = useState<Waypoint[]>([
-    {
-      latlng: new L.LatLng(42.2425451, -82.9843214),
-      label: 'Current location',
-    },
-    {
-      latlng: new L.LatLng(42.27273618224211, -82.98179626464844),
-    },
-    {
-      latlng: new L.LatLng(42.297373449020185, -83.00634384155275),
-    },
-    {
-      latlng: new L.LatLng(42.31806638425365, -82.98025131225587),
-    },
-    {
-      latlng: new L.LatLng(42.29584977392906, -83.05372238159181),
-    },
-  ]);
+  const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
+  // const [waypoints, setWaypoints] = useState<Waypoint[]>([
+  //   {
+  //     latlng: new L.LatLng(42.2425451, -82.9843214),
+  //     label: 'Current location',
+  //   },
+  //   {
+  //     latlng: new L.LatLng(42.27273618224211, -82.98179626464844),
+  //   },
+  //   {
+  //     latlng: new L.LatLng(42.297373449020185, -83.00634384155275),
+  //   },
+  //   {
+  //     latlng: new L.LatLng(42.31806638425365, -82.98025131225587),
+  //   },
+  //   {
+  //     latlng: new L.LatLng(42.29584977392906, -83.05372238159181),
+  //   },
+  // ]);
   const [nogoWaypoints, setNogoWaypoints] = useState<L.LatLng[]>([]);
   const [route, setRoute] = useState<GeoJSON.LineString | null>(null);
   const [routeProperties, setRouteProperties] =
