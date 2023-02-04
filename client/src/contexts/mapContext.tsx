@@ -23,7 +23,6 @@ type MapContextType =
       setMap: (map: L.Map) => void;
       setCurrentLocation: (location: Location | null) => void;
       setFollowUser: (val: boolean) => void;
-      setWaypoints: (waypoints: Waypoint[]) => void;
       addWaypoint: (latlng: L.LatLng, label?: string) => void;
       updateWaypoint: (index: number, latlng: L.LatLng, label?: string) => void;
       reorderWaypoint: (sourceIndex: number, destIndex: number) => void;
@@ -49,24 +48,28 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
   const [followUser, setFollowUser] = useState(false);
   const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
+
   // const [waypoints, setWaypoints] = useState<Waypoint[]>([
   //   {
   //     latlng: new L.LatLng(42.2425451, -82.9843214),
   //     label: 'Current location',
   //   },
   //   {
-  //     latlng: new L.LatLng(42.27273618224211, -82.98179626464844),
+  //     latlng: new L.LatLng(42.2660088, -83.0089185),
+  //     label:
+  //       "Hamoudi's Shawarma, Liberty Street, Windsor, Southwestern Ontario, Ontario, N9E 1H4, Canada",
   //   },
   //   {
-  //     latlng: new L.LatLng(42.297373449020185, -83.00634384155275),
+  //     latlng: new L.LatLng(42.29374455, -83.02255922441043),
+  //     label: 'Jackson Park, Windsor, Southwestern Ontario, Ontario, Canada',
   //   },
   //   {
-  //     latlng: new L.LatLng(42.31806638425365, -82.98025131225587),
-  //   },
-  //   {
-  //     latlng: new L.LatLng(42.29584977392906, -83.05372238159181),
+  //     latlng: new L.LatLng(42.3070911, -82.9942131),
+  //     label:
+  //       'Walkerville, Windsor, Southwestern Ontario, Ontario, N8W 3X4, Canada',
   //   },
   // ]);
+
   const [nogoWaypoints, setNogoWaypoints] = useState<L.LatLng[]>([]);
   const [route, setRoute] = useState<GeoJSON.LineString | null>(null);
   const [routeProperties, setRouteProperties] =
@@ -243,7 +246,6 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         setMap,
         setCurrentLocation,
         setFollowUser,
-        setWaypoints,
         addWaypoint,
         updateWaypoint,
         reorderWaypoint,
