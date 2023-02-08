@@ -11,6 +11,10 @@ const RegionSchema = new mongoose.Schema<IRegion>({
     type: PolygonSchema,
     required: true,
   },
+  contributors: {
+    type: [mongoose.SchemaTypes.ObjectId],
+    required: true,
+  },
 });
 
 export const RegionModel = mongoose.model<IRegion>('Region', RegionSchema);

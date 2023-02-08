@@ -15,6 +15,10 @@ const UserSchema = new mongoose.Schema<IUser>({
     first: String,
     last: String,
   },
+  role: {
+    type: String,
+    enum: ['admin', 'verified contributor'],
+  },
 });
 
 export const UserModel = mongoose.model<IUser>('User', UserSchema);

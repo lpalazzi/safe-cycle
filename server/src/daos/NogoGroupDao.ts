@@ -5,11 +5,7 @@ import { NogoGroupModel } from 'models';
 
 export class NogoGroupDao extends BaseDao<INogoGroup, INogoGroupReturnDTO> {
   constructor() {
-    const populate = {
-      path: 'user',
-      select: '-_id name',
-    };
-    super(NogoGroupModel, populate);
+    super(NogoGroupModel);
   }
 
   async getUserIdOnList(nogoGroupId: mongoose.Types.ObjectId) {

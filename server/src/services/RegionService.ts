@@ -21,4 +21,17 @@ export class RegionService {
     }
     return geojsonWithin(lineString, region.polygon);
   }
+
+  async isUserContributorOnRegion(
+    userId: mongoose.Types.ObjectId,
+    regionId: mongoose.Types.ObjectId
+  ) {
+    const region = await this.regionDao.getById(regionId);
+    if (!region) {
+      throw new Error(`Region not found with id=${regionId}`);
+    }
+    return !!region.contributors.find((contributorId) =>
+      contributorId.equals(userId)
+    );
+  }
 }
