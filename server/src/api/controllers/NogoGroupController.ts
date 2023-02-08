@@ -15,17 +15,6 @@ export const nogoGroup = (app: express.Router) => {
   app.use('/nogoGroup', route);
   const nogoGroupService = container.resolve(NogoGroupService);
 
-  route.get('/getAllPublic', async (req, res, next) => {
-    try {
-      const nogoGroups = await nogoGroupService.getAllPublic();
-      return res.json({
-        nogoGroups,
-      });
-    } catch (err) {
-      next(err);
-    }
-  });
-
   route.get('/getAllForUser', checkLoggedIn, async (req, res, next) => {
     try {
       const userId = new mongoose.Types.ObjectId(req.session.userId);
@@ -68,8 +57,8 @@ export const nogoGroup = (app: express.Router) => {
       const nogoGroupUpdate: INogoGroupUpdateDTO = req.body.nogoGroupUpdate;
       const userId = new mongoose.Types.ObjectId(req.session.userId);
       const userOwnsNogoGroup = await nogoGroupService.doesUserOwnNogoGroup(
-        nogoGroupId,
-        userId
+        userId,
+        nogoGroupId
       );
       if (!userOwnsNogoGroup) {
         throw new UnauthorizedError(
@@ -99,8 +88,8 @@ export const nogoGroup = (app: express.Router) => {
       const nogoGroupId = new mongoose.Types.ObjectId(req.params.id);
       const userId = new mongoose.Types.ObjectId(req.session.userId);
       const userOwnsNogoGroup = await nogoGroupService.doesUserOwnNogoGroup(
-        nogoGroupId,
-        userId
+        userId,
+        nogoGroupId
       );
       if (!userOwnsNogoGroup) {
         throw new UnauthorizedError(

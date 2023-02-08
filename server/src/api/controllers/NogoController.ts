@@ -45,8 +45,8 @@ export const nogo = (app: express.Router) => {
         );
       if (
         !nogoGroupService.doesUserOwnNogoGroup(
-          new mongoose.Types.ObjectId(nogoGroupId),
-          new mongoose.Types.ObjectId(req.session.userId)
+          new mongoose.Types.ObjectId(req.session.userId),
+          new mongoose.Types.ObjectId(nogoGroupId)
         )
       )
         throw new UnauthorizedError('User does not have access to Nogo Group');
