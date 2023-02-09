@@ -17,6 +17,11 @@ export class UserService {
     return await this.userDao.getOne({ email });
   }
 
+  async isUserAdmin(userId: mongoose.Types.ObjectId) {
+    const user = await this.userDao.getById(userId);
+    return user?.role === 'admin';
+  }
+
   async signup(
     userDTO: IUserSignupDTO
   ): Promise<{ user: IUserReturnDTO | null; error: string | null }> {
