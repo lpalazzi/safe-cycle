@@ -8,6 +8,7 @@ declare module 'joi/lib' {
     geojson: () => {
       position: () => AnySchema;
       lineString: () => AnySchema;
+      polygon: () => AnySchema;
     };
   }
 }

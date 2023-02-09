@@ -14,3 +14,5 @@ export interface IRegionReturnDTO extends Omit<IRegion, 'contributors'> {
     role: UserRole;
   }[];
 }
+
+export interface IRegionCreateDTO extends Omit<IRegion, '_id contributors'> {}
