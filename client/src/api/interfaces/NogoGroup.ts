@@ -1,12 +1,9 @@
-import { ID, Name } from 'types';
+import { ID } from 'types';
 
 export interface INogoGroupReturnDTO {
   _id: ID;
+  user: ID;
   name: string;
-  user: {
-    name: Name;
-  };
-  isPublic?: boolean;
 }
 
 export interface INogoGroupCreateDTO

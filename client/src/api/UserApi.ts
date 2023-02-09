@@ -1,5 +1,4 @@
 import { User } from 'models';
-import { ID } from 'types';
 import {
   IUserLoginDTO,
   IUserReturnDTO,
@@ -14,12 +13,6 @@ export class UserApi {
     const response = await makeRequest(`${this.baseUrl}/getActiveUser`);
     const userReturn: IUserReturnDTO = response.user;
     return userReturn ? new User(userReturn) : null;
-  }
-
-  static async getById(id: ID) {
-    const response = await makeRequest(`${this.baseUrl}/${id}`);
-    const userReturn: IUserReturnDTO = response.user;
-    return new User(userReturn);
   }
 
   static async signup(userSignup: IUserSignupDTO) {

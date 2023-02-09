@@ -13,13 +13,13 @@ import {
 import { openModal, openConfirmModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import {
-  IconCheck,
   IconPlus,
   IconDots,
   IconRoadOff,
   IconEdit,
   IconTrash,
   IconInfoCircle,
+  IconX,
 } from '@tabler/icons-react';
 
 import { NogoGroup } from 'models';
@@ -43,6 +43,7 @@ export const UserNogoGroups: React.FC<UserNogoGroupsProps> = ({
     selectedNogoGroups,
     editingNogoGroup,
     selectNogoGroup,
+    deselectNogoGroup,
     setEditingNogoGroup,
   } = useGlobalContext();
 
@@ -98,7 +99,7 @@ export const UserNogoGroups: React.FC<UserNogoGroupsProps> = ({
     <Stack spacing='xs'>
       <SidebarTitle
         title='Your Nogo Groups'
-        tooltipLabel='Add and edit custom Nogo Groups. Nogo Groups added here are available to all users to use with their cycling routes.'
+        tooltipLabel='Add and edit custom Nogo Groups to apply to your own routes.'
       />
       {!!loggedInUser ? (
         <>
@@ -115,19 +116,27 @@ export const UserNogoGroups: React.FC<UserNogoGroupsProps> = ({
                         {isEditing ? 'Editing' : 'Applied'}
                       </Text>
                     ) : null}
-                    {alreadySelected ? (
-                      <IconCheck size={18} color='grey' />
-                    ) : (
-                      <Tooltip label='Apply' withArrow hidden={alreadySelected}>
+                    {!isEditing ? (
+                      <Tooltip
+                        label={alreadySelected ? 'Remove' : 'Apply'}
+                        withArrow
+                      >
                         <ActionIcon
-                          disabled={alreadySelected}
-                          onClick={() => selectNogoGroup(nogoGroup._id)}
+                          onClick={() =>
+                            alreadySelected
+                              ? deselectNogoGroup(nogoGroup._id)
+                              : selectNogoGroup(nogoGroup._id)
+                          }
                         >
-                          <IconPlus size={18} />
+                          {alreadySelected ? (
+                            <IconX size={18} />
+                          ) : (
+                            <IconPlus size={18} />
+                          )}
                         </ActionIcon>
                       </Tooltip>
-                    )}
-                    <Menu position='right-end' offset={24}>
+                    ) : null}
+                    <Menu position='left-start'>
                       <Menu.Target>
                         <ActionIcon>
                           <IconDots size={18} />
