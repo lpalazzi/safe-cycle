@@ -59,12 +59,11 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   const getStoredSelectedNogoGroups = async () => {
     const stored = window.localStorage.getItem('selectedNogoGroups');
     if (!stored || stored === '') return;
-    const publicNogoGroups = await NogoGroupApi.getAllPublic();
     const userNogoGroups = await NogoGroupApi.getAllForUser();
     const filteredStoredSelectedNogoGroups = stored
       .split(',')
       .filter((selectedNogoGroup) => {
-        return !![...publicNogoGroups, ...userNogoGroups].find(
+        return !!userNogoGroups.find(
           (nogoGroup) => nogoGroup._id === selectedNogoGroup
         );
       });
