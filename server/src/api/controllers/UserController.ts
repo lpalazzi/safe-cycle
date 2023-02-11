@@ -7,12 +7,47 @@ import {
   BadRequestError,
   InternalServerError,
 } from 'api/errors';
+import { UserRole } from 'types';
 import { IUserLoginDTO, IUserSignupDTO } from 'interfaces';
+import { checkLoggedIn, checkAdmin } from 'api/middlewares';
 
 export const user = (app: express.Router) => {
   const route = express.Router();
   app.use('/user', route);
   const userService = container.resolve(UserService);
+
+  route.get('/getAll', checkLoggedIn, checkAdmin, async (req, res, next) => {
+    try {
+      const users = await userService.getAll();
+      return res.json({
+        users,
+      });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  route.get(
+    '/getById/:userId',
+    checkLoggedIn,
+    checkAdmin,
+    async (req, res, next) => {
+      try {
+        if (!req.params.userId) {
+          throw new BadRequestError('userId not provided');
+        }
+        if (!mongoose.isValidObjectId(req.params.userId)) {
+          throw new BadRequestError('userId is not a valid ObjectId');
+        }
+        const userId = new mongoose.Types.ObjectId(req.params.userId);
+        const user = await userService.getById(userId);
+        if (!user) throw new InternalServerError('User not found');
+        return res.json({ user });
+      } catch (err) {
+        next(err);
+      }
+    }
+  );
 
   route.get('/getActiveUser', async (req, res, next) => {
     try {
@@ -22,6 +57,10 @@ export const user = (app: express.Router) => {
         return res.json({
           user: null,
         });
+      }
+
+      if (!mongoose.isValidObjectId(req.session.userId)) {
+        throw new InternalServerError('Stored userId is not a valid ObjectId');
       }
 
       const user = await userService.getById(
@@ -87,4 +126,36 @@ export const user = (app: express.Router) => {
       next(err);
     }
   });
+
+  route.post(
+    '/updateUserRole',
+    checkLoggedIn,
+    checkAdmin,
+    async (req, res, next) => {
+      try {
+        if (!req.body.userId) {
+          throw new BadRequestError('userId not provided');
+        }
+        if (!mongoose.isValidObjectId(req.body.userId)) {
+          throw new BadRequestError('userId is not a valid ObjectId');
+        }
+        const userId = new mongoose.Types.ObjectId(req.body.userId);
+        const role: UserRole = req.body.role;
+        if (![null, 'admin', 'verified contributor'].includes(role))
+          throw new BadRequestError('Role must be a valid role');
+
+        const success = await userService.updateUserRole(userId, role);
+        if (!success) {
+          throw new InternalServerError(
+            'Role could not be updated for this user'
+          );
+        }
+        return res.json({
+          success: true,
+        });
+      } catch (err) {
+        next(err);
+      }
+    }
+  );
 };

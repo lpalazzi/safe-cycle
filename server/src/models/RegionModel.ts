@@ -14,6 +14,7 @@ const RegionSchema = new mongoose.Schema<IRegion>({
   contributors: {
     type: [mongoose.SchemaTypes.ObjectId],
     required: true,
+    ref: 'User',
   },
 });
 

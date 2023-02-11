@@ -7,6 +7,6 @@ export interface INogoGroupReturnDTO {
 }
 
 export interface INogoGroupCreateDTO
-  extends Omit<INogoGroupReturnDTO, '_id user'> {}
+  extends Omit<INogoGroupReturnDTO, '_id' | 'user'> {}
 
 export interface INogoGroupUpdateDTO extends INogoGroupCreateDTO {}

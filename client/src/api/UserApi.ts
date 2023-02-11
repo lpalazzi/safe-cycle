@@ -1,4 +1,5 @@
 import { User } from 'models';
+import { ID, UserRole } from 'types';
 import {
   IUserLoginDTO,
   IUserReturnDTO,
@@ -8,6 +9,18 @@ import { makeRequest } from './reqHelpers';
 
 export class UserApi {
   private static baseUrl = '/user';
+
+  static async getAll() {
+    const response = await makeRequest(`${this.baseUrl}/getAll`);
+    const usersReturn: IUserReturnDTO[] = response.users;
+    return usersReturn.map((userReturn) => new User(userReturn));
+  }
+
+  static async getById(userId: ID) {
+    const response = await makeRequest(`${this.baseUrl}/getById/${userId}`);
+    const userReturn: IUserReturnDTO = response.user;
+    return new User(userReturn);
+  }
 
   static async getActiveUser() {
     const response = await makeRequest(`${this.baseUrl}/getActiveUser`);
@@ -33,6 +46,18 @@ export class UserApi {
 
   static async logout() {
     const response = await makeRequest(`${this.baseUrl}/logout`, 'POST');
+    return !!response.success;
+  }
+
+  static async updateUserRole(userId: ID, role: UserRole) {
+    const response = await makeRequest(
+      `${this.baseUrl}/updateUserRole`,
+      'POST',
+      {
+        userId,
+        role,
+      }
+    );
     return !!response.success;
   }
 }

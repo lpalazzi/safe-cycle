@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import { container } from 'tsyringe';
 import { RegionService } from 'services';
 import { IRegionCreateDTO } from 'interfaces';
@@ -37,4 +38,68 @@ export const region = (app: express.Router) => {
       next(err);
     }
   });
+
+  route.post(
+    '/addContributorToRegion',
+    checkLoggedIn,
+    checkAdmin,
+    async (req, res, next) => {
+      try {
+        if (!req.body.userId) throw new BadRequestError('userId not provided');
+        if (!req.body.regionId)
+          throw new BadRequestError('regionId not provided');
+        if (!mongoose.isValidObjectId(req.body.userId))
+          throw new BadRequestError('userId is not a valid ObjectId');
+        if (!mongoose.isValidObjectId(req.body.regionId))
+          throw new BadRequestError('regionId is not a valid ObjectId');
+
+        const userId = new mongoose.Types.ObjectId(req.body.userId);
+        const regionId = new mongoose.Types.ObjectId(req.body.regionId);
+        const success = await regionService.addContributorToRegion(
+          regionId,
+          userId
+        );
+        if (!success) {
+          throw new InternalServerError(
+            'User could not be added as a contributor'
+          );
+        }
+        return res.json({ success: true });
+      } catch (err) {
+        next(err);
+      }
+    }
+  );
+
+  route.post(
+    '/removeContributorFromRegion',
+    checkLoggedIn,
+    checkAdmin,
+    async (req, res, next) => {
+      try {
+        if (!req.body.userId) throw new BadRequestError('userId not provided');
+        if (!req.body.regionId)
+          throw new BadRequestError('regionId not provided');
+        if (!mongoose.isValidObjectId(req.body.userId))
+          throw new BadRequestError('userId is not a valid ObjectId');
+        if (!mongoose.isValidObjectId(req.body.regionId))
+          throw new BadRequestError('regionId is not a valid ObjectId');
+
+        const userId = new mongoose.Types.ObjectId(req.body.userId);
+        const regionId = new mongoose.Types.ObjectId(req.body.regionId);
+        const success = await regionService.removeContributorFromRegion(
+          regionId,
+          userId
+        );
+        if (!success) {
+          throw new InternalServerError(
+            'User could not be removed as a contributor'
+          );
+        }
+        return res.json({ success: true });
+      } catch (err) {
+        next(err);
+      }
+    }
+  );
 };

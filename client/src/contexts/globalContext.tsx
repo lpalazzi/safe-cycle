@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { showNotification } from '@mantine/notifications';
-import { NogoGroupApi, UserApi } from 'api';
-import { NogoGroup, User } from 'models';
+import { NogoGroupApi, RegionApi, UserApi } from 'api';
+import { NogoGroup, Region, User } from 'models';
 import { ID, RouteOptions } from 'types';
 import { useMantineTheme } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
@@ -16,6 +16,7 @@ type GlobalContextType =
       selectedNogoGroups: ID[];
       editingNogoGroup: NogoGroup | null;
       routeOptions: RouteOptions;
+      regions: Region[];
       // functions
       updateLoggedInUser: () => void;
       logoutUser: () => void;
@@ -25,6 +26,7 @@ type GlobalContextType =
       deselectNogoGroup: (id: ID) => void;
       setEditingNogoGroup: (nogoGroup: NogoGroup | null) => void;
       updateRouteOptions: (update: Partial<RouteOptions>) => void;
+      refreshRegions: () => void;
     }
   | undefined;
 
@@ -50,10 +52,12 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     null
   );
   const [routeOptions, setRouteOptions] = useState<RouteOptions>({});
+  const [regions, setRegions] = useState<Region[]>([]);
 
   useEffect(() => {
     updateLoggedInUser();
     getStoredSelectedNogoGroups();
+    refreshRegions();
   }, []);
 
   const getStoredSelectedNogoGroups = async () => {
@@ -88,6 +92,19 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
       ...routeOptions,
       ...update,
     });
+  };
+
+  const refreshRegions = async () => {
+    try {
+      const fetchedRegions = await RegionApi.getAll();
+      setRegions(fetchedRegions);
+    } catch (error: any) {
+      showNotification({
+        title: 'Error fetching regions',
+        message: error.message ?? 'Unhandled error',
+        color: 'red',
+      });
+    }
   };
 
   useEffect(() => {
@@ -143,6 +160,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         selectedNogoGroups,
         editingNogoGroup,
         routeOptions,
+        regions,
         updateLoggedInUser,
         logoutUser,
         toggleNavbar,
@@ -151,6 +169,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         deselectNogoGroup,
         setEditingNogoGroup: handleSetEditingNogoGroup,
         updateRouteOptions,
+        refreshRegions,
       }}
     >
       {props.children}

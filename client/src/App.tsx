@@ -12,7 +12,7 @@ function App() {
   return (
     <GlobalContextProvider>
       <MantineProvider withGlobalStyles withNormalizeCSS>
-        <NotificationsProvider position='top-right'>
+        <NotificationsProvider position='top-right' zIndex={100000}>
           <ModalsProvider modalProps={{ zIndex: 10000 }}>
             <MapContextProvider>
               <DndProvider backend={HTML5Backend}>

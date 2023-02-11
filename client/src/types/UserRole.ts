@@ -1,1 +1,1 @@
-export type UserRole = 'admin' | 'verified contributor';
+export type UserRole = null | 'admin' | 'verified contributor';

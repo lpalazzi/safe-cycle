@@ -74,4 +74,41 @@ export class RegionService {
       };
     }
   }
+
+  async addContributorToRegion(
+    regionId: mongoose.Types.ObjectId,
+    userId: mongoose.Types.ObjectId
+  ) {
+    const contributors = await this.regionDao.getContributorIdsOnRegion(
+      regionId
+    );
+    if (!!contributors.find((contributor) => contributor._id.equals(userId))) {
+      throw new Error('User is already a contributor on this region');
+    }
+    contributors.push(userId);
+    const updateResult = await this.regionDao.updateById(regionId, {
+      contributors,
+    });
+    return updateResult.acknowledged && updateResult.modifiedCount === 1;
+  }
+
+  async removeContributorFromRegion(
+    regionId: mongoose.Types.ObjectId,
+    userId: mongoose.Types.ObjectId
+  ) {
+    const contributors = await this.regionDao.getContributorIdsOnRegion(
+      regionId
+    );
+    const index = contributors.findIndex((contributor) =>
+      contributor._id.equals(userId)
+    );
+    if (index < 0) {
+      return true;
+    }
+    contributors.splice(index, 1);
+    const updateResult = await this.regionDao.updateById(regionId, {
+      contributors,
+    });
+    return updateResult.acknowledged && updateResult.modifiedCount === 1;
+  }
 }
