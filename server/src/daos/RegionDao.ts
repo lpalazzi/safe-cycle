@@ -7,7 +7,7 @@ export class RegionDao extends BaseDao<IRegion, IRegionReturnDTO> {
   constructor() {
     const populate = {
       path: 'contributors',
-      select: 'name role -_id',
+      select: '_id name role',
     };
     super(RegionModel, populate);
   }

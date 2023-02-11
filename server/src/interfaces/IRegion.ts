@@ -10,9 +10,11 @@ export interface IRegion {
 
 export interface IRegionReturnDTO extends Omit<IRegion, 'contributors'> {
   contributors: {
+    _id: mongoose.Types.ObjectId;
     name: Name;
     role: UserRole;
   }[];
 }
 
-export interface IRegionCreateDTO extends Omit<IRegion, '_id contributors'> {}
+export interface IRegionCreateDTO
+  extends Omit<IRegion, '_id' | 'contributors'> {}
