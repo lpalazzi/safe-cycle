@@ -9,18 +9,42 @@ export const RoutePreferences: React.FC = () => {
     <Stack spacing='xs'>
       <SidebarTitle title='Route Preferences' />
       <Checkbox
-        label='Avoid low comfort roads'
+        label='Avoid low-comfort roads'
         checked={routeOptions.avoidUnsafe}
         onChange={(e) =>
           updateRouteOptions({ avoidUnsafe: e.currentTarget.checked })
         }
       />
       <Checkbox
-        label='Avoid unpaved roads'
+        label='Stick to cycle routes and trails'
+        checked={routeOptions.stickToCycleRoutes}
+        onChange={(e) =>
+          updateRouteOptions({ stickToCycleRoutes: e.currentTarget.checked })
+        }
+      />
+      <Checkbox
+        label='Prefer paved routes'
+        checked={routeOptions.preferPaved}
+        onChange={(e) =>
+          updateRouteOptions({ preferPaved: e.currentTarget.checked })
+        }
+        disabled={routeOptions.avoidUnpaved || routeOptions.avoidUnpavedB}
+      />
+      <Checkbox
+        label='Avoid unpaved routes (A)'
         checked={routeOptions.avoidUnpaved}
         onChange={(e) =>
           updateRouteOptions({ avoidUnpaved: e.currentTarget.checked })
         }
+        disabled={routeOptions.preferPaved || routeOptions.avoidUnpavedB}
+      />
+      <Checkbox
+        label='Avoid unpaved routes (B)'
+        checked={routeOptions.avoidUnpavedB}
+        onChange={(e) =>
+          updateRouteOptions({ avoidUnpavedB: e.currentTarget.checked })
+        }
+        disabled={routeOptions.preferPaved || routeOptions.avoidUnpaved}
       />
       <Input.Wrapper label='Use an alternative route'>
         <SegmentedControl

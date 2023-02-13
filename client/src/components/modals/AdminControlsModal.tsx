@@ -24,6 +24,8 @@ import { ID, UserRole } from 'types';
 import { IconX } from '@tabler/icons-react';
 
 const AddRegionForm: React.FC = () => {
+  const { refreshRegions } = useGlobalContext();
+
   const form = useForm({
     initialValues: {
       name: '',
@@ -57,6 +59,7 @@ const AddRegionForm: React.FC = () => {
           color: 'green',
         });
         form.reset();
+        refreshRegions();
       }
     } catch (error: any) {
       showNotification({

@@ -98,8 +98,8 @@ export const UserNogoGroups: React.FC<UserNogoGroupsProps> = ({
   return (
     <Stack spacing='xs'>
       <SidebarTitle
-        title='Your Nogo Groups'
-        tooltipLabel='Add and edit custom Nogo Groups to apply to your own routes.'
+        title='Custom Nogo Groups'
+        tooltipLabel='Add and edit custom Nogos to apply to your own routes.'
       />
       {!!loggedInUser ? (
         <>
