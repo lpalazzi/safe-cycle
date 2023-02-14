@@ -13,6 +13,7 @@ export const router = (app: express.Router) => {
     try {
       const points: GeoJSON.Position[] = req.body.points ?? [];
       const nogoGroupIds: string[] = req.body.nogoGroupIds ?? [];
+      const regionIds: string[] = req.body.regionIds ?? [];
       const avoidUnsafe = req.query.avoidUnsafe === 'true' ?? false;
       const avoidUnpaved = req.query.avoidUnpaved === 'true' ?? false;
       const alternativeidx =
@@ -29,16 +30,26 @@ export const router = (app: express.Router) => {
       const invalidNogoGroupId = nogoGroupIds.find(
         (nogoGroupId) => !mongoose.isValidObjectId(nogoGroupId)
       );
-      if (invalidNogoGroupId)
-        throw new BadRequestError(
-          `nogoGroupId=${invalidNogoGroupId} is not a valid ObjectId`
-        );
+      const invalidRegionId = regionIds.find(
+        (regionId) => !mongoose.isValidObjectId(regionId)
+      );
+      if (invalidNogoGroupId || invalidRegionId) {
+        const errorText = invalidNogoGroupId
+          ? `nogoGroupId=${invalidNogoGroupId}`
+          : `regionId=${invalidRegionId}`;
+        throw new BadRequestError(`${errorText} is not a valid ObjectId`);
+      }
 
-      const data = await routerService.getRouteForUser(points, nogoGroupIds, {
-        avoidUnsafe,
-        avoidUnpaved,
-        alternativeidx,
-      });
+      const data = await routerService.getRouteForUser(
+        points,
+        nogoGroupIds,
+        regionIds,
+        {
+          avoidUnsafe,
+          avoidUnpaved,
+          alternativeidx,
+        }
+      );
       const route: GeoJSON.LineString = data.route;
       const properties: GeoJSON.GeoJsonProperties = data.properties;
 

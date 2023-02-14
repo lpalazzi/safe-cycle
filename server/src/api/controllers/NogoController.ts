@@ -1,7 +1,12 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import { container } from 'tsyringe';
-import { NogoGroupService, NogoService, RouterService } from 'services';
+import {
+  NogoGroupService,
+  NogoService,
+  RegionService,
+  RouterService,
+} from 'services';
 import { INogoCreateDTO } from 'interfaces';
 import { checkLoggedIn } from 'api/middlewares';
 import {
@@ -15,17 +20,19 @@ export const nogo = (app: express.Router) => {
   app.use('/nogo', route);
   const nogoService = container.resolve(NogoService);
   const nogoGroupService = container.resolve(NogoGroupService);
+  const regionService = container.resolve(RegionService);
   const routerService = container.resolve(RouterService);
 
-  route.get('/getAllByList/:nogoGroupId', async (req, res, next) => {
+  route.get('/getAllByGroup/:groupId/:groupType', async (req, res, next) => {
     try {
-      if (!mongoose.isValidObjectId(req.params.nogoGroupId)) {
+      if (!mongoose.isValidObjectId(req.params.groupId)) {
         throw new BadRequestError(
-          `${req.params.nogoGroupId} is not a valid ObjectId`
+          `${req.params.groupId} is not a valid ObjectId`
         );
       }
-      const nogoGroupId = new mongoose.Types.ObjectId(req.params.nogoGroupId);
-      const nogos = await nogoService.getAllByList(nogoGroupId);
+      const groupId = new mongoose.Types.ObjectId(req.params.groupId);
+      const isRegion = req.params.groupType === 'region';
+      const nogos = await nogoService.getAllByGroup(groupId, isRegion);
       return res.json({ nogos });
     } catch (err) {
       next(err);
@@ -35,28 +42,49 @@ export const nogo = (app: express.Router) => {
   route.post('/create', checkLoggedIn, async (req, res, next) => {
     try {
       const points: GeoJSON.Position[] = req.body.points ?? [];
-      const nogoGroupId: string = req.body.nogoGroupId;
+      const groupId: string = req.body.groupId;
+      const isOnRegion: boolean = req.body.isOnRegion;
 
       if (points.length < 2)
         throw new BadRequestError('Route request must have at least 2 points');
-      if (!mongoose.isValidObjectId(nogoGroupId))
-        throw new BadRequestError(
-          `nogoGroupId=${nogoGroupId} is not a valid ObjectId`
-        );
+      if (!mongoose.isValidObjectId(groupId))
+        throw new BadRequestError(`groupId=${groupId} is not a valid ObjectId`);
       if (
-        !nogoGroupService.doesUserOwnNogoGroup(
-          new mongoose.Types.ObjectId(req.session.userId),
-          new mongoose.Types.ObjectId(nogoGroupId)
-        )
+        isOnRegion
+          ? !regionService.isUserContributorOnRegion(
+              new mongoose.Types.ObjectId(req.session.userId),
+              new mongoose.Types.ObjectId(groupId)
+            )
+          : !nogoGroupService.doesUserOwnNogoGroup(
+              new mongoose.Types.ObjectId(req.session.userId),
+              new mongoose.Types.ObjectId(groupId)
+            )
       )
-        throw new UnauthorizedError('User does not have access to Nogo Group');
+        throw new UnauthorizedError(
+          `User does not have access to ${isOnRegion ? 'Region' : 'Nogo Group'}`
+        );
 
       const routeData = await routerService.getRouteForNewNogo(points);
       const route = routeData.route;
-      const newNogo: INogoCreateDTO = {
-        lineString: route,
-        nogoGroup: new mongoose.Types.ObjectId(nogoGroupId),
-      };
+
+      const routeIsOutsideRegion =
+        isOnRegion &&
+        !(await regionService.isLineStringInRegion(
+          route,
+          new mongoose.Types.ObjectId(groupId)
+        ));
+      if (routeIsOutsideRegion)
+        throw new BadRequestError('Nogo must be inside selected region');
+
+      const newNogo: INogoCreateDTO = isOnRegion
+        ? {
+            lineString: route,
+            region: new mongoose.Types.ObjectId(groupId),
+          }
+        : {
+            lineString: route,
+            nogoGroup: new mongoose.Types.ObjectId(groupId),
+          };
       const { nogo, error } = await nogoService.create(newNogo);
 
       if (error) throw new InternalServerError(error);

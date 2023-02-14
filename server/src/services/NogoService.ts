@@ -13,8 +13,10 @@ export class NogoService {
     @inject('RegionService') private regionService: RegionService
   ) {}
 
-  async getAllByList(nogoGroupId: mongoose.Types.ObjectId) {
-    return this.nogoDao.get({ nogoGroup: nogoGroupId });
+  async getAllByGroup(groupId: mongoose.Types.ObjectId, isRegion?: boolean) {
+    return this.nogoDao.get(
+      isRegion ? { region: groupId } : { nogoGroup: groupId }
+    );
   }
 
   async deleteById(nogoId: mongoose.Types.ObjectId) {

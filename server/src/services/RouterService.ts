@@ -27,6 +27,7 @@ export class RouterService {
   private async fetchRoute(
     lonlats: GeoJSON.Position[],
     nogoGroupIds: string[],
+    regionIds: string[],
     profile:
       | 'safecycle'
       | 'safecycle-avoidUnsafe'
@@ -37,7 +38,7 @@ export class RouterService {
   ) {
     const url = `${this.brouterUrl}?lonlats=${this.positionsToParamString(
       lonlats
-    )}&nogoGroupIds=${nogoGroupIds.join(
+    )}&nogoGroupIds=${nogoGroupIds.join('|')}&regionIds=${regionIds.join(
       '|'
     )}&profile=${profile}&alternativeidx=${alternativeidx}&format=geojson`;
     return axios
@@ -66,13 +67,14 @@ export class RouterService {
   }
 
   async getRouteForNewNogo(lonlats: GeoJSON.Position[]) {
-    const route = await this.fetchRoute(lonlats, [], 'all');
+    const route = await this.fetchRoute(lonlats, [], [], 'all');
     return route;
   }
 
   async getRouteForUser(
     lonlats: GeoJSON.Position[],
     nogoGroupIds: string[],
+    regionIds: string[],
     routeOptions?: {
       avoidUnsafe?: boolean;
       avoidUnpaved?: boolean;
@@ -89,6 +91,7 @@ export class RouterService {
     const route = await this.fetchRoute(
       lonlats,
       nogoGroupIds,
+      regionIds,
       profile(routeOptions?.avoidUnsafe, routeOptions?.avoidUnpaved),
       routeOptions?.alternativeidx
     );
