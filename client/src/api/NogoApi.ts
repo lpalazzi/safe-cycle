@@ -6,9 +6,11 @@ import { makeRequest } from './reqHelpers';
 export class NogoApi {
   private static baseUrl = '/nogo';
 
-  static async getAllByList(nogoGroupId: ID) {
+  static async getAllByGroup(groupId: ID, isRegion: boolean) {
     const response = await makeRequest(
-      `${this.baseUrl}/getAllByList/${nogoGroupId}`
+      `${this.baseUrl}/getAllByGroup/${groupId}/${
+        isRegion ? 'region' : 'nogogroup'
+      }`
     );
     const nogosReturn: INogoReturnDTO[] = response.nogos;
     if (!nogosReturn) return [];
@@ -16,14 +18,15 @@ export class NogoApi {
     return nogos;
   }
 
-  static async create(waypoints: L.LatLng[], nogoGroupId: ID) {
+  static async create(waypoints: L.LatLng[], groupId: ID, isOnRegion: boolean) {
     const points: GeoJSON.Position[] = waypoints.map((waypoint) => [
       waypoint.lng,
       waypoint.lat,
     ]);
     const response = await makeRequest(`${this.baseUrl}/create`, 'POST', {
       points,
-      nogoGroupId,
+      groupId,
+      isOnRegion,
     });
     const nogoReturn: INogoReturnDTO = response.nogo;
     return new Nogo(nogoReturn);

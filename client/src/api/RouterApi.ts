@@ -9,6 +9,7 @@ export class RouterApi {
   static async generateRoute(
     waypoints: L.LatLng[],
     nogoGroupIds: ID[] = [],
+    regionIds: ID[] = [],
     routeOptions?: RouteOptions
   ) {
     const points: GeoJSON.Position[] = waypoints.map((waypoint) => [
@@ -25,6 +26,7 @@ export class RouterApi {
       {
         points,
         nogoGroupIds,
+        regionIds,
       }
     );
     const route: GeoJSON.LineString = response.route;

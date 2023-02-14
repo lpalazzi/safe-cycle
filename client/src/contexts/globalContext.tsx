@@ -14,7 +14,7 @@ type GlobalContextType =
       isNavbarOpen: boolean;
       isNavModeOn: boolean;
       selectedNogoGroups: ID[];
-      editingNogoGroup: NogoGroup | null;
+      editingGroupOrRegion: NogoGroup | Region | null;
       routeOptions: RouteOptions;
       regions: Region[];
       // functions
@@ -24,7 +24,8 @@ type GlobalContextType =
       toggleNavMode: () => void;
       selectNogoGroup: (id: ID) => void;
       deselectNogoGroup: (id: ID) => void;
-      setEditingNogoGroup: (nogoGroup: NogoGroup | null) => void;
+      clearSelectedNogoGroups: () => void;
+      setEditingGroupOrRegion: (nogoGroup: NogoGroup | Region | null) => void;
       updateRouteOptions: (update: Partial<RouteOptions>) => void;
       refreshRegions: () => void;
     }
@@ -48,9 +49,8 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   const [isNavbarOpen, setIsNavbarOpen] = useState(!isMobileSize);
   const [isNavModeOn, setIsNavModeOn] = useState(false);
   const [selectedNogoGroups, setSelectedNogoGroups] = useState<ID[]>([]);
-  const [editingNogoGroup, setEditingNogoGroup] = useState<NogoGroup | null>(
-    null
-  );
+  const [editingGroupOrRegion, setEditingGroupOrRegion] =
+    useState<NogoGroup | null>(null);
   const [routeOptions, setRouteOptions] = useState<RouteOptions>({});
   const [regions, setRegions] = useState<Region[]>([]);
 
@@ -130,8 +130,12 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     setSelectedNogoGroups(newSelectedNogoGroups);
   };
 
-  const handleSetEditingNogoGroup = (nogoGroup: NogoGroup | null) => {
-    setEditingNogoGroup(nogoGroup);
+  const clearSelectedNogoGroups = () => {
+    setSelectedNogoGroups([]);
+  };
+
+  const handleSetEditingGroupOrRegion = (nogoGroup: NogoGroup | null) => {
+    setEditingGroupOrRegion(nogoGroup);
     if (isMobileSize && nogoGroup) {
       setIsNavbarOpen(false);
     }
@@ -158,7 +162,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         isNavbarOpen,
         isNavModeOn,
         selectedNogoGroups,
-        editingNogoGroup,
+        editingGroupOrRegion,
         routeOptions,
         regions,
         updateLoggedInUser,
@@ -167,7 +171,8 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         toggleNavMode,
         selectNogoGroup,
         deselectNogoGroup,
-        setEditingNogoGroup: handleSetEditingNogoGroup,
+        clearSelectedNogoGroups,
+        setEditingGroupOrRegion: handleSetEditingGroupOrRegion,
         updateRouteOptions,
         refreshRegions,
       }}

@@ -43,33 +43,19 @@ type MapContextProviderType = {
 
 export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   const [map, setMap] = useState<L.Map | null>(null);
-  const { editingNogoGroup, selectedNogoGroups, routeOptions } =
-    useGlobalContext();
+  const {
+    loggedInUser,
+    editingGroupOrRegion,
+    selectedNogoGroups,
+    routeOptions,
+    regions,
+    clearSelectedNogoGroups,
+    setEditingGroupOrRegion,
+  } = useGlobalContext();
+
   const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
   const [followUser, setFollowUser] = useState(false);
   const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
-
-  // const [waypoints, setWaypoints] = useState<Waypoint[]>([
-  //   {
-  //     latlng: new L.LatLng(42.2425451, -82.9843214),
-  //     label: 'Current location',
-  //   },
-  //   {
-  //     latlng: new L.LatLng(42.2660088, -83.0089185),
-  //     label:
-  //       "Hamoudi's Shawarma, Liberty Street, Windsor, Southwestern Ontario, Ontario, N9E 1H4, Canada",
-  //   },
-  //   {
-  //     latlng: new L.LatLng(42.29374455, -83.02255922441043),
-  //     label: 'Jackson Park, Windsor, Southwestern Ontario, Ontario, Canada',
-  //   },
-  //   {
-  //     latlng: new L.LatLng(42.3070911, -82.9942131),
-  //     label:
-  //       'Walkerville, Windsor, Southwestern Ontario, Ontario, N8W 3X4, Canada',
-  //   },
-  // ]);
-
   const [nogoWaypoints, setNogoWaypoints] = useState<L.LatLng[]>([]);
   const [route, setRoute] = useState<GeoJSON.LineString | null>(null);
   const [routeProperties, setRouteProperties] =
@@ -86,7 +72,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
       latlng,
       label,
     };
-    if (!editingNogoGroup) {
+    if (!editingGroupOrRegion) {
       setWaypoints([...waypoints, newWaypoint]);
     } else {
       setNogoWaypoints([...nogoWaypoints, latlng]);
@@ -125,7 +111,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   };
 
   const refreshWaypointLineToCursor = (mousePosition: L.LatLng | null) => {
-    if (mousePosition && editingNogoGroup && nogoWaypoints.length === 1) {
+    if (mousePosition && editingGroupOrRegion && nogoWaypoints.length === 1) {
       setLineToCursor([nogoWaypoints[0], mousePosition]);
     } else {
       setLineToCursor(null);
@@ -133,11 +119,15 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   };
 
   useEffect(() => {
-    if (!editingNogoGroup && waypoints.length >= 2) {
+    if (!editingGroupOrRegion && waypoints.length >= 2) {
+      const regionIds: ID[] = routeOptions.avoidUnsafe
+        ? regions.map((region) => region._id)
+        : [];
       setFetchingCount((prev) => prev + 1);
       RouterApi.generateRoute(
         waypoints.map((waypoint) => waypoint.latlng),
         selectedNogoGroups,
+        regionIds,
         routeOptions
       )
         .then((res) => {
@@ -163,11 +153,15 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
       setRoute(null);
       setRouteProperties(null);
     }
-  }, [waypoints, selectedNogoGroups, editingNogoGroup, routeOptions]);
+  }, [waypoints, selectedNogoGroups, editingGroupOrRegion, routeOptions]);
 
   useEffect(() => {
-    if (nogoWaypoints.length >= 2 && editingNogoGroup) {
-      NogoApi.create(nogoWaypoints, editingNogoGroup._id)
+    if (nogoWaypoints.length >= 2 && editingGroupOrRegion) {
+      NogoApi.create(
+        nogoWaypoints,
+        editingGroupOrRegion._id,
+        editingGroupOrRegion.isRegion
+      )
         .then(() => {
           refreshNogoRoutes();
           clearNogoWaypoints();
@@ -185,16 +179,29 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
 
   const refreshNogoRoutes = async () => {
     try {
-      if (editingNogoGroup) {
-        NogoApi.getAllByList(editingNogoGroup._id).then(setNogoRoutes);
+      if (editingGroupOrRegion) {
+        NogoApi.getAllByGroup(
+          editingGroupOrRegion._id,
+          editingGroupOrRegion.isRegion
+        ).then(setNogoRoutes);
       } else {
         const fetchedNogos: Nogo[] = (
           await Promise.all(
             selectedNogoGroups.map(async (selectedNogoGroup) => {
-              return NogoApi.getAllByList(selectedNogoGroup);
+              return NogoApi.getAllByGroup(selectedNogoGroup, false);
             })
           )
         ).flat();
+        if (routeOptions.avoidUnsafe) {
+          const fetchedRegionNogos: Nogo[] = (
+            await Promise.all(
+              regions.map(async (region) => {
+                return NogoApi.getAllByGroup(region._id, true);
+              })
+            )
+          ).flat();
+          fetchedNogos.push(...fetchedRegionNogos);
+        }
         setNogoRoutes(fetchedNogos);
       }
     } catch (error: any) {
@@ -208,10 +215,19 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
 
   useEffect(() => {
     refreshNogoRoutes();
-    if (!editingNogoGroup) {
+    if (!editingGroupOrRegion) {
       clearNogoWaypoints();
     }
-  }, [editingNogoGroup, selectedNogoGroups]);
+  }, [editingGroupOrRegion, selectedNogoGroups, routeOptions.avoidUnsafe]);
+
+  useEffect(() => {
+    if (!loggedInUser) {
+      clearNogoWaypoints();
+      clearWaypoints();
+      clearSelectedNogoGroups();
+      setEditingGroupOrRegion(null);
+    }
+  }, [loggedInUser]);
 
   const deleteNogo = async (nogoId: ID) => {
     try {

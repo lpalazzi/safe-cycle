@@ -123,11 +123,7 @@ const ManageUsers: React.FC = () => {
   useEffect(() => {
     setContributingRegions(
       selectedUser
-        ? regions.filter((region) => {
-            return !!region.contributors.find((contributor) => {
-              return contributor._id === selectedUser._id;
-            });
-          })
+        ? regions.filter((region) => region.isUserContributor(selectedUser._id))
         : []
     );
   }, [selectedUser, regions]);

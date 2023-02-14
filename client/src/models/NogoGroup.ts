@@ -8,6 +8,7 @@ interface NogoGroupParams {
 export class NogoGroup {
   public _id;
   public name;
+  public isRegion = false;
 
   constructor(params: NogoGroupParams) {
     this._id = params._id;
