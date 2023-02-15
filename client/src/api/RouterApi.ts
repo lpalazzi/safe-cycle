@@ -17,16 +17,13 @@ export class RouterApi {
       waypoint.lat,
     ]);
     const response = await makeRequest(
-      `${this.baseUrl}/generateRoute?alternativeidx=${
-        routeOptions?.alternativeidx ?? 0
-      }${routeOptions?.avoidUnpaved ? '&avoidUnpaved=true' : ''}${
-        routeOptions?.avoidUnsafe ? '&avoidUnsafe=true' : ''
-      }`,
+      `${this.baseUrl}/generateRoute`,
       'POST',
       {
         points,
         nogoGroupIds,
         regionIds,
+        routeOptions,
       }
     );
     const route: GeoJSON.LineString = response.route;

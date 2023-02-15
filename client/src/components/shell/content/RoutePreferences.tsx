@@ -10,13 +10,20 @@ export const RoutePreferences: React.FC = () => {
       <SidebarTitle title='Route Preferences' />
       <Checkbox
         label='Avoid low-comfort roads'
-        checked={routeOptions.avoidUnsafe}
+        checked={routeOptions.avoidLowComfort}
         onChange={(e) =>
-          updateRouteOptions({ avoidUnsafe: e.currentTarget.checked })
+          updateRouteOptions({ avoidLowComfort: e.currentTarget.checked })
         }
       />
       <Checkbox
-        label='Stick to cycle routes and trails'
+        label='Avoid main roads'
+        checked={routeOptions.avoidMainRoads}
+        onChange={(e) =>
+          updateRouteOptions({ avoidMainRoads: e.currentTarget.checked })
+        }
+      />
+      <Checkbox
+        label='Prefer cycle routes and trails'
         checked={routeOptions.stickToCycleRoutes}
         onChange={(e) =>
           updateRouteOptions({ stickToCycleRoutes: e.currentTarget.checked })
@@ -28,23 +35,6 @@ export const RoutePreferences: React.FC = () => {
         onChange={(e) =>
           updateRouteOptions({ preferPaved: e.currentTarget.checked })
         }
-        disabled={routeOptions.avoidUnpaved || routeOptions.avoidUnpavedB}
-      />
-      <Checkbox
-        label='Avoid unpaved routes (A)'
-        checked={routeOptions.avoidUnpaved}
-        onChange={(e) =>
-          updateRouteOptions({ avoidUnpaved: e.currentTarget.checked })
-        }
-        disabled={routeOptions.preferPaved || routeOptions.avoidUnpavedB}
-      />
-      <Checkbox
-        label='Avoid unpaved routes (B)'
-        checked={routeOptions.avoidUnpavedB}
-        onChange={(e) =>
-          updateRouteOptions({ avoidUnpavedB: e.currentTarget.checked })
-        }
-        disabled={routeOptions.preferPaved || routeOptions.avoidUnpaved}
       />
       <Input.Wrapper label='Use an alternative route'>
         <SegmentedControl
