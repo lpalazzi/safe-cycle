@@ -1,8 +1,11 @@
-import { ID } from 'types';
+import { ID, Name } from 'types';
 
 export interface INogoGroupReturnDTO {
   _id: ID;
-  user: ID;
+  user: {
+    _id: ID;
+    name: Name;
+  };
   name: string;
 }
 

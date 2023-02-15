@@ -8,7 +8,7 @@ import {
   RouterService,
 } from 'services';
 import { INogoCreateDTO } from 'interfaces';
-import { checkLoggedIn } from 'api/middlewares';
+import { checkAdmin, checkLoggedIn } from 'api/middlewares';
 import {
   BadRequestError,
   InternalServerError,
@@ -95,6 +95,29 @@ export const nogo = (app: express.Router) => {
       next(err);
     }
   });
+
+  route.post(
+    '/transferNogosToRegion',
+    checkLoggedIn,
+    checkAdmin,
+    async (req, res, next) => {
+      try {
+        if (!mongoose.isValidObjectId(req.body.nogoGroupId))
+          throw new BadRequestError('nogoGroupId is not a valid ObjectId');
+        if (!mongoose.isValidObjectId(req.body.regionId))
+          throw new BadRequestError('regionId is not a valid ObjectId');
+        const nogoGroupId = new mongoose.Types.ObjectId(req.body.nogoGroupId);
+        const regionId = new mongoose.Types.ObjectId(req.body.regionId);
+        const updateCount = await nogoService.transferNogosToRegion(
+          nogoGroupId,
+          regionId
+        );
+        return res.json({ updateCount });
+      } catch (err) {
+        next(err);
+      }
+    }
+  );
 
   route.delete('/delete/:id', checkLoggedIn, async (req, res, next) => {
     try {

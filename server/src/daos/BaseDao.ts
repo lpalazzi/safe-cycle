@@ -38,8 +38,18 @@ export class BaseDao<Interface, ReturnInterface = Interface> {
     return this.getById(createdDocument._id);
   }
 
-  async updateById(id: mongoose.Types.ObjectId, update: Partial<Interface>) {
+  async updateById(
+    id: mongoose.Types.ObjectId,
+    update: mongoose.UpdateQuery<Interface>
+  ) {
     return this.model.updateOne({ _id: id }, update);
+  }
+
+  async updateMany(
+    filter: mongoose.FilterQuery<Interface>,
+    update: mongoose.UpdateQuery<Interface>
+  ) {
+    return this.model.updateMany(filter, update);
   }
 
   async deleteById(id: mongoose.Types.ObjectId) {

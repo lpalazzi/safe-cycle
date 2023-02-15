@@ -16,8 +16,8 @@ import { ModalSettings } from '@mantine/modals/lib/context';
 import { showNotification } from '@mantine/notifications';
 
 import { useGlobalContext } from 'contexts/globalContext';
-import { Region, User } from 'models';
-import { RegionApi, UserApi } from 'api';
+import { NogoGroup, Region, User } from 'models';
+import { NogoApi, NogoGroupApi, RegionApi, UserApi } from 'api';
 import { IRegionCreateDTO } from 'api/interfaces/Region';
 import { validatePolygonStr } from 'utils/validation';
 import { ID, UserRole } from 'types';
@@ -85,6 +85,104 @@ const AddRegionForm: React.FC = () => {
           placeholder='Enter the GeoJSON Polygon object for this region'
           minRows={10}
           {...form.getInputProps('polygon')}
+        />
+      </Stack>
+      <Group position='right' mt='md'>
+        <Button type='submit'>Submit</Button>
+      </Group>
+    </form>
+  );
+};
+
+const TransferToRegionForm: React.FC = () => {
+  const { regions, refreshRegions } = useGlobalContext();
+  const [nogoGroups, setNogoGroups] = useState<NogoGroup[]>([]);
+
+  useEffect(() => {
+    NogoGroupApi.getAll().then(setNogoGroups);
+  }, []);
+
+  const form = useForm({
+    initialValues: {
+      nogoGroup: null,
+      region: null,
+    } as {
+      nogoGroup: string | null;
+      region: string | null;
+    },
+    validate: {
+      nogoGroup: (value) => {
+        if (!value || value === '') return 'Nogo Group is required';
+      },
+      region: (value) => {
+        if (!value || value === '') return 'Region is required';
+      },
+    },
+  });
+
+  const handleSubmit = async (values: {
+    nogoGroup: string | null;
+    region: string | null;
+  }) => {
+    try {
+      if (!values.nogoGroup || !values.region)
+        throw new Error('Incomplete form');
+      const updateCount = await NogoApi.transferNogosToRegion(
+        values.nogoGroup,
+        values.region
+      );
+      const nogoGroupName = nogoGroups.find(
+        (nogoGroup) => nogoGroup._id === values.nogoGroup
+      )?.name;
+      const regionName = regions.find(
+        (region) => region._id === values.region
+      )?.name;
+      showNotification({
+        title: 'Success',
+        message: `${updateCount} Nogos were transferred from ${nogoGroupName} to ${regionName}`,
+        color: 'green',
+      });
+      form.reset();
+      refreshRegions();
+    } catch (error: any) {
+      showNotification({
+        title: 'Error',
+        message: error.message || 'Undefined error',
+        color: 'red',
+      });
+    }
+  };
+
+  const nogoGroupOptions = nogoGroups.map((nogoGroup) => {
+    return {
+      value: nogoGroup._id,
+      label: nogoGroup.name,
+      name: nogoGroup.getOwner(),
+    };
+  });
+
+  const regionOptions = regions.map((region) => {
+    return {
+      value: region._id,
+      label: region.name,
+    };
+  });
+
+  return (
+    <form onSubmit={form.onSubmit(handleSubmit)}>
+      <Stack spacing='xs'>
+        <Select
+          label='Nogo Group'
+          placeholder='Select a Nogo Group'
+          itemComponent={SelectItem}
+          data={nogoGroupOptions}
+          {...form.getInputProps('nogoGroup')}
+        />
+        <Select
+          label='Region'
+          placeholder='Select a region'
+          data={regionOptions}
+          {...form.getInputProps('region')}
         />
       </Stack>
       <Group position='right' mt='md'>
@@ -342,6 +440,12 @@ const AdminControlsContent: React.FC = () => {
         <Accordion.Control>Add a region</Accordion.Control>
         <Accordion.Panel>
           <AddRegionForm />
+        </Accordion.Panel>
+      </Accordion.Item>
+      <Accordion.Item value='transfer-to-region'>
+        <Accordion.Control>Transfer nogos to a region</Accordion.Control>
+        <Accordion.Panel>
+          <TransferToRegionForm />
         </Accordion.Panel>
       </Accordion.Item>
     </Accordion>

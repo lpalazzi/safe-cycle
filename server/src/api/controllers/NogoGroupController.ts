@@ -3,17 +3,28 @@ import mongoose from 'mongoose';
 import { container } from 'tsyringe';
 import { NogoGroupService } from 'services';
 import { INogoGroupCreateDTO, INogoGroupUpdateDTO } from 'interfaces';
+import { checkAdmin, checkLoggedIn } from 'api/middlewares';
 import {
   BadRequestError,
   InternalServerError,
   UnauthorizedError,
 } from 'api/errors';
-import { checkLoggedIn } from 'api/middlewares';
 
 export const nogoGroup = (app: express.Router) => {
   const route = express.Router();
   app.use('/nogoGroup', route);
   const nogoGroupService = container.resolve(NogoGroupService);
+
+  route.get('/getAll', checkLoggedIn, checkAdmin, async (req, res, next) => {
+    try {
+      const nogoGroups = await nogoGroupService.getAll();
+      return res.json({
+        nogoGroups,
+      });
+    } catch (err) {
+      next(err);
+    }
+  });
 
   route.get('/getAllForUser', checkLoggedIn, async (req, res, next) => {
     try {
