@@ -10,6 +10,16 @@ import { makeRequest } from './reqHelpers';
 export class NogoGroupApi {
   private static baseUrl = '/nogoGroup';
 
+  static async getAll() {
+    const response = await makeRequest(`${this.baseUrl}/getAll`);
+    const nogoGroupsReturn: INogoGroupReturnDTO[] = response.nogoGroups;
+    if (!nogoGroupsReturn) return [];
+    const nogoGroups = nogoGroupsReturn.map(
+      (nogoGroupReturn) => new NogoGroup(nogoGroupReturn)
+    );
+    return nogoGroups;
+  }
+
   static async getAllForUser() {
     const response = await makeRequest(`${this.baseUrl}/getAllForUser`);
     const nogoGroupsReturn: INogoGroupReturnDTO[] = response.nogoGroups;

@@ -49,8 +49,9 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   const [isNavbarOpen, setIsNavbarOpen] = useState(!isMobileSize);
   const [isNavModeOn, setIsNavModeOn] = useState(false);
   const [selectedNogoGroups, setSelectedNogoGroups] = useState<ID[]>([]);
-  const [editingGroupOrRegion, setEditingGroupOrRegion] =
-    useState<NogoGroup | null>(null);
+  const [editingGroupOrRegion, setEditingGroupOrRegion] = useState<
+    NogoGroup | Region | null
+  >(null);
   const [routeOptions, setRouteOptions] = useState<RouteOptions>({});
   const [regions, setRegions] = useState<Region[]>([]);
 
@@ -134,7 +135,9 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     setSelectedNogoGroups([]);
   };
 
-  const handleSetEditingGroupOrRegion = (nogoGroup: NogoGroup | null) => {
+  const handleSetEditingGroupOrRegion = (
+    nogoGroup: NogoGroup | Region | null
+  ) => {
     setEditingGroupOrRegion(nogoGroup);
     if (isMobileSize && nogoGroup) {
       setIsNavbarOpen(false);

@@ -32,6 +32,19 @@ export class NogoApi {
     return new Nogo(nogoReturn);
   }
 
+  static async transferNogosToRegion(nogoGroupId: ID, regionId: ID) {
+    const response = await makeRequest(
+      `${this.baseUrl}/transferNogosToRegion`,
+      'POST',
+      {
+        nogoGroupId,
+        regionId,
+      }
+    );
+    const updateCount: number = response.updateCount;
+    return updateCount;
+  }
+
   static async delete(nogoId: ID) {
     const response = await makeRequest(
       `${this.baseUrl}/delete/${nogoId}`,

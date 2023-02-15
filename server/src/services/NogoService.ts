@@ -23,6 +23,18 @@ export class NogoService {
     return this.nogoDao.deleteById(nogoId);
   }
 
+  async transferNogosToRegion(
+    nogoGroupId: mongoose.Types.ObjectId,
+    regionId: mongoose.Types.ObjectId
+  ) {
+    const updateResult = await this.nogoDao.updateMany(
+      { nogoGroup: nogoGroupId },
+      { $unset: { nogoGroup: 1 }, $set: { region: regionId } }
+    );
+    if (!updateResult.acknowledged) throw new Error('Transfer failed');
+    return updateResult.modifiedCount;
+  }
+
   async canUserUpdateNogo(
     nogoId: mongoose.Types.ObjectId,
     userId: mongoose.Types.ObjectId
