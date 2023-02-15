@@ -31,3 +31,26 @@ export const getPasswordStrength = (password: string) => {
     10
   );
 };
+
+export const validatePolygonStr = (polygonStr: string) => {
+  if (!polygonStr) return false;
+  try {
+    const polygon = JSON.parse(polygonStr);
+    if (polygon.type !== 'Polygon') return false;
+    const isArrayOfArraysOfArraysOfNumbers =
+      Array.isArray(polygon.coordinates) &&
+      polygon.coordinates.every(
+        (item: any) =>
+          Array.isArray(item) &&
+          item.every(
+            (item: any) =>
+              Array.isArray(item) &&
+              item.every((item: any) => typeof item === 'number')
+          )
+      );
+    if (!isArrayOfArraysOfArraysOfNumbers) return false;
+    return true;
+  } catch (err) {
+    return false;
+  }
+};

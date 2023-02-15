@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { showNotification } from '@mantine/notifications';
-import { NogoGroupApi, UserApi } from 'api';
-import { NogoGroup, User } from 'models';
+import { NogoGroupApi, RegionApi, UserApi } from 'api';
+import { NogoGroup, Region, User } from 'models';
 import { ID, RouteOptions } from 'types';
 import { useMantineTheme } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
@@ -14,8 +14,9 @@ type GlobalContextType =
       isNavbarOpen: boolean;
       isNavModeOn: boolean;
       selectedNogoGroups: ID[];
-      editingNogoGroup: NogoGroup | null;
+      editingGroupOrRegion: NogoGroup | Region | null;
       routeOptions: RouteOptions;
+      regions: Region[];
       // functions
       updateLoggedInUser: () => void;
       logoutUser: () => void;
@@ -23,8 +24,10 @@ type GlobalContextType =
       toggleNavMode: () => void;
       selectNogoGroup: (id: ID) => void;
       deselectNogoGroup: (id: ID) => void;
-      setEditingNogoGroup: (nogoGroup: NogoGroup | null) => void;
+      clearSelectedNogoGroups: () => void;
+      setEditingGroupOrRegion: (nogoGroup: NogoGroup | Region | null) => void;
       updateRouteOptions: (update: Partial<RouteOptions>) => void;
+      refreshRegions: () => void;
     }
   | undefined;
 
@@ -46,25 +49,26 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   const [isNavbarOpen, setIsNavbarOpen] = useState(!isMobileSize);
   const [isNavModeOn, setIsNavModeOn] = useState(false);
   const [selectedNogoGroups, setSelectedNogoGroups] = useState<ID[]>([]);
-  const [editingNogoGroup, setEditingNogoGroup] = useState<NogoGroup | null>(
-    null
-  );
+  const [editingGroupOrRegion, setEditingGroupOrRegion] = useState<
+    NogoGroup | Region | null
+  >(null);
   const [routeOptions, setRouteOptions] = useState<RouteOptions>({});
+  const [regions, setRegions] = useState<Region[]>([]);
 
   useEffect(() => {
     updateLoggedInUser();
     getStoredSelectedNogoGroups();
+    refreshRegions();
   }, []);
 
   const getStoredSelectedNogoGroups = async () => {
     const stored = window.localStorage.getItem('selectedNogoGroups');
     if (!stored || stored === '') return;
-    const publicNogoGroups = await NogoGroupApi.getAllPublic();
     const userNogoGroups = await NogoGroupApi.getAllForUser();
     const filteredStoredSelectedNogoGroups = stored
       .split(',')
       .filter((selectedNogoGroup) => {
-        return !![...publicNogoGroups, ...userNogoGroups].find(
+        return !!userNogoGroups.find(
           (nogoGroup) => nogoGroup._id === selectedNogoGroup
         );
       });
@@ -91,6 +95,19 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     });
   };
 
+  const refreshRegions = async () => {
+    try {
+      const fetchedRegions = await RegionApi.getAll();
+      setRegions(fetchedRegions);
+    } catch (error: any) {
+      showNotification({
+        title: 'Error fetching regions',
+        message: error.message ?? 'Unhandled error',
+        color: 'red',
+      });
+    }
+  };
+
   useEffect(() => {
     window.localStorage.setItem(
       'selectedNogoGroups',
@@ -114,8 +131,14 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     setSelectedNogoGroups(newSelectedNogoGroups);
   };
 
-  const handleSetEditingNogoGroup = (nogoGroup: NogoGroup | null) => {
-    setEditingNogoGroup(nogoGroup);
+  const clearSelectedNogoGroups = () => {
+    setSelectedNogoGroups([]);
+  };
+
+  const handleSetEditingGroupOrRegion = (
+    nogoGroup: NogoGroup | Region | null
+  ) => {
+    setEditingGroupOrRegion(nogoGroup);
     if (isMobileSize && nogoGroup) {
       setIsNavbarOpen(false);
     }
@@ -142,16 +165,19 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         isNavbarOpen,
         isNavModeOn,
         selectedNogoGroups,
-        editingNogoGroup,
+        editingGroupOrRegion,
         routeOptions,
+        regions,
         updateLoggedInUser,
         logoutUser,
         toggleNavbar,
         toggleNavMode,
         selectNogoGroup,
         deselectNogoGroup,
-        setEditingNogoGroup: handleSetEditingNogoGroup,
+        clearSelectedNogoGroups,
+        setEditingGroupOrRegion: handleSetEditingGroupOrRegion,
         updateRouteOptions,
+        refreshRegions,
       }}
     >
       {props.children}

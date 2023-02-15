@@ -2,14 +2,14 @@ import { ID, Name } from 'types';
 
 export interface INogoGroupReturnDTO {
   _id: ID;
-  name: string;
   user: {
+    _id: ID;
     name: Name;
   };
-  isPublic?: boolean;
+  name: string;
 }
 
 export interface INogoGroupCreateDTO
-  extends Omit<INogoGroupReturnDTO, '_id user'> {}
+  extends Omit<INogoGroupReturnDTO, '_id' | 'user'> {}
 
 export interface INogoGroupUpdateDTO extends INogoGroupCreateDTO {}

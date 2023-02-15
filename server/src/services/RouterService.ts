@@ -1,6 +1,7 @@
-import config from 'config';
-import { injectable } from 'tsyringe';
 import axios from 'axios';
+import { injectable } from 'tsyringe';
+import config from 'config';
+import { RouteOptions } from 'types';
 
 @injectable()
 export class RouterService {
@@ -16,28 +17,25 @@ export class RouterService {
     return positions.map(this.positionToString).join('|');
   }
 
-  // private nogosToParamString(nogos: INogo[]) {
-  //   return nogos.reduce((accumulated, nogo, index) => {
-  //     const trail = nogos.length - 1 === index ? '' : '|';
-  //     return (accumulated +=
-  //       nogo.lineString.coordinates.map(this.positionToString) + trail);
-  //   }, '');
-  // }
-
   private async fetchRoute(
     lonlats: GeoJSON.Position[],
     nogoGroupIds: string[],
+    regionIds: string[],
     profile:
       | 'safecycle'
-      | 'safecycle-avoidUnsafe'
-      | 'safecycle-avoidUnpaved'
-      | 'safecycle-avoidUnsafe-avoidUnpaved'
+      | 'safecycle-avoidMainRoads'
+      | 'safecycle-avoidMainRoads-preferPaved'
+      | 'safecycle-avoidMainRoads-preferCycleRoutes'
+      | 'safecycle-avoidMainRoads-preferCycleRoutes-preferPaved'
+      | 'safecycle-preferPaved'
+      | 'safecycle-preferCycleRoutes'
+      | 'safecycle-preferCycleRoutes-preferPaved'
       | 'all',
     alternativeidx: 0 | 1 | 2 | 3 = 0
   ) {
     const url = `${this.brouterUrl}?lonlats=${this.positionsToParamString(
       lonlats
-    )}&nogoGroupIds=${nogoGroupIds.join(
+    )}&nogoGroupIds=${nogoGroupIds.join('|')}&regionIds=${regionIds.join(
       '|'
     )}&profile=${profile}&alternativeidx=${alternativeidx}&format=geojson`;
     return axios
@@ -66,31 +64,24 @@ export class RouterService {
   }
 
   async getRouteForNewNogo(lonlats: GeoJSON.Position[]) {
-    const route = await this.fetchRoute(lonlats, [], 'all');
+    const route = await this.fetchRoute(lonlats, [], [], 'all');
     return route;
   }
 
   async getRouteForUser(
     lonlats: GeoJSON.Position[],
     nogoGroupIds: string[],
-    routeOptions?: {
-      avoidUnsafe?: boolean;
-      avoidUnpaved?: boolean;
-      alternativeidx?: 0 | 1 | 2 | 3;
-    }
+    regionIds: string[],
+    routeOptions: RouteOptions
   ) {
-    const profile = (avoidUnsafe = false, avoidUnpaved = false) => {
-      if (avoidUnsafe && avoidUnpaved)
-        return 'safecycle-avoidUnsafe-avoidUnpaved';
-      if (avoidUnsafe && !avoidUnpaved) return 'safecycle-avoidUnsafe';
-      if (!avoidUnsafe && avoidUnpaved) return 'safecycle-avoidUnpaved';
-      return 'safecycle';
-    };
     const route = await this.fetchRoute(
       lonlats,
       nogoGroupIds,
-      profile(routeOptions?.avoidUnsafe, routeOptions?.avoidUnpaved),
-      routeOptions?.alternativeidx
+      regionIds,
+      `safecycle${routeOptions.avoidMainRoads ? '-avoidMainRoads' : ''}${
+        routeOptions.stickToCycleRoutes ? '-preferCycleRoutes' : ''
+      }${routeOptions.preferPaved ? '-preferPaved' : ''}`,
+      routeOptions.alternativeidx
     );
     return route;
   }

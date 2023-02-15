@@ -13,9 +13,11 @@ import { openModal } from '@mantine/modals';
 import { useGlobalContext } from 'contexts/globalContext';
 import { LoginModal } from 'components/modals/LoginModal';
 import { SignupModal } from 'components/modals/SignupModal';
+import { AdminControlsModal } from 'components/modals/AdminControlsModal';
 import {
   IconChevronRight,
   IconDots,
+  IconKey,
   IconLogout,
   IconSettings,
 } from '@tabler/icons-react';
@@ -65,6 +67,14 @@ export const SidebarFooter: React.FC = () => {
         <Menu.Item icon={<IconSettings size={14} />} disabled>
           Manage account
         </Menu.Item>
+        {loggedInUser.role === 'admin' ? (
+          <Menu.Item
+            icon={<IconKey size={14} />}
+            onClick={() => openModal(AdminControlsModal)}
+          >
+            Admin controls
+          </Menu.Item>
+        ) : null}
         <Menu.Item
           onClick={() => logoutUser()}
           color='red'

@@ -2,23 +2,26 @@ import { ID, Name } from 'types';
 
 interface NogoGroupParams {
   _id: ID;
-  name: string;
   user: {
+    _id: ID;
     name: Name;
   };
-  isPublic?: boolean;
+  name: string;
 }
 
 export class NogoGroup {
   public _id;
   public name;
-  public creator;
-  public isPublic;
+  public isRegion = false;
+  private user;
 
   constructor(params: NogoGroupParams) {
     this._id = params._id;
     this.name = params.name;
-    this.creator = params.user.name.first + ' ' + params.user.name.last;
-    this.isPublic = !!params.isPublic;
+    this.user = params.user;
+  }
+
+  public getOwner() {
+    return this.user.name.first + ' ' + this.user.name.last;
   }
 }

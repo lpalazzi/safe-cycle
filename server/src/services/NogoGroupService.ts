@@ -14,16 +14,12 @@ import { NoID } from 'types';
 export class NogoGroupService {
   constructor(private nogoGroupDao: NogoGroupDao, private nogoDao: NogoDao) {}
 
-  async getById(id: mongoose.Types.ObjectId) {
-    return await this.nogoGroupDao.getById(id);
+  async getAll() {
+    return await this.nogoGroupDao.get({});
   }
 
   async getByUserId(userId: mongoose.Types.ObjectId) {
     return await this.nogoGroupDao.get({ user: userId });
-  }
-
-  async getAllPublic() {
-    return await this.nogoGroupDao.get({ isPublic: true });
   }
 
   async create(
@@ -124,8 +120,8 @@ export class NogoGroupService {
   }
 
   async doesUserOwnNogoGroup(
-    nogoGroupId: mongoose.Types.ObjectId,
-    userId: mongoose.Types.ObjectId
+    userId: mongoose.Types.ObjectId,
+    nogoGroupId: mongoose.Types.ObjectId
   ) {
     const userIdOnNogoGroup = await this.nogoGroupDao.getUserIdOnList(
       nogoGroupId

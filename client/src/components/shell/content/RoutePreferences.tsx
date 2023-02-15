@@ -9,17 +9,31 @@ export const RoutePreferences: React.FC = () => {
     <Stack spacing='xs'>
       <SidebarTitle title='Route Preferences' />
       <Checkbox
-        label='Avoid low comfort roads'
-        checked={routeOptions.avoidUnsafe}
+        label='Avoid low-comfort roads'
+        checked={routeOptions.avoidLowComfort}
         onChange={(e) =>
-          updateRouteOptions({ avoidUnsafe: e.currentTarget.checked })
+          updateRouteOptions({ avoidLowComfort: e.currentTarget.checked })
         }
       />
       <Checkbox
-        label='Avoid unpaved roads'
-        checked={routeOptions.avoidUnpaved}
+        label='Avoid main roads'
+        checked={routeOptions.avoidMainRoads}
         onChange={(e) =>
-          updateRouteOptions({ avoidUnpaved: e.currentTarget.checked })
+          updateRouteOptions({ avoidMainRoads: e.currentTarget.checked })
+        }
+      />
+      <Checkbox
+        label='Prefer cycle routes and trails'
+        checked={routeOptions.stickToCycleRoutes}
+        onChange={(e) =>
+          updateRouteOptions({ stickToCycleRoutes: e.currentTarget.checked })
+        }
+      />
+      <Checkbox
+        label='Prefer paved routes'
+        checked={routeOptions.preferPaved}
+        onChange={(e) =>
+          updateRouteOptions({ preferPaved: e.currentTarget.checked })
         }
       />
       <Input.Wrapper label='Use an alternative route'>

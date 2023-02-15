@@ -4,10 +4,15 @@ import joi from 'joi';
 import { injectable } from 'tsyringe';
 import { UserDao } from 'daos';
 import { IUserLoginDTO, IUserReturnDTO, IUserSignupDTO } from 'interfaces';
+import { UserRole } from 'types';
 
 @injectable()
 export class UserService {
   constructor(private userDao: UserDao) {}
+
+  async getAll() {
+    return await this.userDao.get({});
+  }
 
   async getById(userId: mongoose.Types.ObjectId) {
     return await this.userDao.getById(userId);
@@ -15,6 +20,16 @@ export class UserService {
 
   async getByEmail(email: string) {
     return await this.userDao.getOne({ email });
+  }
+
+  async isUserAdmin(userId: mongoose.Types.ObjectId) {
+    const user = await this.userDao.getById(userId);
+    return user?.role === 'admin';
+  }
+
+  async updateUserRole(userId: mongoose.Types.ObjectId, role: UserRole) {
+    const updateResult = await this.userDao.updateById(userId, { role });
+    return updateResult.acknowledged && updateResult.modifiedCount === 1;
   }
 
   async signup(

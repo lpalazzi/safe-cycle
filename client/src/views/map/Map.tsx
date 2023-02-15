@@ -16,13 +16,15 @@ import { MapHandlers } from './MapHandlers';
 import { Markers } from './Markers';
 import { Route } from './Route';
 import { Nogos } from './Nogos';
+import { Region } from './Region';
 import { EditingNogoIndicator } from './EditingNogoIndicator';
 import { RecenterButton } from './RecenterButton';
 import { LoadingIndicator } from './LoadingIndicator';
 import { RouteProperties } from './RouteProperties';
 
 export const Map: React.FC = () => {
-  const { editingNogoGroup, isNavModeOn, isNavbarOpen } = useGlobalContext();
+  const { editingGroupOrRegion, isNavModeOn, isNavbarOpen } =
+    useGlobalContext();
   const { followUser, route, routeProperties, setMap } = useMapContext();
   return (
     <>
@@ -52,18 +54,19 @@ export const Map: React.FC = () => {
         <ScaleControl />
         <ZoomControl position='bottomright' />
         <MapHandlers />
-        {!editingNogoGroup ? (
+        {!editingGroupOrRegion ? (
           <>
             <Markers />
             <Route />
           </>
         ) : null}
+        <Region />
         <Nogos />
         {!isNavbarOpen ? <LoadingIndicator /> : null}
       </MapContainer>
       {route && routeProperties ? <RouteProperties /> : null}
       {isNavbarOpen ? <LoadingIndicator /> : null}
-      {editingNogoGroup ? <EditingNogoIndicator /> : null}
+      {editingGroupOrRegion ? <EditingNogoIndicator /> : null}
       {isNavModeOn && !followUser ? <RecenterButton /> : null}
     </>
   );
