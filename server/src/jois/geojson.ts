@@ -8,9 +8,16 @@ export const lineString = () =>
     coordinates: joi.array().items(position()).required(),
   });
 
+export const polygon = () =>
+  joi.object({
+    type: joi.string().equal('Polygon').required(),
+    coordinates: joi.array().items(joi.array().items(position()).required()),
+  });
+
 export default () => {
   return {
     position,
     lineString,
+    polygon,
   };
 };

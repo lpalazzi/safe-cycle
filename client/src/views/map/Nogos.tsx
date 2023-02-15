@@ -1,12 +1,12 @@
+import React from 'react';
+import { GeoJSON, Polyline, Popup } from 'react-leaflet';
 import { Button, Group, useMantineTheme } from '@mantine/core';
 import { IconTrash } from '@tabler/icons-react';
 import { useGlobalContext } from 'contexts/globalContext';
-import React from 'react';
-import { GeoJSON, Polyline, Popup } from 'react-leaflet';
-import { useMapContext } from '../../contexts/mapContext';
+import { useMapContext } from 'contexts/mapContext';
 
 export const Nogos: React.FC = () => {
-  const { editingNogoGroup } = useGlobalContext();
+  const { editingGroupOrRegion } = useGlobalContext();
   const { map, nogoRoutes, lineToCursor, deleteNogo } = useMapContext();
   const theme = useMantineTheme();
 
@@ -20,15 +20,15 @@ export const Nogos: React.FC = () => {
       {nogoRoutes.map((nogo) => {
         return (
           <GeoJSON
-            key={nogo._id + editingNogoGroup?._id}
+            key={nogo._id + editingGroupOrRegion?._id}
             data={nogo.lineString}
             style={{
               color: nogoColor,
-              weight: editingNogoGroup ? 4 : 2,
-              opacity: editingNogoGroup ? 1.0 : 0.8,
+              weight: editingGroupOrRegion ? 4 : 2,
+              opacity: editingGroupOrRegion ? 1.0 : 0.8,
             }}
           >
-            {editingNogoGroup ? (
+            {editingGroupOrRegion ? (
               <Popup>
                 <Button
                   fullWidth

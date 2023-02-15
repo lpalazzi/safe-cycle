@@ -3,21 +3,21 @@ import mongoose from 'mongoose';
 import { container } from 'tsyringe';
 import { NogoGroupService } from 'services';
 import { INogoGroupCreateDTO, INogoGroupUpdateDTO } from 'interfaces';
+import { checkAdmin, checkLoggedIn } from 'api/middlewares';
 import {
   BadRequestError,
   InternalServerError,
   UnauthorizedError,
 } from 'api/errors';
-import { checkLoggedIn } from 'api/middlewares';
 
 export const nogoGroup = (app: express.Router) => {
   const route = express.Router();
   app.use('/nogoGroup', route);
   const nogoGroupService = container.resolve(NogoGroupService);
 
-  route.get('/getAllPublic', async (req, res, next) => {
+  route.get('/getAll', checkLoggedIn, checkAdmin, async (req, res, next) => {
     try {
-      const nogoGroups = await nogoGroupService.getAllPublic();
+      const nogoGroups = await nogoGroupService.getAll();
       return res.json({
         nogoGroups,
       });
@@ -68,8 +68,8 @@ export const nogoGroup = (app: express.Router) => {
       const nogoGroupUpdate: INogoGroupUpdateDTO = req.body.nogoGroupUpdate;
       const userId = new mongoose.Types.ObjectId(req.session.userId);
       const userOwnsNogoGroup = await nogoGroupService.doesUserOwnNogoGroup(
-        nogoGroupId,
-        userId
+        userId,
+        nogoGroupId
       );
       if (!userOwnsNogoGroup) {
         throw new UnauthorizedError(
@@ -99,8 +99,8 @@ export const nogoGroup = (app: express.Router) => {
       const nogoGroupId = new mongoose.Types.ObjectId(req.params.id);
       const userId = new mongoose.Types.ObjectId(req.session.userId);
       const userOwnsNogoGroup = await nogoGroupService.doesUserOwnNogoGroup(
-        nogoGroupId,
-        userId
+        userId,
+        nogoGroupId
       );
       if (!userOwnsNogoGroup) {
         throw new UnauthorizedError(

@@ -4,7 +4,7 @@ import { IconEditOff } from '@tabler/icons-react';
 import { useGlobalContext } from 'contexts/globalContext';
 
 export const EditingNogoIndicator: React.FC = () => {
-  const { isMobileSize, editingNogoGroup, setEditingNogoGroup } =
+  const { isMobileSize, editingGroupOrRegion, setEditingGroupOrRegion } =
     useGlobalContext();
   return (
     <Paper
@@ -25,7 +25,7 @@ export const EditingNogoIndicator: React.FC = () => {
         <Text size='sm'>
           You are editing{' '}
           <Text span c='blue' inherit>
-            {editingNogoGroup?.name}
+            {editingGroupOrRegion?.name}
           </Text>
           's Nogos
         </Text>
@@ -34,7 +34,7 @@ export const EditingNogoIndicator: React.FC = () => {
           color='red'
           onClick={(e) => {
             e.stopPropagation();
-            setEditingNogoGroup(null);
+            setEditingGroupOrRegion(null);
           }}
         >
           <Group position='center' spacing='xs' noWrap>

@@ -3,21 +3,36 @@ import mongoose from 'mongoose';
 import { injectable, inject } from 'tsyringe';
 import { INogoCreateDTO, INogoReturnDTO } from 'interfaces';
 import { NogoDao } from 'daos';
-import { NogoGroupService } from 'services';
+import { NogoGroupService, RegionService } from 'services';
 
 @injectable()
 export class NogoService {
   constructor(
     private nogoDao: NogoDao,
-    @inject('NogoGroupService') private nogoGroupService: NogoGroupService
+    @inject('NogoGroupService') private nogoGroupService: NogoGroupService,
+    @inject('RegionService') private regionService: RegionService
   ) {}
 
-  async getAllByList(nogoGroupId: mongoose.Types.ObjectId) {
-    return this.nogoDao.get({ nogoGroup: nogoGroupId });
+  async getAllByGroup(groupId: mongoose.Types.ObjectId, isRegion?: boolean) {
+    return this.nogoDao.get(
+      isRegion ? { region: groupId } : { nogoGroup: groupId }
+    );
   }
 
   async deleteById(nogoId: mongoose.Types.ObjectId) {
     return this.nogoDao.deleteById(nogoId);
+  }
+
+  async transferNogosToRegion(
+    nogoGroupId: mongoose.Types.ObjectId,
+    regionId: mongoose.Types.ObjectId
+  ) {
+    const updateResult = await this.nogoDao.updateMany(
+      { nogoGroup: nogoGroupId },
+      { $unset: { nogoGroup: 1 }, $set: { region: regionId } }
+    );
+    if (!updateResult.acknowledged) throw new Error('Transfer failed');
+    return updateResult.modifiedCount;
   }
 
   async canUserUpdateNogo(
@@ -25,10 +40,12 @@ export class NogoService {
     userId: mongoose.Types.ObjectId
   ) {
     const nogo = await this.nogoDao.getById(nogoId);
-    if (!nogo) {
-      throw new Error('Nogo not found');
-    }
-    return this.nogoGroupService.doesUserOwnNogoGroup(nogo.nogoGroup, userId);
+    if (!nogo) throw new Error('Nogo not found');
+    else if (nogo.region)
+      return this.regionService.isUserContributorOnRegion(userId, nogo.region);
+    else if (nogo.nogoGroup)
+      return this.nogoGroupService.doesUserOwnNogoGroup(userId, nogo.nogoGroup);
+    else return false;
   }
 
   async create(
@@ -76,8 +93,9 @@ export class NogoService {
   private validateNewNogo(newNogo: INogoCreateDTO) {
     const { error } = joi
       .object({
-        nogoGroup: joi.objectId().required(),
         lineString: joi.geojson().lineString().required(),
+        nogoGroup: joi.objectId(),
+        region: joi.objectId(),
       })
       .required()
       .validate(newNogo);

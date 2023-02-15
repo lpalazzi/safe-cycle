@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Stack,
   Paper,
@@ -13,13 +13,14 @@ import {
 import { openModal, openConfirmModal } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import {
-  IconCheck,
   IconPlus,
   IconDots,
-  IconRoadOff,
-  IconEdit,
   IconTrash,
   IconInfoCircle,
+  IconX,
+  IconSettings,
+  IconEditCircle,
+  IconEditCircleOff,
 } from '@tabler/icons-react';
 
 import { NogoGroup } from 'models';
@@ -29,33 +30,43 @@ import { EditNogoGroupModal } from 'components/modals/EditNogoGroupModal';
 import { NewNogoGroupModal } from 'components/modals/NewNogoGroupModal';
 import { SidebarTitle } from '../common/SidebarTitle';
 
-type UserNogoGroupsProps = {
-  userNogoGroups: NogoGroup[];
-  refreshData: () => void;
-};
-
-export const UserNogoGroups: React.FC<UserNogoGroupsProps> = ({
-  userNogoGroups,
-  refreshData,
-}) => {
+export const UserNogoGroups: React.FC = () => {
   const {
     loggedInUser,
     selectedNogoGroups,
-    editingNogoGroup,
+    editingGroupOrRegion,
     selectNogoGroup,
-    setEditingNogoGroup,
+    deselectNogoGroup,
+    setEditingGroupOrRegion,
   } = useGlobalContext();
 
-  const handleEditNogoGroup = (nogoGroup: NogoGroup | null) => {
-    setEditingNogoGroup(nogoGroup);
-  };
+  const [userNogoGroups, setUserNogoGroups] = useState<NogoGroup[]>([]);
 
-  const handleEditUserNogoGroup = (nogoGroup: NogoGroup) => {
-    openModal(EditNogoGroupModal(nogoGroup, refreshData));
-  };
+  useEffect(() => {
+    refreshData();
+  }, [loggedInUser]);
 
-  const handleCreateUserNogoGroup = () => {
-    openModal({ ...NewNogoGroupModal, onClose: refreshData });
+  const refreshData = async () => {
+    try {
+      const fetchedUserNogoGroups = await NogoGroupApi.getAllForUser();
+      setUserNogoGroups(fetchedUserNogoGroups);
+      const editingNogoGroupWasDeleted = !fetchedUserNogoGroups.some(
+        (nogoGroup) => nogoGroup._id === editingGroupOrRegion?._id
+      );
+      if (editingNogoGroupWasDeleted) {
+        setEditingGroupOrRegion(null);
+      }
+    } catch (error: any) {
+      if (error.message === 'User is not logged in') {
+        setUserNogoGroups([]);
+        return;
+      }
+      showNotification({
+        title: 'Error fetching Nogo Group data',
+        message: error.message || 'Undefined error',
+        color: 'red',
+      });
+    }
   };
 
   const handleDeleteUserNogoGroup = (nogoGroup: NogoGroup) => {
@@ -97,13 +108,13 @@ export const UserNogoGroups: React.FC<UserNogoGroupsProps> = ({
   return (
     <Stack spacing='xs'>
       <SidebarTitle
-        title='Your Nogo Groups'
-        tooltipLabel='Add and edit custom Nogo Groups. Nogo Groups added here are available to all users to use with their cycling routes.'
+        title='Custom Nogo Groups'
+        tooltipLabel='Add and edit custom Nogos to apply to your own routes.'
       />
       {!!loggedInUser ? (
         <>
           {userNogoGroups.map((nogoGroup) => {
-            const isEditing = editingNogoGroup?._id === nogoGroup._id;
+            const isEditing = editingGroupOrRegion?._id === nogoGroup._id;
             const alreadySelected = selectedNogoGroups.includes(nogoGroup._id);
             return (
               <Paper>
@@ -115,19 +126,27 @@ export const UserNogoGroups: React.FC<UserNogoGroupsProps> = ({
                         {isEditing ? 'Editing' : 'Applied'}
                       </Text>
                     ) : null}
-                    {alreadySelected ? (
-                      <IconCheck size={18} color='grey' />
-                    ) : (
-                      <Tooltip label='Apply' withArrow hidden={alreadySelected}>
+                    {!isEditing ? (
+                      <Tooltip
+                        label={alreadySelected ? 'Remove' : 'Apply'}
+                        withArrow
+                      >
                         <ActionIcon
-                          disabled={alreadySelected}
-                          onClick={() => selectNogoGroup(nogoGroup._id)}
+                          onClick={() =>
+                            alreadySelected
+                              ? deselectNogoGroup(nogoGroup._id)
+                              : selectNogoGroup(nogoGroup._id)
+                          }
                         >
-                          <IconPlus size={18} />
+                          {alreadySelected ? (
+                            <IconX size={18} />
+                          ) : (
+                            <IconPlus size={18} />
+                          )}
                         </ActionIcon>
                       </Tooltip>
-                    )}
-                    <Menu position='right-end' offset={24}>
+                    ) : null}
+                    <Menu position='left-start'>
                       <Menu.Target>
                         <ActionIcon>
                           <IconDots size={18} />
@@ -135,16 +154,28 @@ export const UserNogoGroups: React.FC<UserNogoGroupsProps> = ({
                       </Menu.Target>
                       <Menu.Dropdown>
                         <Menu.Item
-                          icon={<IconRoadOff size={14} />}
+                          icon={
+                            isEditing ? (
+                              <IconEditCircleOff size={14} />
+                            ) : (
+                              <IconEditCircle size={14} />
+                            )
+                          }
                           onClick={() =>
-                            handleEditNogoGroup(isEditing ? null : nogoGroup)
+                            setEditingGroupOrRegion(
+                              isEditing ? null : nogoGroup
+                            )
                           }
                         >
                           {isEditing ? 'Stop editing Nogos' : 'Edit Nogos'}
                         </Menu.Item>
                         <Menu.Item
-                          icon={<IconEdit size={14} />}
-                          onClick={() => handleEditUserNogoGroup(nogoGroup)}
+                          icon={<IconSettings size={14} />}
+                          onClick={() =>
+                            openModal(
+                              EditNogoGroupModal(nogoGroup, refreshData)
+                            )
+                          }
                         >
                           Edit list properties
                         </Menu.Item>
@@ -165,7 +196,9 @@ export const UserNogoGroups: React.FC<UserNogoGroupsProps> = ({
           <Button
             variant='light'
             leftIcon={<IconPlus size={18} />}
-            onClick={handleCreateUserNogoGroup}
+            onClick={() =>
+              openModal({ ...NewNogoGroupModal, onClose: refreshData })
+            }
           >
             Create new Nogo Group
           </Button>
