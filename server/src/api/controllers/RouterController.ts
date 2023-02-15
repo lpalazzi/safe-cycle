@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import { container } from 'tsyringe';
 import { RouterService } from 'services';
+import { RouteOptions } from 'types';
 import { BadRequestError } from 'api/errors';
 
 export const router = (app: express.Router) => {
@@ -14,15 +15,14 @@ export const router = (app: express.Router) => {
       const points: GeoJSON.Position[] = req.body.points ?? [];
       const nogoGroupIds: string[] = req.body.nogoGroupIds ?? [];
       const regionIds: string[] = req.body.regionIds ?? [];
-      const avoidUnsafe = req.query.avoidUnsafe === 'true' ?? false;
-      const avoidUnpaved = req.query.avoidUnpaved === 'true' ?? false;
-      const alternativeidx =
-        (Number(req.query.alternativeidx) as 0 | 1 | 2 | 3) ?? 0;
+      const routeOptions: RouteOptions = req.body.routeOptions ?? {
+        alternativeidx: 0,
+      };
 
       if (points.length < 2)
         throw new BadRequestError('Route request must have at least 2 points');
 
-      if (![0, 1, 2, 3].includes(alternativeidx))
+      if (![undefined, 0, 1, 2, 3].includes(routeOptions.alternativeidx))
         throw new BadRequestError(
           'alternativeidx must be a valid integer from 0 to 3'
         );
@@ -44,11 +44,7 @@ export const router = (app: express.Router) => {
         points,
         nogoGroupIds,
         regionIds,
-        {
-          avoidUnsafe,
-          avoidUnpaved,
-          alternativeidx,
-        }
+        routeOptions
       );
       const route: GeoJSON.LineString = data.route;
       const properties: GeoJSON.GeoJsonProperties = data.properties;
