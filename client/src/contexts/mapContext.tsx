@@ -3,7 +3,7 @@ import L from 'leaflet';
 import { useGlobalContext } from './globalContext';
 import { ID, Location, Waypoint } from 'types';
 import { Nogo } from 'models';
-import { NogoApi, RouterApi } from 'api';
+import { GeocodingApi, NogoApi, RouterApi } from 'api';
 import { BrouterProperties } from 'api/interfaces/Router';
 import { showNotification } from '@mantine/notifications';
 
@@ -67,11 +67,21 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   const [fetchingCount, setFetchingCount] = useState(0);
   const loadingRoute = fetchingCount > 0;
 
-  const addWaypoint = (latlng: L.LatLng, label?: string) => {
+  const addWaypoint = async (latlng: L.LatLng, label?: string) => {
     const newWaypoint = {
       latlng,
       label,
     };
+    if (!label) {
+      const fetchedPlace = await GeocodingApi.reverse(latlng);
+      newWaypoint.label = fetchedPlace.display_name;
+    } else if (!editingGroupOrRegion) {
+      const bounds = new L.LatLngBounds(latlng, latlng);
+      waypoints.forEach((waypoint) => {
+        bounds.extend(waypoint.latlng);
+      });
+      map?.fitBounds(bounds, { maxZoom: 17 });
+    }
     if (!editingGroupOrRegion) {
       setWaypoints([...waypoints, newWaypoint]);
     } else {
