@@ -1,9 +1,16 @@
 import { makeRequest } from './reqHelpers';
 import { GeocodeSearchResult } from './interfaces/Geocoding';
-import { LatLngBounds } from 'leaflet';
+import { LatLng, LatLngBounds } from 'leaflet';
 
 export class GeocodingApi {
   private static baseUrl = 'https://nominatim.openstreetmap.org';
+
+  static async reverse(latlng: LatLng) {
+    const result: GeocodeSearchResult = await makeRequest(
+      `${this.baseUrl}/reverse?lat=${latlng.lat}&lon=${latlng.lng}&format=json`
+    );
+    return result;
+  }
 
   static async search(query: string, viewbox?: LatLngBounds) {
     let searchResults: GeocodeSearchResult[] = [];
@@ -25,12 +32,12 @@ export class GeocodingApi {
       );
       searchResults.push(
         ...unboundedResults.filter((unboundedResult) => {
-          return !!searchResults.find((searchResult) => {
-            searchResult.place_id === unboundedResult.place_id;
+          return !searchResults.find((searchResult) => {
+            return searchResult.place_id === unboundedResult.place_id;
           });
         })
       );
-      searchResults.length = 10;
+      // searchResults.length = 10;
     }
 
     return searchResults;

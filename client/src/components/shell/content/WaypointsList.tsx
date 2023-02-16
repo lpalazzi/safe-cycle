@@ -17,11 +17,11 @@ import {
   Select,
   Text,
   SelectItem,
-  Button,
   Paper,
+  Button,
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { IconLocation, IconX, IconGripHorizontal } from '@tabler/icons-react';
+import { IconX, IconGripHorizontal } from '@tabler/icons-react';
 
 import { GeocodingApi } from 'api';
 import { GeocodeSearchResult } from 'api/interfaces/Geocoding';
@@ -29,8 +29,14 @@ import { useMapContext } from 'contexts/mapContext';
 import { Waypoint } from 'types';
 
 export const WaypointsList: React.FC = () => {
-  const { map, waypoints, addWaypoint, reorderWaypoint, removeWaypoint } =
-    useMapContext();
+  const {
+    map,
+    waypoints,
+    addWaypoint,
+    reorderWaypoint,
+    removeWaypoint,
+    clearWaypoints,
+  } = useMapContext();
 
   const [draggableWaypoints, setDraggableWaypoints] = useState(waypoints);
   const [geoSearchValue, setGeoSearchValue] = useState<string>('');
@@ -59,7 +65,10 @@ export const WaypointsList: React.FC = () => {
     }
 
     try {
-      const res = await GeocodingApi.search(query, map?.getBounds());
+      const res = await GeocodingApi.search(
+        query,
+        map?.getBounds().pad(Math.max(0, 1 + 0.5 * (map.getZoom() - 10)))
+      );
       setGeoSearchResults(res);
     } catch (error: any) {
       showNotification({
@@ -76,6 +85,10 @@ export const WaypointsList: React.FC = () => {
   }, [map]);
 
   const handleLocationSelect = (value: string | null) => {
+    if (value === 'location') {
+      handleCurrentLocationSelect();
+      return;
+    }
     const selectedGeoSearchResult = geoSearchResults.find(
       (geoSearchResult) => geoSearchResult.place_id.toString() === value
     );
@@ -106,83 +119,94 @@ export const WaypointsList: React.FC = () => {
     handleGeoSearchValueChanged(geoSearchValue);
   }, [geoSearchValue]);
 
-  const geoSearchResultOptions: SelectItem[] = geoSearchResults.map(
-    (geoSearchResult) => {
-      return {
-        value: geoSearchResult.place_id.toString(),
-        label: geoSearchResult.display_name,
-      };
-    }
-  );
+  const geoSearchResultOptions: SelectItem[] =
+    geoSearchValue === ''
+      ? [
+          {
+            value: 'location',
+            label: 'Your current location',
+          },
+        ]
+      : geoSearchResults.map((geoSearchResult) => {
+          return {
+            value: geoSearchResult.place_id.toString(),
+            label: geoSearchResult.display_name,
+          };
+        });
 
   return (
-    <Stack spacing='md'>
+    <Stack spacing='xl'>
       <Text size='sm'>
         Search for your destination, or select points on the map to add to your
         route.
       </Text>
-      <Timeline
-        style={{ zIndex: 100 }}
-        active={draggableWaypoints.length - 1}
-        bulletSize={20}
-        styles={{
-          item: {
-            marginTop: '0px !important',
-            '::before': {
-              inset: '0px auto -16px -4px',
+      <Stack spacing={0}>
+        <Timeline
+          style={{ zIndex: 100 }}
+          active={draggableWaypoints.length - 1}
+          bulletSize={20}
+          styles={{
+            item: {
+              marginTop: '0px !important',
+              '::before': {
+                inset: '0px auto -16px -4px',
+              },
             },
-          },
-          itemContent: {
-            transform: 'translateY(-15px)',
-          },
-        }}
-      >
-        {draggableWaypoints.length === 0 ? (
-          <Timeline.Item lineVariant='dotted' pt={8} pb={8}>
-            <Button
-              leftIcon={<IconLocation size={18} />}
-              onClick={handleCurrentLocationSelect}
-              fullWidth
-            >
-              Start at your current location
-            </Button>
+            itemContent: {
+              transform: 'translateY(-15px)',
+            },
+          }}
+        >
+          {draggableWaypoints.map((waypoint, index) => {
+            return (
+              <Timeline.Item
+                bullet={<Text size={12}>{index + 1}</Text>}
+                lineVariant='dotted'
+              >
+                <DraggableWaypointItem
+                  id={waypoint.label + waypoint.latlng.toString()}
+                  index={index}
+                  waypoint={waypoint}
+                  disableDrag={draggableWaypoints.length === 1}
+                  reorderDraggableWaypoint={reorderDraggableWaypoint}
+                  onDrop={reorderWaypoint}
+                  onCancel={() => setDraggableWaypoints(waypoints)}
+                  removeWaypoint={removeWaypoint}
+                />
+              </Timeline.Item>
+            );
+          })}
+          <Timeline.Item lineVariant='dotted'>
+            <Select
+              key={draggableWaypoints.length}
+              searchable
+              placeholder='Search for a location'
+              data={geoSearchResultOptions}
+              onSearchChange={setGeoSearchValue}
+              onChange={handleLocationSelect}
+              searchValue={geoSearchValue}
+              nothingFound='No results found'
+              filter={() => true}
+              rightSection={<div></div>}
+              pt={8}
+            />
           </Timeline.Item>
-        ) : null}
-        {draggableWaypoints.map((waypoint, index) => {
-          return (
-            <Timeline.Item
-              bullet={<Text size={12}>{index + 1}</Text>}
-              lineVariant='dotted'
+        </Timeline>
+        {waypoints.length > 0 ? (
+          <Group position='right'>
+            <Button
+              compact
+              size='xs'
+              variant='subtle'
+              color='gray'
+              rightIcon={<IconX size={14} />}
+              onClick={clearWaypoints}
             >
-              <DraggableWaypointItem
-                id={waypoint.label + waypoint.latlng.toString()}
-                index={index}
-                waypoint={waypoint}
-                disableDrag={draggableWaypoints.length === 1}
-                reorderDraggableWaypoint={reorderDraggableWaypoint}
-                onDrop={reorderWaypoint}
-                onCancel={() => setDraggableWaypoints(waypoints)}
-                removeWaypoint={removeWaypoint}
-              />
-            </Timeline.Item>
-          );
-        })}
-        <Timeline.Item lineVariant='dotted'>
-          <Select
-            key={draggableWaypoints.length}
-            searchable
-            placeholder='Search for a location'
-            data={geoSearchResultOptions}
-            onSearchChange={setGeoSearchValue}
-            onChange={handleLocationSelect}
-            searchValue={geoSearchValue}
-            nothingFound='No results found'
-            filter={() => true}
-            rightSection={<div></div>}
-            pt={8}
-          />
-        </Timeline.Item>
-      </Timeline>
+              Clear all
+            </Button>
+          </Group>
+        ) : null}
+      </Stack>
     </Stack>
   );
 };
