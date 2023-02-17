@@ -32,6 +32,7 @@ export const WaypointsList: React.FC = () => {
   const {
     map,
     waypoints,
+    currentLocation,
     addWaypoint,
     reorderWaypoint,
     removeWaypoint,
@@ -104,11 +105,15 @@ export const WaypointsList: React.FC = () => {
   };
 
   const handleCurrentLocationSelect = () => {
-    map?.once('locationfound', (e) => {
-      const { latlng, heading } = e;
-      addWaypoint(latlng, 'Current location');
-    });
-    map?.locate();
+    if (currentLocation) {
+      addWaypoint(currentLocation.latlng, 'Current location');
+    } else {
+      map?.once('locationfound', (e) => {
+        const { latlng, heading } = e;
+        addWaypoint(latlng, 'Current location');
+      });
+      map?.locate();
+    }
   };
 
   useEffect(() => {
@@ -181,6 +186,7 @@ export const WaypointsList: React.FC = () => {
               key={draggableWaypoints.length}
               searchable
               placeholder='Search for a location'
+              value={null}
               data={geoSearchResultOptions}
               onSearchChange={setGeoSearchValue}
               onChange={handleLocationSelect}
