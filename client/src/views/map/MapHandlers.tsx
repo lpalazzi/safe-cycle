@@ -87,7 +87,7 @@ export const MapHandlers: React.FC = () => {
       );
     } else if (navMarker) {
       map.removeLayer(navMarker);
-      map.stopLocate();
+      // map.stopLocate();
       map.setZoom(14);
       setFollowUser(false);
     }
@@ -97,7 +97,7 @@ export const MapHandlers: React.FC = () => {
     L.easyButton(
       'fa-location-crosshairs',
       () => {
-        map.locate();
+        map.locate({ watch: true, enableHighAccuracy: true });
       },
       'Current location'
     )
