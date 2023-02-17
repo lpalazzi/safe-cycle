@@ -74,8 +74,8 @@ export const UserNogoGroups: React.FC = () => {
       title: `Delete ${nogoGroup.name}`,
       children: (
         <Text size='sm'>
-          Are you sure you want to delete this Nogo Group? All Nogos saved in
-          this list will be deleted.
+          Are you sure you want to delete this group? All nogos saved in this
+          group will be deleted.
         </Text>
       ),
       labels: { confirm: 'Delete Nogo Group', cancel: "No don't delete it" },
@@ -108,8 +108,8 @@ export const UserNogoGroups: React.FC = () => {
   return (
     <Stack spacing='xs'>
       <SidebarTitle
-        title='Custom Nogo Groups'
-        tooltipLabel='Add and edit custom Nogos to apply to your own routes.'
+        title='User Nogos'
+        tooltipLabel='Add and edit custom nogos to apply to your routes.'
       />
       {!!loggedInUser ? (
         <>
@@ -120,7 +120,7 @@ export const UserNogoGroups: React.FC = () => {
               <Paper>
                 <Group position='apart'>
                   <Text size='sm'>{nogoGroup.name}</Text>
-                  <Group position='right'>
+                  <Group position='right' spacing='xs'>
                     {alreadySelected || isEditing ? (
                       <Text size='sm' c='dimmed'>
                         {isEditing ? 'Editing' : 'Applied'}
@@ -128,7 +128,9 @@ export const UserNogoGroups: React.FC = () => {
                     ) : null}
                     {!isEditing ? (
                       <Tooltip
-                        label={alreadySelected ? 'Remove' : 'Apply'}
+                        label={
+                          alreadySelected ? 'Disable' : 'Avoid these nogos'
+                        }
                         withArrow
                       >
                         <ActionIcon
@@ -146,29 +148,30 @@ export const UserNogoGroups: React.FC = () => {
                         </ActionIcon>
                       </Tooltip>
                     ) : null}
-                    <Menu position='left-start'>
+                    <Tooltip
+                      label={isEditing ? 'Stop editing' : 'Edit nogos'}
+                      withArrow
+                    >
+                      <ActionIcon
+                        onClick={() =>
+                          setEditingGroupOrRegion(isEditing ? null : nogoGroup)
+                        }
+                        color={isEditing ? 'red' : undefined}
+                      >
+                        {isEditing ? (
+                          <IconEditCircleOff size={18} />
+                        ) : (
+                          <IconEditCircle size={18} />
+                        )}
+                      </ActionIcon>
+                    </Tooltip>
+                    <Menu position='top-start'>
                       <Menu.Target>
                         <ActionIcon>
                           <IconDots size={18} />
                         </ActionIcon>
                       </Menu.Target>
                       <Menu.Dropdown>
-                        <Menu.Item
-                          icon={
-                            isEditing ? (
-                              <IconEditCircleOff size={14} />
-                            ) : (
-                              <IconEditCircle size={14} />
-                            )
-                          }
-                          onClick={() =>
-                            setEditingGroupOrRegion(
-                              isEditing ? null : nogoGroup
-                            )
-                          }
-                        >
-                          {isEditing ? 'Stop editing Nogos' : 'Edit Nogos'}
-                        </Menu.Item>
                         <Menu.Item
                           icon={<IconSettings size={14} />}
                           onClick={() =>
@@ -177,7 +180,7 @@ export const UserNogoGroups: React.FC = () => {
                             )
                           }
                         >
-                          Edit list properties
+                          Edit group properties
                         </Menu.Item>
                         <Menu.Item
                           icon={<IconTrash size={14} />}
@@ -205,7 +208,7 @@ export const UserNogoGroups: React.FC = () => {
         </>
       ) : (
         <Alert icon={<IconInfoCircle size={16} />} color='gray'>
-          Please sign in to add your own Nogos
+          Please sign in to add your own nogos
         </Alert>
       )}
     </Stack>

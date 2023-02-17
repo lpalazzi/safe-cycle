@@ -179,7 +179,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         .catch((err) => {
           clearNogoWaypoints();
           showNotification({
-            title: 'Error creating Nogo',
+            title: 'Error creating nogo',
             message: err.message || 'Undefined error',
             color: 'red',
           });
@@ -216,7 +216,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
       }
     } catch (error: any) {
       showNotification({
-        title: 'Error fetching Nogos',
+        title: 'Error fetching n',
         message: error.message || 'Undefined error',
         color: 'red',
       });
@@ -244,13 +244,13 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
       const deletedCount = await NogoApi.delete(nogoId);
       showNotification({
         message:
-          deletedCount > 0 ? '1 Nogo was deleted' : 'Nogo was not deleted',
+          deletedCount > 0 ? '1 nogo was deleted' : 'Nogo was not deleted',
         color: deletedCount > 0 ? 'green' : 'red',
       });
       refreshNogoRoutes();
     } catch (error: any) {
       showNotification({
-        title: 'Error deleting Nogo',
+        title: 'Error deleting nogo',
         message: error.message || 'Undefined error',
         color: 'red',
       });

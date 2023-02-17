@@ -43,7 +43,7 @@ export const UserRegions: React.FC = () => {
                   </Text>
                 ) : null}
                 <Tooltip
-                  label={isEditing ? 'Stop editing' : 'Edit Nogos'}
+                  label={isEditing ? 'Stop editing' : 'Edit nogos'}
                   withArrow
                 >
                   <ActionIcon
