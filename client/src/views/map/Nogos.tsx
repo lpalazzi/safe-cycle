@@ -41,7 +41,7 @@ export const Nogos: React.FC = () => {
                 >
                   <Group position='center' spacing='xs' noWrap>
                     <IconTrash />
-                    <>Delete Nogo</>
+                    <>Delete nogo</>
                   </Group>
                 </Button>
               </Popup>

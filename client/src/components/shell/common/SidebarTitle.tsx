@@ -1,6 +1,6 @@
+import React from 'react';
 import { Group, Title, Tooltip } from '@mantine/core';
 import { IconInfoCircle } from '@tabler/icons-react';
-import React from 'react';
 
 export const SidebarTitle: React.FC<{
   title: string;
@@ -8,7 +8,9 @@ export const SidebarTitle: React.FC<{
 }> = ({ title, tooltipLabel }) => {
   return (
     <Group spacing='xs' align='center'>
-      <Title order={4}>{title}</Title>
+      <Title order={4} weight='normal'>
+        {title}
+      </Title>
       {tooltipLabel ? (
         <Tooltip
           multiline

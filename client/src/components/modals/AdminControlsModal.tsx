@@ -139,7 +139,7 @@ const TransferToRegionForm: React.FC = () => {
       )?.name;
       showNotification({
         title: 'Success',
-        message: `${updateCount} Nogos were transferred from ${nogoGroupName} to ${regionName}`,
+        message: `${updateCount} nogos were transferred from ${nogoGroupName} to ${regionName}`,
         color: 'green',
       });
       form.reset();

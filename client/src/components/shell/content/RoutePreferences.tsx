@@ -1,15 +1,38 @@
 import React from 'react';
-import { Stack, Checkbox, Input, SegmentedControl } from '@mantine/core';
+import {
+  Stack,
+  Checkbox,
+  Input,
+  SegmentedControl,
+  Anchor,
+  Space,
+} from '@mantine/core';
 import { SidebarTitle } from '../common/SidebarTitle';
 import { useGlobalContext } from 'contexts/globalContext';
+import { useModals } from '@mantine/modals';
+// import { NogosInfoModal } from 'components/modals/NogosInfoModal';
 
 export const RoutePreferences: React.FC = () => {
   const { routeOptions, updateRouteOptions } = useGlobalContext();
+  const { openModal } = useModals();
   return (
     <Stack spacing='xs'>
       <SidebarTitle title='Route Preferences' />
       <Checkbox
-        label='Avoid low-comfort roads'
+        label={
+          <div style={{ display: 'flex' }}>
+            Avoid suggested nogos
+            <Space w='xs' />
+            {/* <Anchor
+              onClick={(e) => {
+                e.preventDefault();
+                openModal(NogosInfoModal);
+              }}
+            >
+              Learn more
+            </Anchor> */}
+          </div>
+        }
         checked={routeOptions.avoidLowComfort}
         onChange={(e) =>
           updateRouteOptions({ avoidLowComfort: e.currentTarget.checked })

@@ -27,7 +27,7 @@ export const EditingNogoIndicator: React.FC = () => {
           <Text span c='blue' inherit>
             {editingGroupOrRegion?.name}
           </Text>
-          's Nogos
+          's nogos
         </Text>
         <Button
           fullWidth
@@ -39,7 +39,7 @@ export const EditingNogoIndicator: React.FC = () => {
         >
           <Group position='center' spacing='xs' noWrap>
             <IconEditOff />
-            <>Stop editing Nogos</>
+            <>Stop editing nogos</>
           </Group>
         </Button>
       </Stack>

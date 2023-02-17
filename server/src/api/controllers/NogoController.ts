@@ -130,7 +130,7 @@ export const nogo = (app: express.Router) => {
       const userCanDelete = await nogoService.canUserUpdateNogo(nogoId, userId);
       if (!userCanDelete) {
         throw new UnauthorizedError(
-          'User is not authorized to delete this Nogo'
+          'User is not authorized to delete this nogo'
         );
       }
 
