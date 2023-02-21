@@ -142,8 +142,7 @@ export const WaypointsList: React.FC = () => {
   return (
     <Stack spacing='xl'>
       <Text size='sm'>
-        Search for your destination, or select points on the map to add to your
-        route.
+        Search for your destination, or select points on the map.
       </Text>
       <Stack spacing={0}>
         <Timeline
