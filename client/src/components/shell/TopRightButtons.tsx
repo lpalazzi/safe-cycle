@@ -32,7 +32,7 @@ export const TopRightButtons: React.FC = () => {
               <IconMenu2 color='black' size={32} />
             </ActionIcon>
           )}
-          <ActionIcon
+          {/* <ActionIcon
             onClick={() => toggleNavMode()}
             size='xl'
             variant='default'
@@ -42,7 +42,7 @@ export const TopRightButtons: React.FC = () => {
             ) : (
               <IconNavigation color='black' size={32} />
             )}
-          </ActionIcon>
+          </ActionIcon> */}
         </>
       ) : null}
     </Stack>
