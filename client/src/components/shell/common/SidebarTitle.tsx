@@ -1,28 +1,28 @@
 import React from 'react';
 import { Group, Title, Tooltip } from '@mantine/core';
+import { ModalSettings } from '@mantine/modals/lib/context';
+import { useModals } from '@mantine/modals';
 import { IconInfoCircle } from '@tabler/icons-react';
 
 export const SidebarTitle: React.FC<{
   title: string;
-  tooltipLabel?: string;
-}> = ({ title, tooltipLabel }) => {
+  infoModal?: ModalSettings;
+}> = ({ title, infoModal }) => {
+  const { openModal } = useModals();
   return (
     <Group spacing='xs' align='center'>
       <Title order={4} weight='normal'>
         {title}
       </Title>
-      {tooltipLabel ? (
+      {infoModal ? (
         <Tooltip
-          multiline
-          width={300}
           withArrow
           transition='fade'
           transitionDuration={200}
-          events={{ hover: true, focus: false, touch: true }}
-          label={tooltipLabel}
+          label='Learn more'
         >
-          <div style={{ height: '18px' }}>
-            <IconInfoCircle size={18} />
+          <div style={{ height: '18px', cursor: 'pointer' }}>
+            <IconInfoCircle size={18} onClick={() => openModal(infoModal)} />
           </div>
         </Tooltip>
       ) : null}

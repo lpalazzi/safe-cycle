@@ -29,6 +29,7 @@ import { useGlobalContext } from 'contexts/globalContext';
 import { EditNogoGroupModal } from 'components/modals/EditNogoGroupModal';
 import { NewNogoGroupModal } from 'components/modals/NewNogoGroupModal';
 import { SidebarTitle } from '../common/SidebarTitle';
+import { NogosInfoModal } from 'components/modals/NogosInfoModal';
 
 export const UserNogoGroups: React.FC = () => {
   const {
@@ -107,10 +108,7 @@ export const UserNogoGroups: React.FC = () => {
 
   return (
     <Stack spacing='xs'>
-      <SidebarTitle
-        title='User Nogos'
-        tooltipLabel='Add and edit custom nogos to apply to your routes.'
-      />
+      <SidebarTitle title='User Nogos' infoModal={NogosInfoModal('nogos')} />
       {!!loggedInUser ? (
         <>
           {userNogoGroups.map((nogoGroup) => {

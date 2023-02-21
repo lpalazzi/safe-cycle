@@ -26,10 +26,7 @@ export const UserRegions: React.FC = () => {
 
   return (
     <Stack spacing='xs'>
-      <SidebarTitle
-        title='Regions'
-        tooltipLabel='You are a contributor to the regions listed below.'
-      />
+      <SidebarTitle title='Regions' />
       {userRegions.map((region) => {
         const isEditing = editingGroupOrRegion?._id === region._id;
         return (

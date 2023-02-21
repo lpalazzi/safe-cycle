@@ -10,11 +10,12 @@ import {
 import { SidebarTitle } from '../common/SidebarTitle';
 import { useGlobalContext } from 'contexts/globalContext';
 import { useModals } from '@mantine/modals';
-// import { NogosInfoModal } from 'components/modals/NogosInfoModal';
+import { NogosInfoModal } from 'components/modals/NogosInfoModal';
 
 export const RoutePreferences: React.FC = () => {
   const { routeOptions, updateRouteOptions } = useGlobalContext();
   const { openModal } = useModals();
+
   return (
     <Stack spacing='xs'>
       <SidebarTitle title='Route Preferences' />
@@ -23,14 +24,14 @@ export const RoutePreferences: React.FC = () => {
           <div style={{ display: 'flex' }}>
             Avoid suggested nogos
             <Space w='xs' />
-            {/* <Anchor
+            <Anchor
               onClick={(e) => {
                 e.preventDefault();
-                openModal(NogosInfoModal);
+                openModal(NogosInfoModal('suggested'));
               }}
             >
               Learn more
-            </Anchor> */}
+            </Anchor>
           </div>
         }
         checked={routeOptions.avoidLowComfort}
