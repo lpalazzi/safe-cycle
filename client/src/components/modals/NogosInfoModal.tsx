@@ -61,14 +61,12 @@ const NogosInfo: React.FC<NogosInfoProps> = ({ initialView }) => {
         Supported regions
       </Title>
       <MapContainer
-        bounds={
-          new L.LatLngBounds(
-            [boundingbox[1], boundingbox[0]],
-            [boundingbox[3], boundingbox[2]]
-          )
-        }
+        bounds={new L.LatLngBounds(
+          [boundingbox[1], boundingbox[0]],
+          [boundingbox[3], boundingbox[2]]
+        ).pad(0.5)}
         scrollWheelZoom={false}
-        style={{ height: '500px', borderRadius: '16px' }}
+        style={{ height: '500px', maxHeight: '50vw', borderRadius: '12px' }}
       >
         <TileLayer
           attribution='Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
