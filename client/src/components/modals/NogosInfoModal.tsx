@@ -74,6 +74,18 @@ const NogosInfo: React.FC<NogosInfoProps> = ({ initialView }) => {
           minZoom={0}
           maxZoom={19}
         />
+        {nogos.map((nogo) => (
+          <GeoJSON
+            key={nogo._id}
+            data={nogo.lineString}
+            style={{
+              color: theme.colors.red[7],
+              weight: 3,
+              opacity: 1,
+            }}
+            interactive={false}
+          />
+        ))}
         {regions.map((region) => (
           <GeoJSON
             key={region._id}
@@ -101,17 +113,6 @@ const NogosInfo: React.FC<NogosInfoProps> = ({ initialView }) => {
               </Group>
             </Popup>
           </GeoJSON>
-        ))}
-        {nogos.map((nogo) => (
-          <GeoJSON
-            key={nogo._id}
-            data={nogo.lineString}
-            style={{
-              color: theme.colors.red[7],
-              weight: 3,
-              opacity: 1,
-            }}
-          />
         ))}
       </MapContainer>
       <Text align='center' fs='italic' mt='md'>
