@@ -4,13 +4,14 @@ import {
   Checkbox,
   Input,
   SegmentedControl,
-  Anchor,
   Space,
+  Tooltip,
 } from '@mantine/core';
 import { SidebarTitle } from '../common/SidebarTitle';
 import { useGlobalContext } from 'contexts/globalContext';
 import { useModals } from '@mantine/modals';
-import { NogosInfoModal } from 'components/modals/NogosInfoModal';
+import { AboutModal } from 'components/modals/AboutModal';
+import { IconInfoCircle } from '@tabler/icons-react';
 
 export const RoutePreferences: React.FC = () => {
   const { routeOptions, updateRouteOptions } = useGlobalContext();
@@ -22,16 +23,23 @@ export const RoutePreferences: React.FC = () => {
       <Checkbox
         label={
           <div style={{ display: 'flex' }}>
-            Avoid suggested nogos
+            Avoid nogos
             <Space w='xs' />
-            <Anchor
-              onClick={(e) => {
-                e.preventDefault();
-                openModal(NogosInfoModal('suggested'));
-              }}
+            <Tooltip
+              withArrow
+              transition='fade'
+              transitionDuration={200}
+              label='Learn more'
             >
-              Learn more
-            </Anchor>
+              <IconInfoCircle
+                size={16}
+                style={{ lineHeight: 1.55, margin: 'auto', cursor: 'pointer' }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  openModal(AboutModal('about'));
+                }}
+              />
+            </Tooltip>
           </div>
         }
         checked={routeOptions.avoidLowComfort}

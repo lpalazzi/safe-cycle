@@ -28,8 +28,8 @@ import { NogoGroupApi } from 'api';
 import { useGlobalContext } from 'contexts/globalContext';
 import { EditNogoGroupModal } from 'components/modals/EditNogoGroupModal';
 import { NewNogoGroupModal } from 'components/modals/NewNogoGroupModal';
+import { AboutModal } from 'components/modals/AboutModal';
 import { SidebarTitle } from '../common/SidebarTitle';
-import { NogosInfoModal } from 'components/modals/NogosInfoModal';
 
 export const UserNogoGroups: React.FC = () => {
   const {
@@ -108,7 +108,7 @@ export const UserNogoGroups: React.FC = () => {
 
   return (
     <Stack spacing='xs'>
-      <SidebarTitle title='User Nogos' infoModal={NogosInfoModal('nogos')} />
+      <SidebarTitle title='Private Nogos' infoModal={AboutModal('howto')} />
       {!!loggedInUser ? (
         <>
           {userNogoGroups.map((nogoGroup) => {
