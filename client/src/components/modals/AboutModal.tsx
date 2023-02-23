@@ -28,10 +28,11 @@ import { Nogo } from 'models';
 
 type ViewType = 'about' | 'howto' | 'regions';
 
-export const AboutModal = (initialView: ViewType) => {
+export const AboutModal = (initialView: ViewType, isMobileSize: boolean) => {
   return {
     children: <AboutModalContent initialView={initialView} />,
     size: '1000px',
+    fullScreen: isMobileSize,
   } as ModalSettings;
 };
 

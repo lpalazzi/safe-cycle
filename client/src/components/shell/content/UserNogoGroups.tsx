@@ -36,6 +36,7 @@ export const UserNogoGroups: React.FC = () => {
     loggedInUser,
     selectedNogoGroups,
     editingGroupOrRegion,
+    isMobileSize,
     selectNogoGroup,
     deselectNogoGroup,
     setEditingGroupOrRegion,
@@ -108,7 +109,10 @@ export const UserNogoGroups: React.FC = () => {
 
   return (
     <Stack spacing='xs'>
-      <SidebarTitle title='Private Nogos' infoModal={AboutModal('howto')} />
+      <SidebarTitle
+        title='Private Nogos'
+        infoModal={AboutModal('howto', isMobileSize)}
+      />
       {!!loggedInUser ? (
         <>
           {userNogoGroups.map((nogoGroup) => {
