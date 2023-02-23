@@ -14,7 +14,7 @@ import { AboutModal } from 'components/modals/AboutModal';
 import { IconInfoCircle } from '@tabler/icons-react';
 
 export const RoutePreferences: React.FC = () => {
-  const { routeOptions, updateRouteOptions } = useGlobalContext();
+  const { routeOptions, isMobileSize, updateRouteOptions } = useGlobalContext();
   const { openModal } = useModals();
 
   return (
@@ -36,7 +36,7 @@ export const RoutePreferences: React.FC = () => {
                 style={{ lineHeight: 1.55, margin: 'auto', cursor: 'pointer' }}
                 onClick={(e) => {
                   e.preventDefault();
-                  openModal(AboutModal('about'));
+                  openModal(AboutModal('about', isMobileSize));
                 }}
               />
             </Tooltip>

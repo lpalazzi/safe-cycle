@@ -26,7 +26,7 @@ export const SidebarHeader: React.FC = () => {
         <Group position='right' noWrap spacing={0}>
           <Tooltip label='About' position='bottom'>
             <ActionIcon
-              onClick={() => openModal(AboutModal('about'))}
+              onClick={() => openModal(AboutModal('about', isMobileSize))}
               size='lg'
             >
               <IconInfoCircle color='black' size={26} />

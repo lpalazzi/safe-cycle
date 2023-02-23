@@ -5,6 +5,8 @@ import { NogoGroup, Region, User } from 'models';
 import { ID, RouteOptions } from 'types';
 import { useMantineTheme } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
+import { openModal } from '@mantine/modals';
+import { AboutModal } from 'components/modals/AboutModal';
 
 type GlobalContextType =
   | {
@@ -57,9 +59,18 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
 
   useEffect(() => {
     updateLoggedInUser();
+    openInfoModalOnFirstVisit();
     getStoredSelectedNogoGroups();
     refreshRegions();
   }, []);
+
+  const openInfoModalOnFirstVisit = () => {
+    const visited = window.localStorage.getItem('visited');
+    if (!visited) {
+      window.localStorage.setItem('visited', '1');
+      openModal(AboutModal('about', isMobileSize));
+    }
+  };
 
   const getStoredSelectedNogoGroups = async () => {
     const stored = window.localStorage.getItem('selectedNogoGroups');
