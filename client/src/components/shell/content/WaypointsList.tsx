@@ -5,8 +5,22 @@ import React, {
   useRef,
   useCallback,
 } from 'react';
-import { useDrag, useDrop } from 'react-dnd';
+import {
+  DndProvider,
+  useDrag,
+  useDrop,
+  useDragLayer,
+  XYCoord,
+} from 'react-dnd';
 import type { Identifier } from 'dnd-core';
+import {
+  MultiBackend,
+  TouchTransition,
+  PointerTransition,
+  MultiBackendOptions,
+} from 'react-dnd-multi-backend';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
 import { LatLng } from 'leaflet';
 import debounce from 'lodash.debounce';
 import {
@@ -24,9 +38,9 @@ import { showNotification } from '@mantine/notifications';
 import { IconX, IconGripHorizontal } from '@tabler/icons-react';
 
 import { GeocodingApi } from 'api';
+import { Waypoint } from 'types';
 import { GeocodeSearchResult } from 'api/interfaces/Geocoding';
 import { useMapContext } from 'contexts/mapContext';
-import { Waypoint } from 'types';
 
 export const WaypointsList: React.FC = () => {
   const {
@@ -140,79 +154,82 @@ export const WaypointsList: React.FC = () => {
         });
 
   return (
-    <Stack spacing='xl'>
-      <Text size='sm'>
-        Search for your destination, or select points on the map.
-      </Text>
-      <Stack spacing={0}>
-        <Timeline
-          style={{ zIndex: 100 }}
-          active={draggableWaypoints.length - 1}
-          bulletSize={20}
-          styles={{
-            item: {
-              marginTop: '0px !important',
-              '::before': {
-                inset: '0px auto -16px -4px',
+    <DndProvider backend={MultiBackend} options={HTML5toTouch}>
+      <Stack spacing='xl'>
+        <Text size='sm'>
+          Search for your destination, or select points on the map.
+        </Text>
+        <Stack spacing={0}>
+          <Timeline
+            style={{ zIndex: 100 }}
+            active={draggableWaypoints.length - 1}
+            bulletSize={20}
+            styles={{
+              item: {
+                marginTop: '0px !important',
+                '::before': {
+                  inset: '0px auto -16px -4px',
+                },
               },
-            },
-            itemContent: {
-              transform: 'translateY(-15px)',
-            },
-          }}
-        >
-          {draggableWaypoints.map((waypoint, index) => {
-            return (
-              <Timeline.Item
-                bullet={<Text size={12}>{index + 1}</Text>}
-                lineVariant='dotted'
+              itemContent: {
+                transform: 'translateY(-15px)',
+              },
+            }}
+          >
+            {draggableWaypoints.map((waypoint, index) => {
+              return (
+                <Timeline.Item
+                  bullet={<Text size={12}>{index + 1}</Text>}
+                  lineVariant='dotted'
+                >
+                  <DraggableWaypointItem
+                    id={waypoint.label + waypoint.latlng.toString()}
+                    index={index}
+                    waypoint={waypoint}
+                    disableDrag={draggableWaypoints.length === 1}
+                    reorderDraggableWaypoint={reorderDraggableWaypoint}
+                    onDrop={reorderWaypoint}
+                    onCancel={() => setDraggableWaypoints(waypoints)}
+                    removeWaypoint={removeWaypoint}
+                  />
+                </Timeline.Item>
+              );
+            })}
+            <Timeline.Item lineVariant='dotted'>
+              <Select
+                key={draggableWaypoints.length}
+                searchable
+                placeholder='Search for a location'
+                value={null}
+                data={geoSearchResultOptions}
+                onSearchChange={setGeoSearchValue}
+                onChange={handleLocationSelect}
+                searchValue={geoSearchValue}
+                nothingFound='No results found'
+                filter={() => true}
+                rightSection={<div></div>}
+                pt={8}
+              />
+            </Timeline.Item>
+          </Timeline>
+          {waypoints.length > 0 ? (
+            <Group position='right'>
+              <Button
+                compact
+                size='xs'
+                variant='subtle'
+                color='gray'
+                rightIcon={<IconX size={14} />}
+                onClick={clearWaypoints}
               >
-                <DraggableWaypointItem
-                  id={waypoint.label + waypoint.latlng.toString()}
-                  index={index}
-                  waypoint={waypoint}
-                  disableDrag={draggableWaypoints.length === 1}
-                  reorderDraggableWaypoint={reorderDraggableWaypoint}
-                  onDrop={reorderWaypoint}
-                  onCancel={() => setDraggableWaypoints(waypoints)}
-                  removeWaypoint={removeWaypoint}
-                />
-              </Timeline.Item>
-            );
-          })}
-          <Timeline.Item lineVariant='dotted'>
-            <Select
-              key={draggableWaypoints.length}
-              searchable
-              placeholder='Search for a location'
-              value={null}
-              data={geoSearchResultOptions}
-              onSearchChange={setGeoSearchValue}
-              onChange={handleLocationSelect}
-              searchValue={geoSearchValue}
-              nothingFound='No results found'
-              filter={() => true}
-              rightSection={<div></div>}
-              pt={8}
-            />
-          </Timeline.Item>
-        </Timeline>
-        {waypoints.length > 0 ? (
-          <Group position='right'>
-            <Button
-              compact
-              size='xs'
-              variant='subtle'
-              color='gray'
-              rightIcon={<IconX size={14} />}
-              onClick={clearWaypoints}
-            >
-              Clear all
-            </Button>
-          </Group>
-        ) : null}
+                Clear all
+              </Button>
+            </Group>
+          ) : null}
+        </Stack>
       </Stack>
-    </Stack>
+      <CustomPreviewLayer />
+    </DndProvider>
   );
 };
 
@@ -271,10 +288,14 @@ const DraggableWaypointItem: React.FC<DraggableWaypointItemProps> = ({
     },
   });
 
+  const label =
+    waypoint.label ??
+    waypoint.latlng.lat.toFixed(6) + ', ' + waypoint.latlng.lng.toFixed(6);
+
   const [{ isHoverOutside }, drag, preview] = useDrag({
     type: 'waypoint',
     item: () => {
-      return { id, curIndex: index, srcIndex: index };
+      return { id, curIndex: index, srcIndex: index, label: label };
     },
     collect: (monitor) => ({
       isHoverOutside: monitor.getTargetIds().length === 0,
@@ -295,13 +316,9 @@ const DraggableWaypointItem: React.FC<DraggableWaypointItemProps> = ({
 
   const opacity = isOver ? 0 : 1;
 
-  const label =
-    waypoint.label ??
-    waypoint.latlng.lat.toFixed(6) + ', ' + waypoint.latlng.lng.toFixed(6);
-
   return (
     <Paper ref={ref} data-handler-id={handlerId} pt={8} pb={8}>
-      <Group ref={preview} position='apart' noWrap style={{ opacity }}>
+      <Group position='apart' noWrap style={{ opacity }}>
         <Text lineClamp={1} size='sm' style={{ lineHeight: '36px' }}>
           {label}
         </Text>
@@ -316,6 +333,81 @@ const DraggableWaypointItem: React.FC<DraggableWaypointItemProps> = ({
           </ActionIcon>
         </Group>
       </Group>
+      <div ref={preview} style={{ display: 'none' }} />
     </Paper>
   );
 };
+
+const CustomPreviewLayer: React.FC = () => {
+  const { isDragging, item, initialOffset, currentOffset } = useDragLayer(
+    (monitor) => ({
+      item: monitor.getItem(),
+      itemType: monitor.getItemType(),
+      initialOffset: monitor.getInitialSourceClientOffset(),
+      currentOffset: monitor.getSourceClientOffset(),
+      isDragging: monitor.isDragging(),
+    })
+  );
+  if (!isDragging) return null;
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        pointerEvents: 'none',
+        zIndex: 100,
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '100%',
+      }}
+    >
+      <div style={getItemStyles(initialOffset, currentOffset)}>
+        <Paper p={8} w={350} withBorder>
+          <Group position='apart' noWrap>
+            <Text lineClamp={1} size='sm' style={{ lineHeight: '36px' }}>
+              {item.label}
+            </Text>
+          </Group>
+        </Paper>
+      </div>
+    </div>
+  );
+};
+
+const HTML5toTouch: MultiBackendOptions = {
+  backends: [
+    {
+      id: 'html5',
+      backend: HTML5Backend,
+      transition: PointerTransition,
+    },
+    {
+      id: 'touch',
+      backend: TouchBackend,
+      options: { delayTouchStart: 100 },
+      preview: true,
+      transition: TouchTransition,
+    },
+  ],
+};
+
+function getItemStyles(
+  initialOffset: XYCoord | null,
+  currentOffset: XYCoord | null
+) {
+  if (!initialOffset || !currentOffset) {
+    return {
+      display: 'none',
+    };
+  }
+
+  let { x, y } = currentOffset;
+  x -= 275;
+  y -= 25;
+
+  const transform = `translate(${x}px, ${y}px)`;
+  return {
+    transform,
+    WebkitTransform: transform,
+  };
+}
