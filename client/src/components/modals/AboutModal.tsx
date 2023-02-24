@@ -336,6 +336,11 @@ const SupportedRegionsList: React.FC<{ map: L.Map | null }> = ({ map }) => {
                   ).pad(0.2)
                 )
               }
+              styles={{
+                inner: {
+                  justifyContent: 'flex-start',
+                },
+              }}
             >
               {region.name}
             </Button>
