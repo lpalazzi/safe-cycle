@@ -17,6 +17,8 @@ import {
   Flex,
   Space,
   Anchor,
+  ScrollArea,
+  Button,
 } from '@mantine/core';
 import { IconEditCircle, IconPlus } from '@tabler/icons-react';
 import LogoSvg from 'assets/brand/logo-name.svg';
@@ -41,7 +43,9 @@ type AboutModalProps = {
 };
 
 const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
+  const { isMobileSize } = useGlobalContext();
   const [view, setView] = useState<string | null>(initialView);
+  const [map, setMap] = useState<L.Map | null>(null);
   return (
     <Container>
       <Image
@@ -169,7 +173,14 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
               </Anchor>
               .
             </Text>
-            <SupportedRegionsMap open={view === 'regions'} />
+            <Group position='apart' noWrap={isMobileSize ? false : true}>
+              <SupportedRegionsMap
+                open={view === 'regions'}
+                map={map}
+                setMap={setMap}
+              />
+              <SupportedRegionsList map={map} />
+            </Group>
             <Text align='center' fs='italic' mt='md'>
               If you are a knowledgeable cyclist and interested in becoming a
               contributor for either an existing or unsupported region, contact
@@ -182,7 +193,11 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
   );
 };
 
-const SupportedRegionsMap: React.FC<{ open: boolean }> = ({ open }) => {
+const SupportedRegionsMap: React.FC<{
+  open: boolean;
+  map: L.Map | null;
+  setMap: (map: L.Map) => void;
+}> = ({ open, map, setMap }) => {
   const { regions } = useGlobalContext();
   const [displayMap, setDisplayMap] = useState(false);
   const [nogos, setNogos] = useState<Nogo[]>([]);
@@ -214,14 +229,16 @@ const SupportedRegionsMap: React.FC<{ open: boolean }> = ({ open }) => {
 
   return displayMap && boundingBox ? (
     <MapContainer
+      ref={setMap}
       bounds={new L.LatLngBounds(
         [boundingBox[1], boundingBox[0]],
         [boundingBox[3], boundingBox[2]]
-      ).pad(0.5)}
+      ).pad(0.2)}
       scrollWheelZoom={false}
       style={{
         height: '500px',
         maxHeight: '50vw',
+        width: '100%',
         borderRadius: '12px',
       }}
     >
@@ -253,6 +270,11 @@ const SupportedRegionsMap: React.FC<{ open: boolean }> = ({ open }) => {
             opacity: 1.0,
             fillOpacity: 0.1,
           }}
+          eventHandlers={{
+            click: (e) => {
+              map?.flyToBounds((e.target as L.GeoJSON).getBounds().pad(0.5));
+            },
+          }}
         >
           <Tooltip direction='top' sticky={true}>
             <Title order={4} align='center'>
@@ -279,11 +301,47 @@ const SupportedRegionsMap: React.FC<{ open: boolean }> = ({ open }) => {
       style={{
         height: '500px',
         maxHeight: '50vw',
+        width: '100%',
         borderRadius: '12px',
         backgroundColor: theme.colors.gray[3],
       }}
     >
       <Loader />
     </Flex>
+  );
+};
+
+const SupportedRegionsList: React.FC<{ map: L.Map | null }> = ({ map }) => {
+  const { regions, isMobileSize } = useGlobalContext();
+  return (
+    <ScrollArea
+      style={{
+        height: '500px',
+        maxHeight: '50vw',
+        width: isMobileSize ? '100%' : '400px',
+        backgroundColor: 'unset',
+      }}
+    >
+      <Button.Group orientation='vertical'>
+        {regions.map((region) => {
+          const boundingBox = bbox(feature(region.polygon));
+          return (
+            <Button
+              variant='default'
+              onClick={() =>
+                map?.flyToBounds(
+                  new L.LatLngBounds(
+                    [boundingBox[1], boundingBox[0]],
+                    [boundingBox[3], boundingBox[2]]
+                  ).pad(0.2)
+                )
+              }
+            >
+              {region.name}
+            </Button>
+          );
+        })}
+      </Button.Group>
+    </ScrollArea>
   );
 };
