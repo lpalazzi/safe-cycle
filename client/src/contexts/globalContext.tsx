@@ -67,6 +67,9 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   const openInfoModalOnFirstVisit = () => {
     const visited = window.localStorage.getItem('visited');
     if (!visited) {
+      const isMobileSize = window.matchMedia(
+        `(max-width: ${theme.breakpoints.sm - 1}px)`
+      ).matches; // useMediaQuery state is still undefined on initial load
       window.localStorage.setItem('visited', '1');
       openModal(AboutModal('about', isMobileSize));
     }
