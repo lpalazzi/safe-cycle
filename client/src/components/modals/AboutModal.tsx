@@ -127,15 +127,18 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
               <List.Item>
                 Click{' '}
                 <IconEditCircle
-                  style={{ verticalAlign: 'text-bottom' }}
-                  size={16}
+                  size={18}
+                  style={{ position: 'relative', top: '0.15em' }}
                 />{' '}
                 (Edit nogos) on the group you want to add nogos to.
               </List.Item>
               <List.Item>Select points on the map to create nogos.</List.Item>
               <List.Item>
                 Click{' '}
-                <IconPlus style={{ verticalAlign: 'text-bottom' }} size={16} />{' '}
+                <IconPlus
+                  size={18}
+                  style={{ position: 'relative', top: '0.15em' }}
+                />{' '}
                 (Avoid these nogos) on a Nogo Group to apply the nogos to your
                 routes.
               </List.Item>
@@ -272,7 +275,9 @@ const SupportedRegionsMap: React.FC<{
           }}
           eventHandlers={{
             click: (e) => {
-              map?.flyToBounds((e.target as L.GeoJSON).getBounds().pad(0.5));
+              map?.flyToBounds((e.target as L.GeoJSON).getBounds().pad(0.2), {
+                duration: 0.8,
+              });
             },
           }}
         >
@@ -333,7 +338,10 @@ const SupportedRegionsList: React.FC<{ map: L.Map | null }> = ({ map }) => {
                   new L.LatLngBounds(
                     [boundingBox[1], boundingBox[0]],
                     [boundingBox[3], boundingBox[2]]
-                  ).pad(0.2)
+                  ).pad(0.2),
+                  {
+                    animate: false,
+                  }
                 )
               }
               styles={{

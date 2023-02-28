@@ -9,7 +9,17 @@ import { Map } from 'views/map/Map';
 function App() {
   return (
     <GlobalContextProvider>
-      <MantineProvider withGlobalStyles withNormalizeCSS>
+      <MantineProvider
+        withGlobalStyles
+        withNormalizeCSS
+        theme={{
+          fontFamily: 'Noto Sans, sans-serif',
+          headings: { fontFamily: 'Noto Sans, sans-serif' },
+          components: {
+            Accordion: { styles: { control: { lineHeight: 1.55 } } },
+          },
+        }}
+      >
         <NotificationsProvider position='top-right' zIndex={100000}>
           <ModalsProvider modalProps={{ zIndex: 10000 }}>
             <MapContextProvider>
