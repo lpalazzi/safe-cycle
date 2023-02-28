@@ -1,4 +1,4 @@
-export interface GeocodeSearchResult {
+export interface NominatimSearchResult {
   place_id: number;
   osm_id: number;
   osm_type: string;
@@ -10,7 +10,7 @@ export interface GeocodeSearchResult {
   type: string;
   importance: number;
   icon?: string;
-  address?: GeocodeAddress;
+  address?: NominatimAddress;
   extratags?: {
     capital?: string;
     website?: string;
@@ -22,7 +22,7 @@ export interface GeocodeSearchResult {
   licence?: string;
 }
 
-interface GeocodeAddress {
+interface NominatimAddress {
   continent?: string;
 
   country?: string;
