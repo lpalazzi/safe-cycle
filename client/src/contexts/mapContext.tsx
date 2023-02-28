@@ -67,14 +67,18 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   const [fetchingCount, setFetchingCount] = useState(0);
   const loadingRoute = fetchingCount > 0;
 
+  const getLabelFromLatLng = async (latlng: L.LatLng) => {
+    const fetchedPlace = await GeocodingApi.reverse(latlng);
+    return fetchedPlace.display_name;
+  };
+
   const addWaypoint = async (latlng: L.LatLng, label?: string) => {
     const newWaypoint = {
       latlng,
       label,
     };
     if (!label) {
-      const fetchedPlace = await GeocodingApi.reverse(latlng);
-      newWaypoint.label = fetchedPlace.display_name;
+      newWaypoint.label = await getLabelFromLatLng(latlng);
     } else if (!editingGroupOrRegion) {
       const bounds = new L.LatLngBounds(latlng, latlng);
       waypoints.forEach((waypoint) => {
@@ -89,10 +93,14 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     }
   };
 
-  const updateWaypoint = (index: number, latlng: L.LatLng, label?: string) => {
+  const updateWaypoint = async (
+    index: number,
+    latlng: L.LatLng,
+    label?: string
+  ) => {
     const updatedWaypoint = {
       latlng,
-      label,
+      label: label ?? (await getLabelFromLatLng(latlng)),
     };
     const newWaypoints = [...waypoints];
     newWaypoints.splice(index, 1, updatedWaypoint);
