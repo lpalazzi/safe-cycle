@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Stack, Paper, Group, ActionIcon, Tooltip, Text } from '@mantine/core';
-import { IconEditCircle, IconEditCircleOff } from '@tabler/icons-react';
+import {
+  IconDownload,
+  IconEditCircle,
+  IconEditCircleOff,
+} from '@tabler/icons-react';
 
 import { Region } from 'models';
 import { useGlobalContext } from 'contexts/globalContext';
@@ -39,23 +43,30 @@ export const UserRegions: React.FC = () => {
                     {isEditing ? 'Editing' : 'Applied'}
                   </Text>
                 ) : null}
-                <Tooltip
-                  label={isEditing ? 'Stop editing' : 'Edit nogos'}
-                  withArrow
-                >
-                  <ActionIcon
-                    onClick={() =>
-                      setEditingGroupOrRegion(isEditing ? null : region)
-                    }
-                    color={isEditing ? 'red' : undefined}
+                <Group position='right' spacing='xs'>
+                  <Tooltip label='Export' withArrow>
+                    <ActionIcon onClick={() => region.downloadNogos()}>
+                      <IconDownload size={18} />
+                    </ActionIcon>
+                  </Tooltip>
+                  <Tooltip
+                    label={isEditing ? 'Stop editing' : 'Edit nogos'}
+                    withArrow
                   >
-                    {isEditing ? (
-                      <IconEditCircleOff size={18} />
-                    ) : (
-                      <IconEditCircle size={18} />
-                    )}
-                  </ActionIcon>
-                </Tooltip>
+                    <ActionIcon
+                      onClick={() =>
+                        setEditingGroupOrRegion(isEditing ? null : region)
+                      }
+                      color={isEditing ? 'red' : undefined}
+                    >
+                      {isEditing ? (
+                        <IconEditCircleOff size={18} />
+                      ) : (
+                        <IconEditCircle size={18} />
+                      )}
+                    </ActionIcon>
+                  </Tooltip>
+                </Group>
               </Group>
             </Group>
           </Paper>
