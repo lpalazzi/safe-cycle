@@ -1,112 +1,57 @@
 import L from 'leaflet';
-import { makeRequest } from './reqHelpers';
-import { NominatimSearchResult } from './interfaces/Nominatim';
-import {
-  BingAutosuggestResult,
-  BingLocationResult,
-} from './interfaces/BingMaps';
 import { GeocodeSearchResult } from 'types';
+import { IGeocodeSearchResult } from './interfaces/Geocoding';
+import { makeRequest } from './reqHelpers';
 
 export class GeocodingApi {
-  private static nominatimBaseUrl = 'https://nominatim.openstreetmap.org';
-  private static bingMapsBaseUrl = 'http://dev.virtualearth.net/REST/v1';
-  private static bingMapsApiKey =
-    'Aox0npMYoqh35LofTFVmTh-FMxb6FiHQcex_RhYWdQ2Gt-qx94pHNWMqpqvtchHl';
-
-  static async geocode(query: string) {
-    const result: BingLocationResult = await makeRequest(
-      `${this.bingMapsBaseUrl}/Locations/${query}?maxResults=1&key=${this.bingMapsApiKey}`
-    );
-
-    const coordinates =
-      result?.resourceSets?.[0]?.resources?.[0]?.point?.coordinates;
-    if (result.statusCode !== 200 || !coordinates) {
-      return null;
-    }
-
-    return new L.LatLng(coordinates[0], coordinates[1]);
-  }
-
-  static async reverse(latlng: L.LatLng) {
-    const result: NominatimSearchResult = await makeRequest(
-      `${this.nominatimBaseUrl}/reverse?lat=${latlng.lat}&lon=${latlng.lng}&format=json`
-    );
-    return result;
-  }
+  private static baseUrl = '/geocoding';
 
   static async search(
     query: string,
-    viewbox: L.LatLngBounds,
+    bounds: L.LatLngBounds,
     userLocation?: L.LatLng
   ) {
-    // TODO: if no Bing Maps API key, call searchWithNominatim
-
-    const userMapView = [
-      viewbox.getSouthEast().lat,
-      viewbox.getSouthEast().lng,
-      viewbox.getNorthWest().lat,
-      viewbox.getNorthWest().lng,
+    const viewboxStr = [
+      bounds.getSouthEast().lat,
+      bounds.getSouthEast().lng,
+      bounds.getNorthWest().lat,
+      bounds.getNorthWest().lng,
     ].join();
-    const result: BingAutosuggestResult = await makeRequest(
-      `${
-        this.bingMapsBaseUrl
-      }/Autosuggest?query=${query}&userMapView=${userMapView}&userLocation=${
-        userLocation ? [userLocation.lat, userLocation.lng].join() : ''
-      }&maxResults=10&key=${this.bingMapsApiKey}`
+
+    const userLocationStr = userLocation
+      ? [userLocation.lat, userLocation.lng].join()
+      : undefined;
+
+    const response = await makeRequest(
+      `${this.baseUrl}/search/${query}?viewbox=${viewboxStr}${
+        userLocationStr ? '&userLocation=' + userLocationStr : ''
+      }`
     );
 
-    const places = result?.resourceSets?.[0]?.resources?.[0]?.value;
-    if (result.statusCode !== 200 || !places || !places.length) {
-      return this.searchWithNominatim(query, viewbox);
-    }
-
-    return places.map((place) => {
+    const searchResults: IGeocodeSearchResult[] = response.searchResults;
+    return searchResults.map((searchResult) => {
       return {
-        label: [place.name, place.address.formattedAddress]
-          .filter((r) => !!r)
-          .join(', '),
+        label: searchResult.label,
+        latlng: searchResult.position
+          ? new L.LatLng(
+              searchResult.position.latitude,
+              searchResult.position.longitude
+            )
+          : undefined,
       } as GeocodeSearchResult;
     });
   }
 
-  static async searchWithNominatim(query: string, viewbox?: L.LatLngBounds) {
-    let searchResults: NominatimSearchResult[] = [];
+  static async geocode(query: string) {
+    const response = await makeRequest(`${this.baseUrl}/geocode/${query}`);
+    const position: { latitude: number; longitude: number } = response.position;
+    return new L.LatLng(position.latitude, position.longitude);
+  }
 
-    const viewboxStr = viewbox?.toBBoxString();
-
-    if (viewboxStr) {
-      const boundedResults: NominatimSearchResult[] = await makeRequest(
-        `${this.nominatimBaseUrl}/search?q=${query}&viewbox=${viewboxStr}&bounded=1&addressdetails=1&format=json`
-      );
-      searchResults.push(...boundedResults);
-    }
-
-    if (searchResults.length < 10) {
-      const unboundedResults: NominatimSearchResult[] = await makeRequest(
-        `${
-          this.nominatimBaseUrl
-        }/search?q=${query}&addressdetails=1&format=json${
-          viewboxStr ? `&viewbox=${viewboxStr}` : ''
-        }`
-      );
-      searchResults.push(
-        ...unboundedResults.filter((unboundedResult) => {
-          return !searchResults.find((searchResult) => {
-            return searchResult.place_id === unboundedResult.place_id;
-          });
-        })
-      );
-    }
-
-    return searchResults.map((searchResult) => {
-      const res: GeocodeSearchResult = {
-        label: searchResult.display_name,
-        latlng: new L.LatLng(
-          Number(searchResult.lat),
-          Number(searchResult.lon)
-        ),
-      };
-      return res;
-    });
+  static async reverse(latlng: L.LatLng) {
+    const response = await makeRequest(
+      `${this.baseUrl}/reverse/${latlng.lat}/${latlng.lng}`
+    );
+    return response.label as string;
   }
 }
