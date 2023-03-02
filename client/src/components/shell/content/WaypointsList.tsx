@@ -38,8 +38,7 @@ import { showNotification } from '@mantine/notifications';
 import { IconX, IconGripHorizontal } from '@tabler/icons-react';
 
 import { GeocodingApi } from 'api';
-import { Waypoint } from 'types';
-import { GeocodeSearchResult } from 'api/interfaces/Geocoding';
+import { Waypoint, GeocodeSearchResult } from 'types';
 import { useMapContext } from 'contexts/mapContext';
 
 export const WaypointsList: React.FC = () => {
@@ -74,7 +73,7 @@ export const WaypointsList: React.FC = () => {
   );
 
   const executeGeoSearch = async (query: string) => {
-    if (query === '') {
+    if (query === '' || !map) {
       setGeoSearchResults([]);
       return;
     }
@@ -82,7 +81,8 @@ export const WaypointsList: React.FC = () => {
     try {
       const res = await GeocodingApi.search(
         query,
-        map?.getBounds().pad(Math.max(0, 1 + 0.5 * (map.getZoom() - 10)))
+        map?.getBounds().pad(Math.max(0, 1 + 0.5 * (map.getZoom() - 10))),
+        currentLocation?.latlng
       );
       setGeoSearchResults(res);
     } catch (error: any) {
@@ -97,23 +97,32 @@ export const WaypointsList: React.FC = () => {
 
   const handleGeoSearchValueChanged = useMemo(() => {
     return debounce(executeGeoSearch, 300);
-  }, [map]);
+  }, [map, currentLocation]);
 
-  const handleLocationSelect = (value: string | null) => {
+  const handleLocationSelect = async (value: string | null) => {
     if (value === 'location') {
       handleCurrentLocationSelect();
       return;
     }
     const selectedGeoSearchResult = geoSearchResults.find(
-      (geoSearchResult) => geoSearchResult.place_id.toString() === value
+      (geoSearchResult) => geoSearchResult.label === value
     );
     if (selectedGeoSearchResult) {
+      const latlng =
+        selectedGeoSearchResult.latlng ??
+        (await GeocodingApi.geocode(selectedGeoSearchResult.label));
+
+      if (!latlng) {
+        showNotification({
+          title: 'Geocoding error',
+          message: 'Unable to locate selected search result',
+          color: 'red',
+        });
+        return;
+      }
       addWaypoint(
-        new LatLng(
-          Number(selectedGeoSearchResult.lat),
-          Number(selectedGeoSearchResult.lon)
-        ),
-        selectedGeoSearchResult.display_name
+        new LatLng(Number(latlng.lat), Number(latlng.lng)),
+        selectedGeoSearchResult.label
       );
     }
   };
@@ -148,8 +157,8 @@ export const WaypointsList: React.FC = () => {
         ]
       : geoSearchResults.map((geoSearchResult) => {
           return {
-            value: geoSearchResult.place_id.toString(),
-            label: geoSearchResult.display_name,
+            value: geoSearchResult.label,
+            label: geoSearchResult.label,
           };
         });
 

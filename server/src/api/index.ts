@@ -8,5 +8,6 @@ controllers.nogo(app);
 controllers.nogoGroup(app);
 controllers.region(app);
 controllers.router(app);
+controllers.geocoding(app);
 
 export default app;

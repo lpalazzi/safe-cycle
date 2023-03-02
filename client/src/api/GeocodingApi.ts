@@ -1,45 +1,57 @@
+import L from 'leaflet';
+import { GeocodeSearchResult } from 'types';
+import { IGeocodeSearchResult } from './interfaces/Geocoding';
 import { makeRequest } from './reqHelpers';
-import { GeocodeSearchResult } from './interfaces/Geocoding';
-import { LatLng, LatLngBounds } from 'leaflet';
 
 export class GeocodingApi {
-  private static baseUrl = 'https://nominatim.openstreetmap.org';
+  private static baseUrl = '/geocoding';
 
-  static async reverse(latlng: LatLng) {
-    const result: GeocodeSearchResult = await makeRequest(
-      `${this.baseUrl}/reverse?lat=${latlng.lat}&lon=${latlng.lng}&format=json`
+  static async search(
+    query: string,
+    bounds: L.LatLngBounds,
+    userLocation?: L.LatLng
+  ) {
+    const viewboxStr = [
+      bounds.getSouthEast().lat,
+      bounds.getSouthEast().lng,
+      bounds.getNorthWest().lat,
+      bounds.getNorthWest().lng,
+    ].join();
+
+    const userLocationStr = userLocation
+      ? [userLocation.lat, userLocation.lng].join()
+      : undefined;
+
+    const response = await makeRequest(
+      `${this.baseUrl}/search/${query}?viewbox=${viewboxStr}${
+        userLocationStr ? '&userLocation=' + userLocationStr : ''
+      }`
     );
-    return result;
+
+    const searchResults: IGeocodeSearchResult[] = response.searchResults;
+    return searchResults.map((searchResult) => {
+      return {
+        label: searchResult.label,
+        latlng: searchResult.position
+          ? new L.LatLng(
+              searchResult.position.latitude,
+              searchResult.position.longitude
+            )
+          : undefined,
+      } as GeocodeSearchResult;
+    });
   }
 
-  static async search(query: string, viewbox?: LatLngBounds) {
-    let searchResults: GeocodeSearchResult[] = [];
+  static async geocode(query: string) {
+    const response = await makeRequest(`${this.baseUrl}/geocode/${query}`);
+    const position: { latitude: number; longitude: number } = response.position;
+    return new L.LatLng(position.latitude, position.longitude);
+  }
 
-    const viewboxStr = viewbox?.toBBoxString();
-
-    if (viewboxStr) {
-      const boundedResults: GeocodeSearchResult[] = await makeRequest(
-        `${this.baseUrl}/search?q=${query}&viewbox=${viewboxStr}&bounded=1&addressdetails=1&format=json`
-      );
-      searchResults.push(...boundedResults);
-    }
-
-    if (searchResults.length < 10) {
-      const unboundedResults: GeocodeSearchResult[] = await makeRequest(
-        `${this.baseUrl}/search?q=${query}&addressdetails=1&format=json${
-          viewboxStr ? `&viewbox=${viewboxStr}` : ''
-        }`
-      );
-      searchResults.push(
-        ...unboundedResults.filter((unboundedResult) => {
-          return !searchResults.find((searchResult) => {
-            return searchResult.place_id === unboundedResult.place_id;
-          });
-        })
-      );
-      // searchResults.length = 10;
-    }
-
-    return searchResults;
+  static async reverse(latlng: L.LatLng) {
+    const response = await makeRequest(
+      `${this.baseUrl}/reverse/${latlng.lat}/${latlng.lng}`
+    );
+    return response.label as string;
   }
 }
