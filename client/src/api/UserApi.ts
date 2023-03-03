@@ -1,6 +1,7 @@
 import { User } from 'models';
 import { ID, UserRole } from 'types';
 import {
+  IUserChangePasswordDTO,
   IUserLoginDTO,
   IUserReturnDTO,
   IUserSignupDTO,
@@ -57,6 +58,15 @@ export class UserApi {
         userId,
         role,
       }
+    );
+    return !!response.success;
+  }
+
+  static async changePassword(changePasswordDTO: IUserChangePasswordDTO) {
+    const response = await makeRequest(
+      `${this.baseUrl}/changePassword`,
+      'POST',
+      { changePasswordDTO }
     );
     return !!response.success;
   }

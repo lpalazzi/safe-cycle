@@ -8,7 +8,11 @@ import {
   InternalServerError,
 } from 'api/errors';
 import { UserRole } from 'types';
-import { IUserLoginDTO, IUserSignupDTO } from 'interfaces';
+import {
+  IUserChangePasswordDTO,
+  IUserLoginDTO,
+  IUserSignupDTO,
+} from 'interfaces';
 import { checkLoggedIn, checkAdmin } from 'api/middlewares';
 
 export const user = (app: express.Router) => {
@@ -122,6 +126,25 @@ export const user = (app: express.Router) => {
           success: true,
         });
       });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  route.post('/changePassword', checkLoggedIn, async (req, res, next) => {
+    try {
+      const userId = new mongoose.Types.ObjectId(req.session.userId);
+      const changePasswordDTO: IUserChangePasswordDTO =
+        req.body.changePasswordDTO;
+
+      const { success, error } = await userService.changePassword(
+        userId,
+        changePasswordDTO
+      );
+
+      if (error) throw new BadRequestError(error);
+
+      return res.json({ success });
     } catch (err) {
       next(err);
     }

@@ -3,7 +3,12 @@ import argon2 from 'argon2';
 import joi from 'joi';
 import { injectable } from 'tsyringe';
 import { UserDao } from 'daos';
-import { IUserLoginDTO, IUserReturnDTO, IUserSignupDTO } from 'interfaces';
+import {
+  IUserLoginDTO,
+  IUserChangePasswordDTO,
+  IUserReturnDTO,
+  IUserSignupDTO,
+} from 'interfaces';
 import { UserRole } from 'types';
 
 @injectable()
@@ -98,6 +103,48 @@ export class UserService {
       return {
         user: null,
         error: err.message || 'Unhandled login error',
+      };
+    }
+  }
+
+  public async changePassword(
+    userId: mongoose.Types.ObjectId,
+    changePasswordDTO: IUserChangePasswordDTO
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      const user = await this.userDao.getById(userId);
+      if (!user) throw new Error(`No user found with id=${userId.toString()}`);
+
+      const { error } = joi
+        .object({
+          currentPassword: joi.string().required(),
+          newPassword: joi.string().min(8).max(64).required(),
+        })
+        .required()
+        .validate(changePasswordDTO);
+      if (error) throw new Error(error.message);
+
+      const { currentPassword, newPassword } = changePasswordDTO;
+      const currentPasswordHash = await this.userDao.getHashById(user._id);
+      const correctCurrentPassword = await argon2.verify(
+        currentPasswordHash ?? '',
+        currentPassword
+      );
+      if (!correctCurrentPassword)
+        throw new Error('The current password that was submitted is incorrect');
+
+      const newPasswordHash = await argon2.hash(newPassword);
+      await this.userDao.updateById(userId, {
+        passwordHash: newPasswordHash,
+      });
+
+      return {
+        success: true,
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        error: err.message || 'Unhandled error when changing password',
       };
     }
   }
