@@ -20,4 +20,9 @@ export interface IUserLoginDTO {
   password: string;
 }
 
+export interface IUserChangePasswordDTO {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface IUserReturnDTO extends Omit<IUser, 'passwordHash'> {}

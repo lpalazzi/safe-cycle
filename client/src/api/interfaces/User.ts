@@ -17,3 +17,8 @@ export interface IUserLoginDTO {
   email: string;
   password: string;
 }
+
+export interface IUserChangePasswordDTO {
+  currentPassword: string;
+  newPassword: string;
+}
