@@ -42,9 +42,9 @@ export const RoutePreferences: React.FC = () => {
             </Tooltip>
           </div>
         }
-        checked={routeOptions.avoidLowComfort}
+        checked={routeOptions.avoidNogos}
         onChange={(e) =>
-          updateRouteOptions({ avoidLowComfort: e.currentTarget.checked })
+          updateRouteOptions({ avoidNogos: e.currentTarget.checked })
         }
       />
       <Checkbox

@@ -5,7 +5,7 @@ import { closeAllModals } from '@mantine/modals';
 import { ModalSettings } from '@mantine/modals/lib/context';
 import { showNotification } from '@mantine/notifications';
 
-import { UserApi } from 'api';
+import { TrackerApi, UserApi } from 'api';
 import { IUserSignupDTO as SignupFormValues } from 'api/interfaces/User';
 import { validateEmail, validatePassword } from 'utils/validation';
 import { useGlobalContext } from 'contexts/globalContext';
@@ -49,7 +49,8 @@ const SignupForm: React.FC = () => {
 
   const handleSubmit = async (values: SignupFormValues) => {
     try {
-      await UserApi.signup(values);
+      const user = await UserApi.signup(values);
+      TrackerApi.logSignup(user._id);
       updateLoggedInUser();
       closeAllModals();
     } catch (error: any) {
