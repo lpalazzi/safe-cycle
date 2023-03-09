@@ -1,5 +1,5 @@
 export type RouteOptions = {
-  avoidLowComfort?: boolean;
+  avoidNogos?: boolean;
   avoidMainRoads?: boolean;
   stickToCycleRoutes?: boolean;
   preferPaved?: boolean;

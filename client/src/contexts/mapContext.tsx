@@ -133,7 +133,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
 
   useEffect(() => {
     if (!editingGroupOrRegion && waypoints.length >= 2) {
-      const regionIds: ID[] = routeOptions.avoidLowComfort
+      const regionIds: ID[] = routeOptions.avoidNogos
         ? regions.map((region) => region._id)
         : [];
       setFetchingCount((prev) => prev + 1);
@@ -141,7 +141,8 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         waypoints.map((waypoint) => waypoint.latlng),
         selectedNogoGroups,
         regionIds,
-        routeOptions
+        routeOptions,
+        loggedInUser
       )
         .then((res) => {
           setRoute(res.route);
@@ -205,7 +206,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
             })
           )
         ).flat();
-        if (routeOptions.avoidLowComfort) {
+        if (routeOptions.avoidNogos) {
           const fetchedRegionNogos: Nogo[] = (
             await Promise.all(
               regions.map(async (region) => {
@@ -231,7 +232,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     if (!editingGroupOrRegion) {
       clearNogoWaypoints();
     }
-  }, [editingGroupOrRegion, selectedNogoGroups, routeOptions.avoidLowComfort]);
+  }, [editingGroupOrRegion, selectedNogoGroups, routeOptions.avoidNogos]);
 
   useEffect(() => {
     if (!loggedInUser) {
