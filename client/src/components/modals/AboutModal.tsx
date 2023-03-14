@@ -4,6 +4,8 @@ import { MapContainer, TileLayer, GeoJSON, Tooltip } from 'react-leaflet';
 import bbox from '@turf/bbox';
 import { BBox, feature, featureCollection } from '@turf/helpers';
 import { ModalSettings } from '@mantine/modals/lib/context';
+import { useForm } from '@mantine/form';
+import { showNotification } from '@mantine/notifications';
 import {
   Container,
   Title,
@@ -19,14 +21,20 @@ import {
   Anchor,
   ScrollArea,
   Button,
+  Stack,
+  TextInput,
+  Textarea,
+  LoadingOverlay,
 } from '@mantine/core';
 import { IconEditCircle, IconPlus } from '@tabler/icons-react';
 import LogoSvg from 'assets/brand/logo-name.svg';
 import ImgNogoWithout from 'assets/info/info-nogo-without.png';
 import ImgNogoWith from 'assets/info/info-nogo-with.png';
 import { useGlobalContext } from 'contexts/globalContext';
-import { NogoApi } from 'api';
 import { Nogo } from 'models';
+import { EmailApi, NogoApi } from 'api';
+import { IContactFormDTO as ContactFormValues } from 'api/interfaces/Email';
+import { validateEmail } from 'utils/validation';
 
 type ViewType = 'about' | 'howto' | 'regions';
 
@@ -107,6 +115,39 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
             </Text>
           </Accordion.Panel>
         </Accordion.Item>
+        <Accordion.Item value='regions'>
+          <Accordion.Control>
+            <b>Supported regions</b>
+          </Accordion.Control>
+          <Accordion.Panel>
+            <Text mb='md'>
+              SafeCycle currently only supports a handful of regions. If you
+              live in an unsupported region, you can still use SafeCycle to
+              explore cycling routes in your area by using our other available
+              route preferences and by{' '}
+              <Anchor onClick={() => setView('howto')}>
+                creating your own private nogos
+              </Anchor>
+              .
+            </Text>
+            <Group position='apart' noWrap={isMobileSize ? false : true}>
+              <SupportedRegionsMap
+                open={view === 'regions'}
+                map={map}
+                setMap={setMap}
+              />
+              <SupportedRegionsList map={map} />
+            </Group>
+            <Text align='center' fs='italic' mt='md'>
+              If you are a knowledgeable cyclist and interested in becoming a
+              contributor for either an existing or unsupported region,{' '}
+              <Anchor onClick={() => setView('contact')}>
+                please contact us
+              </Anchor>
+              .
+            </Text>
+          </Accordion.Panel>
+        </Accordion.Item>
         <Accordion.Item value='howto'>
           <Accordion.Control>
             <b>Create your own nogos</b>
@@ -161,38 +202,165 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
             </List>
           </Accordion.Panel>
         </Accordion.Item>
-        <Accordion.Item value='regions'>
+        <Accordion.Item value='updating'>
           <Accordion.Control>
-            <b>Supported regions</b>
+            <b>Help keep our nogos up to date</b>
           </Accordion.Control>
           <Accordion.Panel>
-            <Text mb='md'>
-              SafeCycle currently only supports a handful of regions. If you
-              live in an unsupported region, you can still use SafeCycle to
-              explore cycling routes in your area by using our other available
-              route preferences and by{' '}
-              <Anchor onClick={() => setView('howto')}>
-                creating your own private nogos
-              </Anchor>
-              .
+            <Text mb='sm'>
+              At SafeCycle, our job is never done. Roadways and cycle routes
+              change and are updated over time, and as a result our data can
+              become outdated. Help us keep our nogos up-to-date by{' '}
+              <Anchor onClick={() => setView('contact')}>
+                sending us a message
+              </Anchor>{' '}
+              if you find:
             </Text>
-            <Group position='apart' noWrap={isMobileSize ? false : true}>
-              <SupportedRegionsMap
-                open={view === 'regions'}
-                map={map}
-                setMap={setMap}
-              />
-              <SupportedRegionsList map={map} />
-            </Group>
-            <Text align='center' fs='italic' mt='md'>
-              If you are a knowledgeable cyclist and interested in becoming a
-              contributor for either an existing or unsupported region, contact
-              us at <u>lpalazzi@xyzdigital.com</u>.
-            </Text>
+            <List ml='md' mr='md'>
+              <List.Item>
+                SafeCycle is routing on a high-traffic road that lacks dedicated
+                space for cyclists which you think should be added as a nogo,
+              </List.Item>
+              <List.Item>
+                SafeCycle is routing on a road that does not allow public access
+                (e.g., private road or Indigenous land), or
+              </List.Item>
+              <List.Item>
+                SafeCycle is avoiding a road that has been recently updated and
+                improved for cycling, and so should no longer be a nogo.
+              </List.Item>
+            </List>
+          </Accordion.Panel>
+        </Accordion.Item>
+        <Accordion.Item value='contact'>
+          <Accordion.Control>
+            <b>Contact us</b>
+          </Accordion.Control>
+          <Accordion.Panel>
+            <ContactForm />
           </Accordion.Panel>
         </Accordion.Item>
       </Accordion>
     </Container>
+  );
+};
+
+const ContactForm: React.FC = () => {
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [pendingResponse, setPendingResponse] = useState(false);
+
+  const form = useForm({
+    initialValues: {
+      name: {
+        first: '',
+        last: '',
+      },
+      email: '',
+      subject: '',
+      message: '',
+    } as ContactFormValues,
+    validate: {
+      name: {
+        first: (value) => {
+          if (!value) return 'First name is required';
+          return null;
+        },
+        last: (value) => {
+          if (!value) return 'Last name is required';
+          return null;
+        },
+      },
+      email: (value) => {
+        if (!value) return 'Email is required';
+        return validateEmail(value) ? null : 'Invalid email';
+      },
+      subject: (value) => {
+        if (!value) return 'Subject is required';
+        return null;
+      },
+      message: (value) => {
+        if (!value) return 'Message is required';
+        return null;
+      },
+    },
+  });
+
+  const handleSubmit = (values: ContactFormValues) => {
+    setPendingResponse(true);
+    EmailApi.submitContactForm(values)
+      .then((success) => {
+        if (!success) throw new Error('Email could not be sent');
+        setFormSubmitted(true);
+        setPendingResponse(false);
+      })
+      .catch((error) => {
+        showNotification({
+          title: 'Error submiting form',
+          message: error.message || 'Undefined error',
+          color: 'red',
+        });
+        setPendingResponse(false);
+      });
+  };
+
+  return (
+    <Stack spacing='md'>
+      <Text>
+        If you would like to report a bug or incorrect nogo data, are interested
+        in becoming a regional contributor, or have any questions and/or
+        concerns about SafeCycle, please get in touch by submitting the
+        following form.
+      </Text>
+      {formSubmitted ? (
+        <Text h={200} mt='xl' align='center' italic>
+          Thank you for contacting us! We'll be in touch soon.
+        </Text>
+      ) : (
+        <form onSubmit={form.onSubmit(handleSubmit)}>
+          <Container h={500} maw={400} m='auto' pos='relative'>
+            <LoadingOverlay visible={pendingResponse} overlayBlur={2} />
+            <Stack spacing='xs'>
+              <Group position='apart' grow>
+                <TextInput
+                  withAsterisk
+                  label='First Name'
+                  placeholder='John'
+                  {...form.getInputProps('name.first')}
+                />
+                <TextInput
+                  withAsterisk
+                  label='Last Name'
+                  placeholder='Smith'
+                  {...form.getInputProps('name.last')}
+                />
+              </Group>
+              <TextInput
+                withAsterisk
+                label='Email'
+                placeholder='your@email.com'
+                {...form.getInputProps('email')}
+              />
+              <TextInput
+                withAsterisk
+                label='Subject'
+                placeholder='Enter a subject'
+                {...form.getInputProps('subject')}
+              />
+              <Textarea
+                withAsterisk
+                label='Message'
+                placeholder='Enter your message'
+                minRows={8}
+                {...form.getInputProps('message')}
+              />
+            </Stack>
+            <Group position='right' mt='md'>
+              <Button type='submit'>Submit</Button>
+            </Group>
+          </Container>
+        </form>
+      )}
+    </Stack>
   );
 };
 

@@ -9,4 +9,10 @@ export default {
   brouterUrl: process.env.BROUTER_URL ?? 'http://localhost:17777/brouter',
   sessionSecret: process.env.SESSION_SECRET ?? 'no_secret',
   bingMapsApiKey: process.env.BING_MAPS_API_KEY,
+  contactEmail: {
+    host: process.env.CONTACT_EMAIL_HOST,
+    port: Number(process.env.CONTACT_EMAIL_PORT),
+    address: process.env.CONTACT_EMAIL_ADDRESS,
+    password: process.env.CONTACT_EMAIL_PASSWORD,
+  },
 };

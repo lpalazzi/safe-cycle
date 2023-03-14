@@ -9,5 +9,6 @@ controllers.nogoGroup(app);
 controllers.region(app);
 controllers.router(app);
 controllers.geocoding(app);
+controllers.email(app);
 
 export default app;

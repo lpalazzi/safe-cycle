@@ -5,6 +5,7 @@ export * from './RouterService';
 export * from './RegionService';
 export * from './BingMapsService';
 export * from './NominatimService';
+export * from './EmailService';
 
 import { container } from 'tsyringe';
 import * as services from 'services';
@@ -15,3 +16,4 @@ container.register('RouterService', services.RouterService);
 container.register('RegionService', services.RegionService);
 container.register('BingMapsService', services.BingMapsService);
 container.register('NominatimService', services.NominatimService);
+container.register('EmailService', services.EmailService);
