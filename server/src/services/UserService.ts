@@ -107,7 +107,7 @@ export class UserService {
     }
   }
 
-  public async changePassword(
+  async changePassword(
     userId: mongoose.Types.ObjectId,
     changePasswordDTO: IUserChangePasswordDTO
   ): Promise<{ success: boolean; error?: string }> {
