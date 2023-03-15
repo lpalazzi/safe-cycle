@@ -18,7 +18,8 @@
     "build-brouter": "(cd ./brouter ; bash ./scripts/build.sh)",
     "dev": "concurrently \"yarn dev-client\" \"yarn dev-server\" ",
     "dev-client": "yarn build-client:watch",
-    "dev-server": "nodemon --exec \"yarn build-server && node\" build/index.js"
+    "dev-server": "nodemon --exec \"yarn build-server && node\" build/index.js",
+    "test": "yarn workspace server test"
   },
   "devDependencies": {
     "nodemon": "^2.0.20",
