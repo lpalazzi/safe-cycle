@@ -46,8 +46,7 @@ export class NogoGroupApi {
         nogoGroupUpdate,
       }
     );
-    const nogoGroupReturn: INogoGroupReturnDTO = response.updatedNogoGroup;
-    return new NogoGroup(nogoGroupReturn);
+    return !!response.success;
   }
 
   static async delete(nogoGroupId: ID) {
