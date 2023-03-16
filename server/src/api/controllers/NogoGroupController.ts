@@ -1,5 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import joi from 'joi';
 import { container } from 'tsyringe';
 import { NogoGroupService } from 'services';
 import { INogoGroupCreateDTO, INogoGroupUpdateDTO } from 'interfaces';
@@ -42,16 +43,23 @@ export const nogoGroup = (app: express.Router) => {
     try {
       const newNogoGroup: INogoGroupCreateDTO = req.body.nogoGroup;
       const userId = new mongoose.Types.ObjectId(req.session.userId);
-      const { nogoGroup, error } = await nogoGroupService.create(
-        newNogoGroup,
-        userId
-      );
 
-      if (error) {
-        throw new BadRequestError(error);
-      } else if (!nogoGroup) {
+      const { error } = joi
+        .object({
+          name: joi.string().required(),
+        })
+        .required()
+        .validate(newNogoGroup);
+
+      if (error)
+        throw new BadRequestError(
+          error.message || 'Request was not formatted correctly'
+        );
+
+      const nogoGroup = await nogoGroupService.create(newNogoGroup, userId);
+
+      if (!nogoGroup)
         throw new InternalServerError('Nogo Group could not be created');
-      }
 
       return res.json({ nogoGroup });
     } catch (err) {
@@ -77,15 +85,15 @@ export const nogoGroup = (app: express.Router) => {
         );
       }
 
-      const { updatedNogoGroup, error } = await nogoGroupService.updateById(
+      const updateResult = await nogoGroupService.updateById(
         nogoGroupId,
         nogoGroupUpdate
       );
-      if (error) {
-        throw new InternalServerError(error);
-      }
 
-      return res.json({ updatedNogoGroup });
+      if (!updateResult.acknowledged)
+        throw new InternalServerError('Nogo Group was not modified');
+
+      return res.json({ success: true });
     } catch (err) {
       next(err);
     }
