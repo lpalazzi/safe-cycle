@@ -10,7 +10,7 @@ export class TrackerApi {
     try {
       umami.trackEvent(event_value, event_data, undefined, this.website_id);
     } catch (error: any) {
-      throw new Error(error.message);
+      console.error(error.message);
     }
   }
 
