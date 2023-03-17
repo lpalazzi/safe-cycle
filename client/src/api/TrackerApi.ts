@@ -7,7 +7,11 @@ export class TrackerApi {
   private static website_id = 'bc04b117-4c24-466f-b007-e5ffc246aba0';
 
   private static logEvent(event_value: string, event_data: any) {
-    umami.trackEvent(event_value, event_data, undefined, this.website_id);
+    try {
+      umami.trackEvent(event_value, event_data, undefined, this.website_id);
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
   }
 
   static logSignup(userId: ID) {
