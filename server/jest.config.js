@@ -2,12 +2,8 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  globalSetup: './test/init.test.ts',
+  setupFiles: ['dotenv/config'],
+  setupFilesAfterEnv: ['./test/jest.init.ts'],
   rootDir: 'src',
-  modulePaths: ['<rootDir>/src'],
-  // roots: ['.'],
-  // moduleDirectories: ['node_modules', 'src'],
-  // moduleNameMapper: {
-  //   '(.*)': '<rootDir>/$1',
-  // },
+  modulePaths: ['<rootDir>'],
 };

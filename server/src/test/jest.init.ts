@@ -1,3 +1,7 @@
+require('tsconfig-paths/register');
+require('dotenv').config({ path: './../.env' });
+
+import 'reflect-metadata';
 import mongoose from 'mongoose';
 import express from 'express';
 import expressLoader from '../loaders/express';
@@ -15,11 +19,11 @@ beforeAll(async () => {
   }
 
   const app = express();
-  await expressLoader(app);
+  await expressLoader(app, true);
   joi();
 });
 
 afterAll(async () => {
-  // await mongoose.connection.dropDatabase();
+  await mongoose.connection.dropDatabase();
   await mongoose.connection.close();
 });
