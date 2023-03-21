@@ -1,5 +1,5 @@
 require('tsconfig-paths/register');
-require('dotenv').config({ path: './../.env' });
+require('dotenv').config({ path: './src/test/test.env' });
 
 import 'reflect-metadata';
 import mongoose from 'mongoose';
@@ -10,7 +10,7 @@ import config from '../config';
 
 beforeAll(async () => {
   try {
-    await mongoose.connect(config.mongoUrl + '-test', {
+    await mongoose.connect(config.mongoUrl, {
       serverSelectionTimeoutMS: 5000,
     });
   } catch (error: any) {
@@ -19,7 +19,7 @@ beforeAll(async () => {
   }
 
   const app = express();
-  await expressLoader(app, true);
+  await expressLoader(app);
   joi();
 });
 
