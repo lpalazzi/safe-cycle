@@ -15,6 +15,7 @@ describe('doesUserOwnNogoGroup', () => {
     );
     expect(userOwnsNogoGroup).toBe(true);
   });
+
   test('returns false if user does not own group', async () => {
     const user = await getTestUser();
     const nogoGroup = await createTestNogoGroup();

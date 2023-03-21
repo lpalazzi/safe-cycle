@@ -1,7 +1,59 @@
+import { getTestUser } from 'test/data.user';
+import { createTestNogoGroup } from 'test/data.nogoGroup';
+import { makeRequest } from 'test/request';
+
 describe('/getAll', () => {
-  test('returns all nogo groups in db when requested by admin', () => {});
-  test('throws UnauthorizedError when requested by normal user', () => {});
-  test('throws UnauthorizedError when not logged in', () => {});
+  test('returns all nogo groups in db when requested by admin', async () => {
+    await createTestNogoGroup();
+    const user = await getTestUser('admin');
+    await makeRequest({
+      url: '/nogoGroup/getAll',
+      method: 'GET',
+      loggedInUserEmail: user.email,
+    })
+      .then((res) => {
+        expect(res.data?.nogoGroups?.length).toBeGreaterThanOrEqual(1);
+      })
+      .catch((err) => {
+        fail('UnauthorizedError was thrown');
+      });
+  });
+
+  test('throws UnauthorizedError when requested by normal user', async () => {
+    const user = await getTestUser();
+    await makeRequest({
+      url: '/nogoGroup/getAll',
+      method: 'GET',
+      loggedInUserEmail: user.email,
+    })
+      .then((res) => {
+        fail('Expected UnauthorizedError to be thrown');
+      })
+      .catch((err) => {
+        if (err.response) {
+          expect(err.response.status).toBe(401);
+        } else {
+          throw err;
+        }
+      });
+  });
+
+  test('throws UnauthorizedError when not logged in', async () => {
+    await makeRequest({
+      url: '/nogoGroup/getAll',
+      method: 'GET',
+    })
+      .then((res) => {
+        fail('Expected UnauthorizedError to be thrown');
+      })
+      .catch((err) => {
+        if (err.response) {
+          expect(err.response.status).toBe(401);
+        } else {
+          throw err;
+        }
+      });
+  });
 });
 
 describe('/getAllForUser', () => {
