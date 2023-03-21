@@ -21,6 +21,7 @@ beforeAll(async () => {
   const app = express();
   await expressLoader(app);
   joi();
+  app.listen(config.port);
 });
 
 afterAll(async () => {
