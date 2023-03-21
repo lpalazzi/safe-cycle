@@ -1,7 +1,7 @@
 import { container } from 'tsyringe';
 import { NogoGroupService } from 'services';
-import { getTestUser } from 'test/data-helpers/user';
-import { createTestNogoGroup } from 'test/data-helpers/nogoGroup';
+import { getTestUser } from 'test/data.user';
+import { createTestNogoGroup } from 'test/data.nogoGroup';
 
 const nogoGroupService = container.resolve(NogoGroupService);
 

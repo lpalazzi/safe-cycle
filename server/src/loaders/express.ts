@@ -12,7 +12,7 @@ declare module 'express-session' {
   }
 }
 
-export default async (app: express.Express, test?: boolean) => {
+export default async (app: express.Express) => {
   if (config.test) {
     app.set('trust proxy', 1);
   }
@@ -22,22 +22,20 @@ export default async (app: express.Express, test?: boolean) => {
   app.use(cookieParser());
   app.use(express.static('public'));
 
-  if (!test) {
-    app.use(
-      session({
-        secret: config.sessionSecret,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-          secure: config.test ? false : true,
-          maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-        },
-        store: MongoStore.create({
-          mongoUrl: config.mongoUrl,
-        }),
-      })
-    );
-  }
+  app.use(
+    session({
+      secret: config.sessionSecret,
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: config.test ? false : true,
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      },
+      store: MongoStore.create({
+        mongoUrl: config.mongoUrl,
+      }),
+    })
+  );
 
   app.use(controllers);
   app.use(errorResponder);
