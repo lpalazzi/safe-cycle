@@ -1,6 +1,9 @@
-import { getTestUser } from 'test/data.user';
-import { createTestNogoGroup } from 'test/data.nogoGroup';
-import { makeRequest } from 'test/request';
+import { useDB, useServer } from 'test/services';
+import { makeRequest } from 'test/helpers';
+import { getTestUser, createTestNogoGroup } from 'test/data';
+
+useDB();
+useServer();
 
 describe('/getAll', () => {
   test('returns all nogo groups in db when requested by admin', async () => {

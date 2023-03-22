@@ -1,6 +1,7 @@
 import express from 'express';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
+import mongoose from 'mongoose';
 import MongoStore from 'connect-mongo';
 import config from 'config';
 import controllers from 'api';
@@ -32,7 +33,7 @@ export default async (app: express.Express) => {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       },
       store: MongoStore.create({
-        mongoUrl: config.mongoUrl,
+        client: mongoose.connection.getClient() as any,
       }),
     })
   );

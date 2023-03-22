@@ -1,8 +1,9 @@
 import { container } from 'tsyringe';
 import { NogoGroupService } from 'services';
-import { getTestUser } from 'test/data.user';
-import { createTestNogoGroup } from 'test/data.nogoGroup';
+import { useDB } from 'test/services';
+import { getTestUser, createTestNogoGroup } from 'test/data';
 
+useDB();
 const nogoGroupService = container.resolve(NogoGroupService);
 
 describe('doesUserOwnNogoGroup', () => {
