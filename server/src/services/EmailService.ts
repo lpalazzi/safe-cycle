@@ -8,6 +8,12 @@ import config from 'config';
 export class EmailService {
   private transporter: Transporter<SMTPTransport.SentMessageInfo>;
 
+  private verifyEmail = async () => {
+    await this.transporter.verify().catch(() => {
+      console.log('Failed to verify email server.');
+    });
+  };
+
   constructor() {
     this.transporter = nodemailer.createTransport({
       host: config.contactEmail.host,
@@ -18,12 +24,7 @@ export class EmailService {
         pass: config.contactEmail.password,
       },
     });
-
-    this.transporter.verify((error) => {
-      if (error) {
-        console.log('Failed to verify email server.');
-      }
-    });
+    this.verifyEmail();
   }
 
   async sendEmail(email: Email) {
