@@ -13,7 +13,7 @@ declare module 'express-session' {
   }
 }
 
-export default async (app: express.Express) => {
+export default (app: express.Express) => {
   if (config.test) {
     app.set('trust proxy', 1);
   }

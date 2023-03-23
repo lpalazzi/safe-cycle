@@ -6,6 +6,6 @@ import joi from './joi';
 
 export const load = async (expressApp: express.Express) => {
   await mongooseLoader();
-  await expressLoader(expressApp);
+  expressLoader(expressApp);
   joi();
 };
