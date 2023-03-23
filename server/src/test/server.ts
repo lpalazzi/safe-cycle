@@ -1,7 +1,7 @@
 import express from 'express';
 import { Server } from 'http';
-import expressLoader from '../../loaders/express';
-import config from '../../config';
+import expressLoader from '../loaders/express';
+import config from '../config';
 
 export const useServer = () => {
   let server: Server;
