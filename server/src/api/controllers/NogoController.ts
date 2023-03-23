@@ -32,6 +32,25 @@ export const nogo = (app: express.Router) => {
       }
       const groupId = new mongoose.Types.ObjectId(req.params.groupId);
       const isRegion = req.params.groupType === 'region';
+
+      if (!isRegion) {
+        if (
+          !req.session.userId ||
+          !mongoose.isValidObjectId(req.session?.userId)
+        )
+          throw new UnauthorizedError('User is not logged in');
+
+        const userId = new mongoose.Types.ObjectId(req.session.userId);
+        const userOwnsNogoGroup = await nogoGroupService.doesUserOwnNogoGroup(
+          userId,
+          groupId
+        );
+        if (!userOwnsNogoGroup)
+          throw new UnauthorizedError(
+            'User does not have access to Nogo Group'
+          );
+      }
+
       const nogos = await nogoService.getAllByGroup(groupId, isRegion);
       return res.json({ nogos });
     } catch (err) {
@@ -51,14 +70,14 @@ export const nogo = (app: express.Router) => {
         throw new BadRequestError(`groupId=${groupId} is not a valid ObjectId`);
       if (
         isOnRegion
-          ? !regionService.isUserContributorOnRegion(
+          ? !(await regionService.isUserContributorOnRegion(
               new mongoose.Types.ObjectId(req.session.userId),
               new mongoose.Types.ObjectId(groupId)
-            )
-          : !nogoGroupService.doesUserOwnNogoGroup(
+            ))
+          : !(await nogoGroupService.doesUserOwnNogoGroup(
               new mongoose.Types.ObjectId(req.session.userId),
               new mongoose.Types.ObjectId(groupId)
-            )
+            ))
       )
         throw new UnauthorizedError(
           `User does not have access to ${isOnRegion ? 'Region' : 'Nogo Group'}`

@@ -1,194 +1,193 @@
-import { useServer } from 'test/server';
+import setupDB from 'test/setupDB';
 import { makeRequest } from 'test/helpers';
-import { getTestUser, createTestNogoGroup } from 'test/data';
-import { INogoGroupCreateDTO, INogoGroupReturnDTO } from 'interfaces';
+import { createTestUser, createTestNogoGroup } from 'test/data';
+import {
+  INogoGroup,
+  INogoGroupCreateDTO,
+  INogoGroupUpdateDTO,
+} from 'interfaces';
+import { NogoGroupModel } from 'models';
 
-useServer();
+setupDB('NogoGroupController');
 
-describe('/getAll', () => {
+describe('GET /nogoGroup/getAll', () => {
   test('returns all nogo groups in db when requested by admin', async () => {
     await createTestNogoGroup();
     await createTestNogoGroup();
-    const user = await getTestUser('admin');
-    await makeRequest({
+    const user = await createTestUser('admin');
+    const res = await makeRequest({
       url: '/nogoGroup/getAll',
-      method: 'GET',
       loggedInUserEmail: user.email,
-    })
-      .then((res) => {
-        expect(res.data?.nogoGroups?.length).toBe(2);
-      })
-      .catch((err) => {
-        throw new Error(
-          `${err.response.status} Error: ${err.response.data.message}`
-        );
-      });
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body?.nogoGroups?.length).toBe(2);
   });
 
   test('throws UnauthorizedError when requested by normal user', async () => {
-    const user = await getTestUser();
-    await makeRequest({
+    const user = await createTestUser();
+    const res = await makeRequest({
       url: '/nogoGroup/getAll',
-      method: 'GET',
       loggedInUserEmail: user.email,
-    })
-      .then((res) => {
-        throw new Error('Expected UnauthorizedError to be thrown');
-      })
-      .catch((err) => {
-        if (err.response) {
-          expect(err.response.status).toBe(401);
-        } else {
-          throw new Error(
-            `${err.response.status} Error: ${err.response.data.message}`
-          );
-        }
-      });
+    });
+    expect(res.statusCode).toBe(401);
   });
 
   test('throws UnauthorizedError when not logged in', async () => {
-    await makeRequest({
-      url: '/nogoGroup/getAll',
-      method: 'GET',
-    })
-      .then((res) => {
-        throw new Error('Expected UnauthorizedError to be thrown');
-      })
-      .catch((err) => {
-        if (err.response) {
-          expect(err.response.status).toBe(401);
-        } else {
-          throw new Error(
-            `${err.response.status} Error: ${err.response.data.message}`
-          );
-        }
-      });
+    const res = await makeRequest({ url: '/nogoGroup/getAll' });
+    expect(res.statusCode).toBe(401);
   });
 });
 
-describe('/getAllForUser', () => {
+describe('GET /nogoGroup/getAllForUser', () => {
   test('returns all nogo groups for logged in user', async () => {
-    const user = await getTestUser();
+    const user = await createTestUser();
     await createTestNogoGroup(user._id);
     await createTestNogoGroup(user._id);
     await createTestNogoGroup();
-    await makeRequest({
+    const res = await makeRequest({
       url: '/nogoGroup/getAllForUser',
-      method: 'GET',
       loggedInUserEmail: user.email,
-    })
-      .then((res) => {
-        expect(res.data?.nogoGroups?.length).toBeGreaterThanOrEqual(2);
-      })
-      .catch((err) => {
-        throw new Error(
-          `${err.response.status} Error: ${err.response.data.message}`
-        );
-      });
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body?.nogoGroups?.length).toBeGreaterThanOrEqual(2);
   });
 
   test('throws UnauthorizedError when not logged in', async () => {
-    await makeRequest({
-      url: '/nogoGroup/getAll',
-      method: 'GET',
-    })
-      .then((res) => {
-        fail('Expected UnauthorizedError to be thrown');
-      })
-      .catch((err) => {
-        if (err.response) {
-          expect(err.response.status).toBe(401);
-        } else {
-          throw new Error(
-            `${err.response.status} Error: ${err.response.data.message}`
-          );
-        }
-      });
+    const res = await makeRequest({ url: '/nogoGroup/getAll' });
+    expect(res.statusCode).toBe(401);
   });
 });
 
-describe('/create', () => {
+describe('POST /nogoGroup/create', () => {
   test('successfully creates a new nogo group', async () => {
-    const user = await getTestUser();
+    const user = await createTestUser();
     const nogoGroup: INogoGroupCreateDTO = {
       name: 'Nogo Group',
     };
-    await makeRequest({
+    const res = await makeRequest({
       url: '/nogoGroup/create',
       method: 'POST',
       data: { nogoGroup },
       loggedInUserEmail: user.email,
-    })
-      .then((res) => {
-        const nogoGroup = res.data.nogoGroup as INogoGroupReturnDTO;
-        expect(nogoGroup?._id).toBeTruthy();
-        expect(nogoGroup?.name).toBe('Nogo Group');
-      })
-      .catch((err) => {
-        throw new Error(
-          `${err.response.status} Error: ${err.response.data.message}`
-        );
-      });
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body?.nogoGroup?._id).toBeTruthy();
+    expect(res.body?.nogoGroup?.name).toBe('Nogo Group');
   });
 
   test('throws BadRequestError when called with incorrect format', async () => {
-    const user = await getTestUser();
+    const user = await createTestUser();
     const nogoGroup = {
       notTheNameProperty: 'Nogo Group',
     };
-    await makeRequest({
+    const res = await makeRequest({
       url: '/nogoGroup/create',
       method: 'POST',
       data: { nogoGroup },
       loggedInUserEmail: user.email,
-    })
-      .then((res) => {
-        throw new Error('Expected BadRequestError to be thrown');
-      })
-      .catch((err) => {
-        if (err.response) {
-          expect(err.response.status).toBe(400);
-        } else {
-          throw new Error(
-            `${err.response.status} Error: ${err.response.data.message}`
-          );
-        }
-      });
+    });
+    expect(res.statusCode).toBe(400);
   });
 
   test('throws UnauthorizedError when not logged in', async () => {
-    const user = await getTestUser();
     const nogoGroup = {
       name: 'Nogo Group',
     };
-    await makeRequest({
+    const res = await makeRequest({
       url: '/nogoGroup/create',
       method: 'POST',
       data: { nogoGroup },
-    })
-      .then((res) => {
-        throw new Error('Expected UnauthorizedError to be thrown');
-      })
-      .catch((err) => {
-        if (err.response) {
-          expect(err.response.status).toBe(401);
-        } else {
-          throw new Error(
-            `${err.response.status} Error: ${err.response.data.message}`
-          );
-        }
-      });
+    });
+    expect(res.statusCode).toBe(401);
   });
 });
 
-describe('/update', () => {
-  test("successfully updates a nogo group's name", async () => {});
-  test('throws UnauthorizedError if user does not own group', async () => {});
-  test('throws UnauthorizedError when not logged in', async () => {});
+describe('POST /nogoGroup/update', () => {
+  test("successfully updates a nogo group's name", async () => {
+    const user = await createTestUser();
+    const nogoGroup = await createTestNogoGroup(user._id);
+    const nogoGroupUpdate: INogoGroupUpdateDTO = {
+      name: 'Updated Nogo Group Name',
+    };
+    const res = await makeRequest({
+      url: `/nogoGroup/update/${nogoGroup._id}`,
+      method: 'POST',
+      data: { nogoGroupUpdate },
+      loggedInUserEmail: user.email,
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body?.success).toBe(true);
+    const updatedNogoGroup: INogoGroup | null = await NogoGroupModel.findById(
+      nogoGroup._id
+    );
+    expect(updatedNogoGroup?.name).toBe('Updated Nogo Group Name');
+  });
+
+  test('throws UnauthorizedError if user does not own group', async () => {
+    const user = await createTestUser();
+    const nogoGroup = await createTestNogoGroup();
+    const nogoGroupUpdate: INogoGroupUpdateDTO = {
+      name: 'Updated Nogo Group Name',
+    };
+    const res = await makeRequest({
+      url: `/nogoGroup/update/${nogoGroup._id}`,
+      method: 'POST',
+      data: { nogoGroupUpdate },
+      loggedInUserEmail: user.email,
+    });
+    expect(res.statusCode).toBe(401);
+  });
+
+  test('throws UnauthorizedError when not logged in', async () => {
+    const user = await createTestUser();
+    const nogoGroup = await createTestNogoGroup(user._id);
+    const nogoGroupUpdate: INogoGroupUpdateDTO = {
+      name: 'Updated Nogo Group Name',
+    };
+    const res = await makeRequest({
+      url: `/nogoGroup/update/${nogoGroup._id}`,
+      method: 'POST',
+      data: { nogoGroupUpdate },
+    });
+    expect(res.statusCode).toBe(401);
+  });
 });
 
-describe('/delete', () => {
-  test('successfully deletes a nogo group', async () => {});
-  test('throws UnauthorizedError if user does not own group', async () => {});
-  test('throws UnauthorizedError when not logged in', async () => {});
+describe('DELETE /nogoGroup/delete', () => {
+  test('successfully deletes a nogo group', async () => {
+    const user = await createTestUser();
+    const nogoGroup = await createTestNogoGroup(user._id);
+    const res = await makeRequest({
+      url: `/nogoGroup/delete/${nogoGroup._id}`,
+      method: 'DELETE',
+      loggedInUserEmail: user.email,
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body?.deleteResult?.nogoGroupDeleted).toBe(true);
+    const deletedNogoGroup: INogoGroup | null = await NogoGroupModel.findById(
+      nogoGroup._id
+    );
+    expect(deletedNogoGroup).toBeNull();
+  });
+
+  test('throws UnauthorizedError if user does not own group', async () => {
+    const user = await createTestUser();
+    const nogoGroup = await createTestNogoGroup();
+    const res = await makeRequest({
+      url: `/nogoGroup/delete/${nogoGroup._id}`,
+      method: 'DELETE',
+      loggedInUserEmail: user.email,
+    });
+    expect(res.statusCode).toBe(401);
+  });
+
+  test('throws UnauthorizedError when not logged in', async () => {
+    const user = await createTestUser();
+    const nogoGroup = await createTestNogoGroup(user._id);
+    const res = await makeRequest({
+      url: `/nogoGroup/delete/${nogoGroup._id}`,
+      method: 'DELETE',
+    });
+    expect(res.statusCode).toBe(401);
+  });
 });

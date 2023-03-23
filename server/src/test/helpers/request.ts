@@ -1,4 +1,6 @@
-import axios from 'axios';
+import express from 'express';
+import request from 'supertest';
+import expressLoader from 'loaders/express';
 
 export const makeRequest = async (options: {
   url: string;
@@ -6,21 +8,32 @@ export const makeRequest = async (options: {
   data?: any;
   loggedInUserEmail?: string;
 }) => {
-  const instance = axios.create({
-    baseURL: 'http://localhost:4000',
-    timeout: 3000,
-  });
+  const app = express();
+  expressLoader(app);
+  const agent = request.agent(app);
+
   if (options.loggedInUserEmail) {
-    const { headers } = await axios.post('http://localhost:4000/user/login', {
-      userLogin: { email: options.loggedInUserEmail, password: 'password' },
-    });
-    const cookie = headers['set-cookie']?.[0];
-    if (!cookie) throw new Error('Session cookie was not returned');
-    instance.defaults.headers.Cookie = cookie;
+    await agent
+      .post('/user/login')
+      .send({
+        userLogin: { email: options.loggedInUserEmail, password: 'password' },
+      })
+      .set('Content-Type', 'application/json');
   }
-  return instance.request({
-    url: options.url,
-    method: options.method || 'GET',
-    data: options.data,
-  });
+
+  if (options.method === 'POST') {
+    return agent
+      .post(options.url)
+      .send(options.data)
+      .set('Content-Type', 'application/json');
+  } else if (options.method === 'PUT') {
+    return agent
+      .put(options.url)
+      .send(options.data)
+      .set('Content-Type', 'application/json');
+  } else if (options.method === 'DELETE') {
+    return agent.delete(options.url);
+  } else {
+    return agent.get(options.url);
+  }
 };
