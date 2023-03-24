@@ -14,6 +14,10 @@ export class RegionService {
     return this.regionDao.get({});
   }
 
+  async existsById(regionId: mongoose.Types.ObjectId) {
+    return this.regionDao.exists({ _id: regionId });
+  }
+
   async isLineStringInRegion(
     lineString: GeoJSON.LineString,
     regionId: mongoose.Types.ObjectId

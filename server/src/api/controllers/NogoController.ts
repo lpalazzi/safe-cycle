@@ -141,11 +141,21 @@ export const nogo = (app: express.Router) => {
           throw new BadRequestError('regionId is not a valid ObjectId');
         const nogoGroupId = new mongoose.Types.ObjectId(req.body.nogoGroupId);
         const regionId = new mongoose.Types.ObjectId(req.body.regionId);
-        const updateCount = await nogoService.transferNogosToRegion(
-          nogoGroupId,
-          regionId
-        );
-        return res.json({ updateCount });
+        try {
+          const updateCount = await nogoService.transferNogosToRegion(
+            nogoGroupId,
+            regionId
+          );
+          return res.json({ updateCount });
+        } catch (error: any) {
+          if (
+            ['Region does not exist', 'Nogo group does not exist'].includes(
+              error.message
+            )
+          )
+            throw new BadRequestError(error.message);
+          throw error;
+        }
       } catch (err) {
         next(err);
       }

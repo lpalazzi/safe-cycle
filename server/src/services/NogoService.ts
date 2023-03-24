@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { injectable, inject } from 'tsyringe';
-import { NogoDao } from 'daos';
+import { NogoDao, RegionDao } from 'daos';
 import { NogoGroupService, RegionService, RouterService } from 'services';
 
 @injectable()
@@ -26,6 +26,11 @@ export class NogoService {
     nogoGroupId: mongoose.Types.ObjectId,
     regionId: mongoose.Types.ObjectId
   ) {
+    if (!(await this.regionService.existsById(regionId)))
+      throw new Error('Region does not exist');
+    if (!(await this.nogoGroupService.existsById(nogoGroupId)))
+      throw new Error('Nogo group does not exist');
+
     const updateResult = await this.nogoDao.updateMany(
       { nogoGroup: nogoGroupId },
       { $unset: { nogoGroup: 1 }, $set: { region: regionId } }
