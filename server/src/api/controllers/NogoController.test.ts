@@ -7,7 +7,7 @@ import {
   createTestRegion,
 } from 'test/data';
 import { NogoModel } from 'models';
-import { INogo } from 'interfaces';
+import { INogo, INogoCreateDTO } from 'interfaces';
 
 setupDB('NogoController');
 
@@ -71,17 +71,17 @@ describe('POST /nogo/create', () => {
   test('successfully creates a nogo in a nogo group', async () => {
     const user = await createTestUser();
     const nogoGroup = await createTestNogoGroup(user._id);
+    const nogoCreate: INogoCreateDTO = {
+      points: [
+        [-83.017787, 42.320941],
+        [-83.017072, 42.321212],
+      ],
+      nogoGroup: nogoGroup._id,
+    };
     const res = await makeRequest({
       url: '/nogo/create',
       method: 'POST',
-      data: {
-        points: [
-          [-83.017787, 42.320941],
-          [-83.017072, 42.321212],
-        ],
-        groupId: nogoGroup._id,
-        isOnRegion: false,
-      },
+      data: { nogoCreate },
       loggedInUserEmail: user.email,
     });
     expect(res.statusCode).toBe(200);
@@ -93,17 +93,17 @@ describe('POST /nogo/create', () => {
   test('successfully creates a nogo in a region', async () => {
     const user = await createTestUser('verified contributor');
     const region = await createTestRegion([user._id]);
+    const nogoCreate: INogoCreateDTO = {
+      points: [
+        [-83.017787, 42.320941],
+        [-83.017072, 42.321212],
+      ],
+      region: region._id,
+    };
     const res = await makeRequest({
       url: '/nogo/create',
       method: 'POST',
-      data: {
-        points: [
-          [-83.017787, 42.320941],
-          [-83.017072, 42.321212],
-        ],
-        groupId: region._id,
-        isOnRegion: true,
-      },
+      data: { nogoCreate },
       loggedInUserEmail: user.email,
     });
     expect(res.statusCode).toBe(200);
@@ -115,14 +115,14 @@ describe('POST /nogo/create', () => {
   test('throws BadRequestError if less than 2 points are provided', async () => {
     const user = await createTestUser();
     const nogoGroup = await createTestNogoGroup(user._id);
+    const nogoCreate = {
+      points: [[-83.017787, 42.320941]],
+      nogoGroup: nogoGroup._id,
+    };
     const res = await makeRequest({
       url: '/nogo/create',
       method: 'POST',
-      data: {
-        points: [[-83.017787, 42.320941]],
-        groupId: nogoGroup._id,
-        isOnRegion: false,
-      },
+      data: { nogoCreate },
       loggedInUserEmail: user.email,
     });
     expect(res.statusCode).toBe(400);
@@ -130,18 +130,17 @@ describe('POST /nogo/create', () => {
 
   test('throws BadRequestError if groupId is not valid ObjectId', async () => {
     const user = await createTestUser();
-    const nogoGroup = await createTestNogoGroup(user._id);
+    const nogoCreate = {
+      points: [
+        [-83.017787, 42.320941],
+        [-83.017072, 42.321212],
+      ],
+      nogoGroup: '12345',
+    };
     const res = await makeRequest({
       url: '/nogo/create',
       method: 'POST',
-      data: {
-        points: [
-          [-83.017787, 42.320941],
-          [-83.017072, 42.321212],
-        ],
-        groupId: '12345',
-        isOnRegion: false,
-      },
+      data: { nogoCreate },
       loggedInUserEmail: user.email,
     });
     expect(res.statusCode).toBe(400);
@@ -150,17 +149,17 @@ describe('POST /nogo/create', () => {
   test('throws BadRequestError if nogo is outside of region', async () => {
     const user = await createTestUser('verified contributor');
     const region = await createTestRegion([user._id]);
+    const nogoCreate: INogoCreateDTO = {
+      points: [
+        [105.09168505668642, 34.90910013239023],
+        [105.09448528289796, 34.90696211766489],
+      ],
+      region: region._id,
+    };
     const res = await makeRequest({
       url: '/nogo/create',
       method: 'POST',
-      data: {
-        points: [
-          [105.09168505668642, 34.90910013239023],
-          [105.09448528289796, 34.90696211766489],
-        ],
-        groupId: region._id,
-        isOnRegion: true,
-      },
+      data: { nogoCreate },
       loggedInUserEmail: user.email,
     });
     expect(res.statusCode).toBe(400);
@@ -169,17 +168,17 @@ describe('POST /nogo/create', () => {
   test('throws UnauthorizedError if user does not own nogo group', async () => {
     const user = await createTestUser();
     const nogoGroup = await createTestNogoGroup();
+    const nogoCreate: INogoCreateDTO = {
+      points: [
+        [-83.017787, 42.320941],
+        [-83.017072, 42.321212],
+      ],
+      nogoGroup: nogoGroup._id,
+    };
     const res = await makeRequest({
       url: '/nogo/create',
       method: 'POST',
-      data: {
-        points: [
-          [-83.017787, 42.320941],
-          [-83.017072, 42.321212],
-        ],
-        groupId: nogoGroup._id,
-        isOnRegion: false,
-      },
+      data: { nogoCreate },
       loggedInUserEmail: user.email,
     });
     expect(res.statusCode).toBe(401);
@@ -188,17 +187,17 @@ describe('POST /nogo/create', () => {
   test('throws UnauthorizedError if user is not contributor on region', async () => {
     const user = await createTestUser('verified contributor');
     const region = await createTestRegion([]);
+    const nogoCreate: INogoCreateDTO = {
+      points: [
+        [-83.017787, 42.320941],
+        [-83.017072, 42.321212],
+      ],
+      region: region._id,
+    };
     const res = await makeRequest({
       url: '/nogo/create',
       method: 'POST',
-      data: {
-        points: [
-          [-83.017787, 42.320941],
-          [-83.017072, 42.321212],
-        ],
-        groupId: region._id,
-        isOnRegion: true,
-      },
+      data: { nogoCreate },
       loggedInUserEmail: user.email,
     });
     expect(res.statusCode).toBe(401);
@@ -207,17 +206,17 @@ describe('POST /nogo/create', () => {
   test('throws UnauthorizedError when not logged in', async () => {
     const user = await createTestUser();
     const nogoGroup = await createTestNogoGroup(user._id);
+    const nogoCreate: INogoCreateDTO = {
+      points: [
+        [-83.017787, 42.320941],
+        [-83.017072, 42.321212],
+      ],
+      nogoGroup: nogoGroup._id,
+    };
     const res = await makeRequest({
       url: '/nogo/create',
       method: 'POST',
-      data: {
-        points: [
-          [-83.017787, 42.320941],
-          [-83.017072, 42.321212],
-        ],
-        groupId: nogoGroup._id,
-        isOnRegion: false,
-      },
+      data: { nogoCreate },
     });
     expect(res.statusCode).toBe(401);
   });

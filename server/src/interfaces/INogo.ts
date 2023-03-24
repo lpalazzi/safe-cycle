@@ -7,6 +7,10 @@ export interface INogo {
   region?: mongoose.Types.ObjectId;
 }
 
-export interface INogoCreateDTO extends Omit<INogo, '_id'> {}
+export interface INogoCreateDTO {
+  points: [GeoJSON.Position, GeoJSON.Position];
+  nogoGroup?: mongoose.Types.ObjectId;
+  region?: mongoose.Types.ObjectId;
+}
 
 export interface INogoReturnDTO extends INogo {}

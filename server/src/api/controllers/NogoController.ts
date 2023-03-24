@@ -1,12 +1,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import joi from 'joi';
 import { container } from 'tsyringe';
-import {
-  NogoGroupService,
-  NogoService,
-  RegionService,
-  RouterService,
-} from 'services';
+import { NogoGroupService, NogoService, RegionService } from 'services';
 import { INogoCreateDTO } from 'interfaces';
 import { checkAdmin, checkLoggedIn } from 'api/middlewares';
 import {
@@ -21,7 +17,6 @@ export const nogo = (app: express.Router) => {
   const nogoService = container.resolve(NogoService);
   const nogoGroupService = container.resolve(NogoGroupService);
   const regionService = container.resolve(RegionService);
-  const routerService = container.resolve(RouterService);
 
   route.get('/getAllByGroup/:groupId/:groupType', async (req, res, next) => {
     try {
@@ -60,56 +55,75 @@ export const nogo = (app: express.Router) => {
 
   route.post('/create', checkLoggedIn, async (req, res, next) => {
     try {
-      const points: GeoJSON.Position[] = req.body.points ?? [];
-      const groupId: string = req.body.groupId;
-      const isOnRegion: boolean = req.body.isOnRegion;
+      const nogoCreate: INogoCreateDTO = req.body.nogoCreate;
 
-      if (points.length < 2)
-        throw new BadRequestError('Route request must have at least 2 points');
-      if (!mongoose.isValidObjectId(groupId))
-        throw new BadRequestError(`groupId=${groupId} is not a valid ObjectId`);
-      if (
-        isOnRegion
-          ? !(await regionService.isUserContributorOnRegion(
-              new mongoose.Types.ObjectId(req.session.userId),
-              new mongoose.Types.ObjectId(groupId)
-            ))
-          : !(await nogoGroupService.doesUserOwnNogoGroup(
-              new mongoose.Types.ObjectId(req.session.userId),
-              new mongoose.Types.ObjectId(groupId)
-            ))
-      )
-        throw new UnauthorizedError(
-          `User does not have access to ${isOnRegion ? 'Region' : 'Nogo Group'}`
+      const { error } = joi
+        .object({
+          points: joi.array().items(joi.geojson().position()).min(2).required(),
+          nogoGroup: joi.objectId(),
+          region: joi.objectId(),
+        })
+        .required()
+        .validate(nogoCreate);
+
+      if (error)
+        throw new BadRequestError(
+          error.message || 'Request was not formatted correctly'
+        );
+      if (!nogoCreate.nogoGroup && !nogoCreate.region)
+        throw new BadRequestError('A group or region ID was not provided');
+
+      if (nogoCreate.nogoGroup && nogoCreate.region)
+        throw new BadRequestError(
+          'A group or region ID cannot both be provided'
         );
 
-      const routeData = await routerService.getRouteForNewNogo(points);
-      const route = routeData.route;
+      const nogoGroupId = nogoCreate.nogoGroup
+        ? new mongoose.Types.ObjectId(nogoCreate.nogoGroup)
+        : undefined;
+      const regionId = nogoCreate.region
+        ? new mongoose.Types.ObjectId(nogoCreate.region)
+        : undefined;
 
-      const routeIsOutsideRegion =
-        isOnRegion &&
-        !(await regionService.isLineStringInRegion(
-          route,
-          new mongoose.Types.ObjectId(groupId)
-        ));
-      if (routeIsOutsideRegion)
-        throw new BadRequestError('Nogo must be inside selected region');
+      if (
+        regionId &&
+        !(await regionService.isUserContributorOnRegion(
+          new mongoose.Types.ObjectId(req.session.userId),
+          regionId
+        ))
+      )
+        throw new UnauthorizedError(`User does not have access to ${'Region'}`);
 
-      const newNogo: INogoCreateDTO = isOnRegion
-        ? {
-            lineString: route,
-            region: new mongoose.Types.ObjectId(groupId),
-          }
-        : {
-            lineString: route,
-            nogoGroup: new mongoose.Types.ObjectId(groupId),
-          };
-      const { nogo, error } = await nogoService.create(newNogo);
+      if (
+        nogoGroupId &&
+        !(await nogoGroupService.doesUserOwnNogoGroup(
+          new mongoose.Types.ObjectId(req.session.userId),
+          nogoGroupId
+        ))
+      )
+        throw new UnauthorizedError(
+          `User does not have access to ${regionId ? 'Region' : 'Nogo Group'}`
+        );
 
-      if (error) throw new InternalServerError(error);
-      if (!nogo) throw new InternalServerError('Nogo could not be created');
-
-      return res.json({ nogo });
+      try {
+        const nogo = await nogoService.create(
+          nogoCreate.points,
+          nogoGroupId,
+          regionId
+        );
+        if (!nogo) throw new Error('Nogo could not be created');
+        return res.json({ nogo });
+      } catch (error: any) {
+        if (
+          [
+            'Only one of nogoGroupId or regionId can be provided',
+            'Either nogoGroupId or regionId must be provided',
+            'Nogo is outside selected region',
+          ].includes(error.message)
+        )
+          throw new BadRequestError(error.message);
+        throw error;
+      }
     } catch (err) {
       next(err);
     }
