@@ -1,16 +1,15 @@
-import joi from 'joi';
 import mongoose from 'mongoose';
 import { injectable, inject } from 'tsyringe';
-import { INogoCreateDTO, INogoReturnDTO } from 'interfaces';
 import { NogoDao } from 'daos';
-import { NogoGroupService, RegionService } from 'services';
+import { NogoGroupService, RegionService, RouterService } from 'services';
 
 @injectable()
 export class NogoService {
   constructor(
     private nogoDao: NogoDao,
     @inject('NogoGroupService') private nogoGroupService: NogoGroupService,
-    @inject('RegionService') private regionService: RegionService
+    @inject('RegionService') private regionService: RegionService,
+    @inject('RouterService') private routerService: RouterService
   ) {}
 
   async getAllByGroup(groupId: mongoose.Types.ObjectId, isRegion?: boolean) {
@@ -49,25 +48,28 @@ export class NogoService {
   }
 
   async create(
-    newNogo: INogoCreateDTO
-  ): Promise<{ nogo: INogoReturnDTO | null; error: string | null }> {
-    try {
-      this.validateNewNogo(newNogo);
-      const nogo = await this.nogoDao.create({
-        ...newNogo,
-        lineString: this.fixStraightLineString(newNogo.lineString),
-      });
+    points: [GeoJSON.Position, GeoJSON.Position],
+    nogoGroupId?: mongoose.Types.ObjectId,
+    regionId?: mongoose.Types.ObjectId
+  ) {
+    if (nogoGroupId && regionId)
+      throw new Error('Only one of nogoGroupId or regionId can be provided');
+    if (!nogoGroupId && !regionId)
+      throw new Error('Either nogoGroupId or regionId must be provided');
 
-      return {
-        nogo,
-        error: null,
-      };
-    } catch (err: any) {
-      return {
-        nogo: null,
-        error: err.message || 'Unhandled error',
-      };
-    }
+    const { route } = await this.routerService.getRouteForNewNogo(points);
+
+    const routeIsOutsideRegion =
+      regionId &&
+      !(await this.regionService.isLineStringInRegion(route, regionId));
+    if (routeIsOutsideRegion)
+      throw new Error('Nogo is outside selected region');
+
+    const nogo = await this.nogoDao.create({
+      lineString: this.fixStraightLineString(route),
+      ...(nogoGroupId ? { nogoGroup: nogoGroupId } : { region: regionId }),
+    });
+    return nogo;
   }
 
   private fixStraightLineString(lineString: GeoJSON.LineString) {
@@ -88,20 +90,5 @@ export class NogoService {
       ];
     }
     return lineString;
-  }
-
-  private validateNewNogo(newNogo: INogoCreateDTO) {
-    const { error } = joi
-      .object({
-        lineString: joi.geojson().lineString().required(),
-        nogoGroup: joi.objectId(),
-        region: joi.objectId(),
-      })
-      .required()
-      .validate(newNogo);
-
-    if (error) {
-      throw new Error(error.message);
-    }
   }
 }

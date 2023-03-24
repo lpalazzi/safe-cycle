@@ -6,3 +6,9 @@ export interface INogoReturnDTO {
   nogoGroup?: ID;
   region?: ID;
 }
+
+export interface INogoCreateDTO {
+  points: [GeoJSON.Position, GeoJSON.Position];
+  nogoGroup?: ID;
+  region?: ID;
+}
