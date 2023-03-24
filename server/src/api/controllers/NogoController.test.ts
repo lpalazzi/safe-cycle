@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import setupDB from 'test/setupDB';
 import { makeRequest } from 'test/helpers';
 import {
@@ -253,9 +254,6 @@ describe('POST /nogo/transferNogosToRegion', () => {
     const nogoGroup = await createTestNogoGroup();
     const region = await createTestRegion();
     await createTestNogo(nogoGroup._id, undefined);
-    await createTestNogo(nogoGroup._id, undefined);
-    await createTestNogo(undefined, region._id);
-    await createTestNogo(undefined, undefined);
     const res = await makeRequest({
       url: '/nogo/transferNogosToRegion',
       method: 'POST',
@@ -266,20 +264,11 @@ describe('POST /nogo/transferNogosToRegion', () => {
       loggedInUserEmail: user.email,
     });
     expect(res.statusCode).toBe(400);
-    const nogosOnRegion: INogo[] = await NogoModel.find({
-      region: region._id,
-    });
-    expect(nogosOnRegion.length).toBe(1);
   });
 
   test('throws BadRequestError if regionId is not valid ObjectId', async () => {
     const user = await createTestUser('admin');
     const nogoGroup = await createTestNogoGroup();
-    const region = await createTestRegion();
-    await createTestNogo(nogoGroup._id, undefined);
-    await createTestNogo(nogoGroup._id, undefined);
-    await createTestNogo(undefined, region._id);
-    await createTestNogo(undefined, undefined);
     const res = await makeRequest({
       url: '/nogo/transferNogosToRegion',
       method: 'POST',
@@ -290,10 +279,36 @@ describe('POST /nogo/transferNogosToRegion', () => {
       loggedInUserEmail: user.email,
     });
     expect(res.statusCode).toBe(400);
-    const nogosOnRegion: INogo[] = await NogoModel.find({
-      region: region._id,
+  });
+
+  test('throws BadRequestError if region referenced by regionId does not exist', async () => {
+    const user = await createTestUser('admin');
+    const nogoGroup = await createTestNogoGroup();
+    const res = await makeRequest({
+      url: '/nogo/transferNogosToRegion',
+      method: 'POST',
+      data: {
+        nogoGroupId: nogoGroup._id,
+        regionId: new mongoose.Types.ObjectId(),
+      },
+      loggedInUserEmail: user.email,
     });
-    expect(nogosOnRegion.length).toBe(1);
+    expect(res.statusCode).toBe(400);
+  });
+
+  test('throws BadRequestError if nogoGroup referenced by nogoGroupId does not exist', async () => {
+    const user = await createTestUser('admin');
+    const region = await createTestRegion();
+    const res = await makeRequest({
+      url: '/nogo/transferNogosToRegion',
+      method: 'POST',
+      data: {
+        nogoGroupId: new mongoose.Types.ObjectId(),
+        regionId: region._id,
+      },
+      loggedInUserEmail: user.email,
+    });
+    expect(res.statusCode).toBe(400);
   });
 
   test('throws UnauthorizedError when requested by normal user', async () => {

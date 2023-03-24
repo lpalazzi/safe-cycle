@@ -21,6 +21,10 @@ export class NogoGroupService {
     return this.nogoGroupDao.get({ user: userId });
   }
 
+  async existsById(nogoGroupId: mongoose.Types.ObjectId) {
+    return this.nogoGroupDao.exists({ _id: nogoGroupId });
+  }
+
   async create(
     newNogoGroup: INogoGroupCreateDTO,
     userId: mongoose.Types.ObjectId
