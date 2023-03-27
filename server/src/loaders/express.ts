@@ -1,9 +1,10 @@
 import express from 'express';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
+import mongoose from 'mongoose';
 import MongoStore from 'connect-mongo';
 import config from 'config';
-import controllers from '../api';
+import controllers from 'api';
 import { errorResponder } from 'api/middlewares';
 
 declare module 'express-session' {
@@ -12,7 +13,7 @@ declare module 'express-session' {
   }
 }
 
-export default async (app: express.Express) => {
+export default (app: express.Express) => {
   if (config.test) {
     app.set('trust proxy', 1);
   }
@@ -32,7 +33,7 @@ export default async (app: express.Express) => {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       },
       store: MongoStore.create({
-        mongoUrl: config.mongoUrl,
+        client: mongoose.connection.getClient() as any,
       }),
     })
   );

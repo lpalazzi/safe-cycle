@@ -173,8 +173,8 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     if (nogoWaypoints.length >= 2 && editingGroupOrRegion) {
       NogoApi.create(
         nogoWaypoints,
-        editingGroupOrRegion._id,
-        editingGroupOrRegion.isRegion
+        editingGroupOrRegion.isRegion ? undefined : editingGroupOrRegion._id,
+        editingGroupOrRegion.isRegion ? editingGroupOrRegion._id : undefined
       )
         .then(() => {
           refreshNogoRoutes();

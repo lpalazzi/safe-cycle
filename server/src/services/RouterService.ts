@@ -63,7 +63,7 @@ export class RouterService {
       });
   }
 
-  async getRouteForNewNogo(lonlats: GeoJSON.Position[]) {
+  async getRouteForNewNogo(lonlats: [GeoJSON.Position, GeoJSON.Position]) {
     const route = await this.fetchRoute(lonlats, [], [], 'all');
     return route;
   }

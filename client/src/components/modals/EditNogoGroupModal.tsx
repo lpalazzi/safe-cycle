@@ -29,7 +29,9 @@ const EditNogoGroupForm: React.FC<EditNogoGroupFormProps> = ({ nogoGroup }) => {
 
   const handleSubmit = async (values: EditNogoGroupFormValues) => {
     try {
-      await NogoGroupApi.update(nogoGroup._id, values);
+      const success = await NogoGroupApi.update(nogoGroup._id, values);
+      if (!success)
+        throw new Error('Nogo Group may not have been succesfully updated');
       closeAllModals();
     } catch (error: any) {
       showNotification({
