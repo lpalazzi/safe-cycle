@@ -3,9 +3,10 @@ import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
 import MongoStore from 'connect-mongo';
+
 import config from 'config';
 import controllers from 'api';
-import { errorResponder } from 'api/middlewares';
+import { errorResponder, sentryCapture } from 'api/middlewares';
 
 declare module 'express-session' {
   interface SessionData {
@@ -39,5 +40,6 @@ export default (app: express.Express) => {
   );
 
   app.use(controllers);
+  if (config.useSentry) app.use(sentryCapture);
   app.use(errorResponder);
 };
