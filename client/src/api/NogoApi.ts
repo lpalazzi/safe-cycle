@@ -1,6 +1,6 @@
 import { Nogo } from 'models';
 import { ID } from 'types';
-import { INogoReturnDTO } from './interfaces/Nogo';
+import { INogoCreateDTO, INogoReturnDTO } from './interfaces/Nogo';
 import { makeRequest } from './reqHelpers';
 
 export class NogoApi {
@@ -18,15 +18,21 @@ export class NogoApi {
     return nogos;
   }
 
-  static async create(waypoints: L.LatLng[], groupId: ID, isOnRegion: boolean) {
-    const points: GeoJSON.Position[] = waypoints.map((waypoint) => [
-      waypoint.lng,
-      waypoint.lat,
-    ]);
+  static async create(
+    waypoints: L.LatLng[],
+    nogoGroupId: ID | undefined,
+    regionId: ID | undefined
+  ) {
+    const nogoCreate: INogoCreateDTO = {
+      points: [
+        [waypoints[0].lng, waypoints[0].lat],
+        [waypoints[1].lng, waypoints[1].lat],
+      ],
+      nogoGroup: nogoGroupId,
+      region: regionId,
+    };
     const response = await makeRequest(`${this.baseUrl}/create`, 'POST', {
-      points,
-      groupId,
-      isOnRegion,
+      nogoCreate,
     });
     const nogoReturn: INogoReturnDTO = response.nogo;
     return new Nogo(nogoReturn);
