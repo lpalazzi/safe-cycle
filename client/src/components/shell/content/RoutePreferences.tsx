@@ -6,12 +6,23 @@ import {
   SegmentedControl,
   Space,
   Tooltip,
+  Grid,
+  Image,
+  Text,
+  Title,
+  Paper,
+  useMantineTheme,
 } from '@mantine/core';
-import { SidebarTitle } from '../common/SidebarTitle';
-import { useGlobalContext } from 'contexts/globalContext';
 import { useModals } from '@mantine/modals';
-import { AboutModal } from 'components/modals/AboutModal';
 import { IconInfoCircle } from '@tabler/icons-react';
+import { RouteOptions } from 'types';
+import { useGlobalContext } from 'contexts/globalContext';
+import { SidebarTitle } from '../common/SidebarTitle';
+import { AboutModal } from 'components/modals/AboutModal';
+
+import LowComfortIcon from 'assets/comfortlevels/2-low.png';
+import MediumComfortIcon from 'assets/comfortlevels/3-medium.png';
+import HighComfortIcon from 'assets/comfortlevels/4-high.png';
 
 export const RoutePreferences: React.FC = () => {
   const { routeOptions, isMobileSize, updateRouteOptions } = useGlobalContext();
@@ -50,6 +61,7 @@ export const RoutePreferences: React.FC = () => {
       <Checkbox
         label='Avoid main roads'
         checked={routeOptions.avoidMainRoads}
+        disabled={routeOptions.stickToCycleRoutes}
         onChange={(e) =>
           updateRouteOptions({ avoidMainRoads: e.currentTarget.checked })
         }
@@ -58,7 +70,12 @@ export const RoutePreferences: React.FC = () => {
         label='Prefer cycle routes and trails'
         checked={routeOptions.stickToCycleRoutes}
         onChange={(e) =>
-          updateRouteOptions({ stickToCycleRoutes: e.currentTarget.checked })
+          updateRouteOptions({
+            stickToCycleRoutes: e.currentTarget.checked,
+            avoidMainRoads: e.currentTarget.checked
+              ? true
+              : routeOptions.avoidMainRoads,
+          })
         }
       />
       <Checkbox
@@ -68,6 +85,7 @@ export const RoutePreferences: React.FC = () => {
           updateRouteOptions({ preferPaved: e.currentTarget.checked })
         }
       />
+      <ComfortLevel routeOptions={routeOptions} />
       <Input.Wrapper label='Use an alternative route'>
         <SegmentedControl
           fullWidth
@@ -86,5 +104,64 @@ export const RoutePreferences: React.FC = () => {
         />
       </Input.Wrapper>
     </Stack>
+  );
+};
+
+const ComfortLevel: React.FC<{ routeOptions: RouteOptions }> = ({
+  routeOptions,
+}) => {
+  const theme = useMantineTheme();
+  const comfortLevel = routeOptions.stickToCycleRoutes
+    ? 'High'
+    : routeOptions.avoidMainRoads
+    ? 'Medium'
+    : 'Low';
+
+  let imgSrc;
+  let description: string;
+  switch (comfortLevel) {
+    case 'High':
+      imgSrc = HighComfortIcon;
+      description =
+        'Prioritizes avoiding car traffic, and primarily routes the user via dedicated cycling infrastructure.';
+      break;
+    case 'Medium':
+      imgSrc = MediumComfortIcon;
+      description =
+        'Makes an effort to avoid busy roads, but may still route the user on roads with low car traffic.';
+      break;
+    case 'Low':
+      imgSrc = LowComfortIcon;
+      description =
+        'Prioritizes arriving to the destination efficiently, and may route the user on roads with considerable car traffic.';
+      break;
+  }
+
+  return (
+    <Paper shadow='sm' radius='md' p='sm' bg={theme.colors.gray[3]}>
+      <Title order={6} align='center'>
+        Comfort level based on selected preferences
+      </Title>
+      <Grid align='center' gutter={0} mih={120}>
+        <Grid.Col span={5}>
+          <Stack spacing={0} align='center'>
+            <div
+              style={{ width: '60%', marginLeft: 'auto', marginRight: 'auto' }}
+            >
+              <Image src={imgSrc} />
+            </div>
+            <Text size='sm'>{comfortLevel + ' Comfort'}</Text>
+          </Stack>
+        </Grid.Col>
+        <Grid.Col span={7}>
+          <Text size='sm'>{description}</Text>
+        </Grid.Col>
+      </Grid>
+      {comfortLevel === 'Low' ? (
+        <Text align='center' size='sm' italic fw='bold'>
+          Only recommended for experienced cyclists
+        </Text>
+      ) : null}
+    </Paper>
   );
 };
