@@ -40,6 +40,6 @@ export default (app: express.Express) => {
   );
 
   app.use(controllers);
-  if (config.useSentry) app.use(sentryCapture);
+  if (config.sentryDsn) app.use(sentryCapture);
   app.use(errorResponder);
 };
