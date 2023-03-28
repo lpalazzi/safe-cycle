@@ -6,7 +6,6 @@ export default {
   sessionSecret: process.env.SESSION_SECRET ?? 'no_secret',
   bingMapsApiKey: process.env.BING_MAPS_API_KEY,
   sentryDsn: process.env.SENTRY_DSN,
-  useSentry: process.env.TEST !== '1' && !!process.env.SENTRY_DSN,
   contactEmail: {
     host: process.env.CONTACT_EMAIL_HOST,
     port: Number(process.env.CONTACT_EMAIL_PORT),

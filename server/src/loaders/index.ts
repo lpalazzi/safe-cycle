@@ -8,7 +8,7 @@ import config from 'config';
 
 export const load = async (expressApp: express.Express) => {
   await mongooseLoader();
-  if (config.useSentry) sentryLoader(expressApp);
+  if (config.sentryDsn) sentryLoader(expressApp);
   expressLoader(expressApp);
   joi();
 };
