@@ -9,7 +9,7 @@ import {
   IUserReturnDTO,
   IUserSignupDTO,
 } from 'interfaces';
-import { UserRole } from 'types';
+import { UserRole, UserSettings } from 'types';
 
 @injectable()
 export class UserService {
@@ -34,6 +34,18 @@ export class UserService {
 
   async updateUserRole(userId: mongoose.Types.ObjectId, role: UserRole) {
     const updateResult = await this.userDao.updateById(userId, { role });
+    return updateResult.acknowledged && updateResult.modifiedCount === 1;
+  }
+
+  async updateUserSettings(
+    userId: mongoose.Types.ObjectId,
+    userSettings: Partial<UserSettings>
+  ) {
+    const user = await this.userDao.getById(userId);
+    const currentSettings = user?.settings || {};
+    const updateResult = await this.userDao.updateById(userId, {
+      settings: { ...currentSettings, ...userSettings },
+    });
     return updateResult.acknowledged && updateResult.modifiedCount === 1;
   }
 

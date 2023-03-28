@@ -3,5 +3,5 @@ export * from './Name';
 export * from './Routing';
 export * from './Location';
 export * from './Waypoint';
-export * from './UserRole';
+export * from './UserTypes';
 export * from './Geocoding';

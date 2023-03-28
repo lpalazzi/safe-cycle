@@ -15,8 +15,12 @@ export const SidebarContent: React.FC = () => {
       <WaypointsList />
       <Divider my='sm' />
       <RoutePreferences />
-      <Divider my='sm' />
-      <UserNogoGroups />
+      {loggedInUser?.settings?.privateNogosEnabled ? (
+        <>
+          <Divider my='sm' />
+          <UserNogoGroups />
+        </>
+      ) : null}
       {loggedInUser?.role === 'verified contributor' ? (
         <>
           <Divider my='sm' />

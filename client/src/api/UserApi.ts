@@ -1,5 +1,5 @@
 import { User } from 'models';
-import { ID, UserRole } from 'types';
+import { ID, UserRole, UserSettings } from 'types';
 import {
   IUserChangePasswordDTO,
   IUserLoginDTO,
@@ -58,6 +58,15 @@ export class UserApi {
         userId,
         role,
       }
+    );
+    return !!response.success;
+  }
+
+  static async updateUserSettings(userSettings: Partial<UserSettings>) {
+    const response = await makeRequest(
+      `${this.baseUrl}/updateUserSettings`,
+      'POST',
+      { userSettings }
     );
     return !!response.success;
   }
