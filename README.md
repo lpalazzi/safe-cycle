@@ -13,7 +13,7 @@ TEST=1
 PORT=8000
 MONGODB_URL=mongodb://127.0.0.1/safecycle
 BROUTER_URL=http://localhost:17777/brouter
-SESSION_SECRET=your_secret
+SESSION_SECRET=your_secret # generate your own secret to put here
 ```
 
 Run `yarn` to install the required packages.
@@ -53,3 +53,7 @@ Start the BRouter server in a separate terminal as described above.
 To run the app in development mode run `yarn dev-client` and `yarn dev-server` in two separate terminals.
 
 Alternatively, `yarn dev` runs both client and server commands concurrently in the same terminal. This will rebuild and restart the server when changes are made. You will have to refresh the browser to see client changes.
+
+## Run tests
+
+The command `yarn test` will run the server's test suite. Make sure you have your local MongoDB service and BRouter server running before starting the tests.
