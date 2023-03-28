@@ -124,11 +124,11 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
               SafeCycle currently only supports a handful of regions. If you
               live in an unsupported region, you can still use SafeCycle to
               explore cycling routes in your area by using our other available
-              route preferences and by{' '}
+              route preferences. You can also{' '}
               <Anchor onClick={() => setView('howto')}>
-                creating your own private nogos
-              </Anchor>
-              .
+                create your own private nogos
+              </Anchor>{' '}
+              for personal use.
             </Text>
             <Group position='apart' noWrap={isMobileSize ? false : true}>
               <SupportedRegionsMap
@@ -150,17 +150,32 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
         </Accordion.Item>
         <Accordion.Item value='howto'>
           <Accordion.Control>
-            <b>Create your own nogos</b>
+            <b>Create private nogos for personal use</b>
           </Accordion.Control>
           <Accordion.Panel>
             <Text>
               In addition to nogos provided by local cyclists, users can create
-              custom nogos to use for their own personal routes.
+              custom nogos to use for personal use. This allows you to use nogos
+              that are tailored to your own cycling preferences.
             </Text>
             <Title order={5} mt='md' mb='xs'>
               How to add private nogos
             </Title>
             <List type='ordered'>
+              <List.Item>
+                First you must enable private nogos from your account settings.
+                <List type='ordered' withPadding maw='90%'>
+                  <List.Item>
+                    Click "Manage account" from the user menu at the bottom of
+                    the sidebar.
+                  </List.Item>
+                  <List.Item>
+                    Under "Account settings", enable private nogos and click
+                    Submit. You should now see a "Private Nogos" section in your
+                    sidebar.
+                  </List.Item>
+                </List>
+              </List.Item>
               <List.Item>
                 Create a Nogo Group via the Private Nogos section in the
                 sidepanel.

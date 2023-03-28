@@ -1,5 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import joi from 'joi';
 import { container } from 'tsyringe';
 import { UserService } from 'services';
 import {
@@ -7,7 +8,7 @@ import {
   BadRequestError,
   InternalServerError,
 } from 'api/errors';
-import { UserRole } from 'types';
+import { UserRole, UserSettings } from 'types';
 import {
   IUserChangePasswordDTO,
   IUserLoginDTO,
@@ -181,4 +182,34 @@ export const user = (app: express.Router) => {
       }
     }
   );
+
+  route.post('/updateUserSettings', checkLoggedIn, async (req, res, next) => {
+    try {
+      const userId = new mongoose.Types.ObjectId(req.session.userId);
+      const userSettings: Partial<UserSettings> = req.body.userSettings;
+      if (!userSettings)
+        throw new BadRequestError('No settings update provided');
+      const { error } = joi
+        .object({
+          privateNogosEnabled: joi.boolean(),
+        })
+        .required()
+        .validate(userSettings);
+      if (error)
+        throw new BadRequestError('Validation error: ' + error.message);
+
+      const success = await userService.updateUserSettings(
+        userId,
+        userSettings
+      );
+      if (!success) {
+        throw new InternalServerError('User settings could not be updated');
+      }
+      return res.json({
+        success: true,
+      });
+    } catch (err) {
+      next(err);
+    }
+  });
 };

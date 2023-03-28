@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { UserRole, Name } from 'types';
+import { UserRole, Name, UserSettings } from 'types';
 
 export interface IUser {
   _id: mongoose.Types.ObjectId;
@@ -7,6 +7,7 @@ export interface IUser {
   passwordHash: string;
   name: Name;
   role?: UserRole;
+  settings?: UserSettings;
 }
 
 export interface IUserSignupDTO {

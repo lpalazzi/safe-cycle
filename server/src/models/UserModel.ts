@@ -19,6 +19,9 @@ const UserSchema = new mongoose.Schema<IUser>({
     type: String,
     enum: [null, 'admin', 'verified contributor'],
   },
+  settings: {
+    privateNogosEnabled: Boolean,
+  },
 });
 
 export const UserModel = mongoose.model<IUser>('User', UserSchema);

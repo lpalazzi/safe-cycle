@@ -1,10 +1,11 @@
-import { ID, Name, UserRole } from 'types';
+import { ID, Name, UserRole, UserSettings } from 'types';
 
 export interface IUserReturnDTO {
   _id: ID;
   email: string;
   name: Name;
   role?: UserRole;
+  settings?: UserSettings;
 }
 
 export interface IUserSignupDTO {
