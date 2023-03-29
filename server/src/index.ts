@@ -11,7 +11,10 @@ import * as loaders from './loaders';
 async function start() {
   const app = express();
   await loaders.load(app);
-  if (config.test || !(config.https.cert && config.https.key)) {
+  if (
+    config.test ||
+    !(config.https.cert && config.https.key && config.https.ca)
+  ) {
     app.listen(config.port, () => {
       console.log(
         `[server]\t Server is running at http://localhost:${config.port}`
@@ -20,8 +23,9 @@ async function start() {
   } else {
     https
       .createServer({
-        key: fs.readFileSync(config.https.key),
-        cert: fs.readFileSync(config.https.cert),
+        key: fs.readFileSync(config.https.key, 'utf-8'),
+        cert: fs.readFileSync(config.https.cert, 'utf-8'),
+        ca: fs.readFileSync(config.https.ca, 'utf-8'),
       })
       .listen(config.port, () => {
         console.log(
