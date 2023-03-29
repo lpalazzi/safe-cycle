@@ -22,11 +22,14 @@ async function start() {
     });
   } else {
     https
-      .createServer({
-        key: fs.readFileSync(config.https.key, 'utf-8'),
-        cert: fs.readFileSync(config.https.cert, 'utf-8'),
-        ca: fs.readFileSync(config.https.ca, 'utf-8'),
-      })
+      .createServer(
+        {
+          key: fs.readFileSync(config.https.key, 'utf-8'),
+          cert: fs.readFileSync(config.https.cert, 'utf-8'),
+          ca: fs.readFileSync(config.https.ca, 'utf-8'),
+        },
+        app
+      )
       .listen(config.port, () => {
         console.log(
           `[server]\t Server is running at https://localhost:${config.port}`
