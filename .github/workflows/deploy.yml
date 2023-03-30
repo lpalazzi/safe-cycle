@@ -1,0 +1,26 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+  
+  deploy:
+    name: Deploy
+    runs-on: self-hosted
+
+    steps:
+      - name: Pull changes
+        run: cd safe-cycle && git pull --recurse-submodules
+      
+      - name: Build BRouter
+        run: yarn build-brouter
+      
+      - name: Install node modules
+        run: yarn
+        
+      - name: Restart BRouter service
+        run: pm2 restart brouter
+        
+      - name: Restart API service
+        run: pm2 restart api
