@@ -1,0 +1,37 @@
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+  
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: DigitalOcean
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN }}
+          
+      - name: SSH into droplet
+        run: doctl compute ssh safecycle@safecycle --ssh-agent-forwarding
+        
+      - name: Pull changes
+        run: cd safe-cycle && git pull --recurse-submodules
+      
+      - name: Build BRouter
+        run: yarn build-brouter
+      
+      - name: Install node modules
+        run: yarn
+        
+      - name: Restart BRouter service
+        run: echo pm2 restart brouter
+        
+      - name: Restart API service
+        run: echo pm2 restart api
