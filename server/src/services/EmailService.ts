@@ -8,11 +8,11 @@ import config from 'config';
 export class EmailService {
   private transporter: Transporter<SMTPTransport.SentMessageInfo>;
 
-  private verifyEmail = async () => {
-    await this.transporter.verify().catch(() => {
-      console.log('Failed to verify email server.');
-    });
-  };
+  // private verifyEmail = async () => {
+  //   await this.transporter.verify().catch(() => {
+  //     console.log('Failed to verify email server.');
+  //   });
+  // };
 
   constructor() {
     this.transporter = nodemailer.createTransport({
@@ -24,7 +24,7 @@ export class EmailService {
         pass: config.contactEmail.password,
       },
     });
-    this.verifyEmail();
+    // this.verifyEmail();
   }
 
   async sendEmail(email: Email) {
