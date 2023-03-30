@@ -36,7 +36,6 @@ jobs:
         uses: supercharge/mongodb-github-action@1.9.0
         with:
           mongodb-version: 5.0.8
-          mongodb-port: 17777
         
       - name: Start BRouter
         run: yarn brouter
