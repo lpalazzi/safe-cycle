@@ -15,10 +15,6 @@ declare module 'express-session' {
 }
 
 export default (app: express.Express) => {
-  if (config.test) {
-    app.set('trust proxy', 1);
-  }
-
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
   app.use(cookieParser());
