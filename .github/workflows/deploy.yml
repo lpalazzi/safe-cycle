@@ -1,8 +1,5 @@
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
 
 jobs:
   test:
@@ -10,17 +7,9 @@ jobs:
   
   deploy:
     name: Deploy
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
-      - name: DigitalOcean
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN }}
-          
-      - name: SSH into droplet
-        run: doctl compute ssh safecycle@safecycle --ssh-agent-forwarding
-        
       - name: Pull changes
         run: cd safe-cycle && git pull --recurse-submodules
       
@@ -31,7 +20,7 @@ jobs:
         run: yarn
         
       - name: Restart BRouter service
-        run: echo pm2 restart brouter
+        run: pm2 restart brouter
         
       - name: Restart API service
-        run: echo pm2 restart api
+        run: pm2 restart api
