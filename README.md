@@ -9,7 +9,7 @@ Web-based routing app for finding safe cycling routes with the option to avoid u
 Create a `.env` file at the root of the project with the following content:
 
 ```
-TEST=1
+TEST=1 # include for a local dev environment, omit for production
 PORT=8000
 MONGODB_URL=mongodb://127.0.0.1/safecycle
 BROUTER_URL=http://localhost:17777/brouter
