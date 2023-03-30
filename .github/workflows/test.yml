@@ -31,6 +31,9 @@ jobs:
       
       - name: Build BRouter
         run: yarn build-brouter
+        
+      - name: Install node modules
+        run: yarn
       
       - name: Start MongoDB server
         uses: supercharge/mongodb-github-action@1.9.0
@@ -38,10 +41,7 @@ jobs:
           mongodb-version: 5.0.8
         
       - name: Start BRouter
-        run: yarn brouter
-      
-      - name: Install node modules
-        run: yarn
+        run: yarn brouter &
       
       - name: Run tests
         run: yarn test
