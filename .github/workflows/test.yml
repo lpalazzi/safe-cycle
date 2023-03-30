@@ -11,14 +11,17 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+        with:
+          submodules: true
       
       - name: Read .nvmrc
-        run: nvmrc=$(cat .nvmrc)
+        run: echo "##[set-output name=NVMRC;]$(cat .nvmrc)"
+        id: nvmrc
       
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: $nvmrc
+          node-version: "${{ steps.nvmrc.outputs.NVMRC }}"
       
       - name: Setup Java JDK
         uses: actions/setup-java@v1.4.4
