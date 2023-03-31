@@ -59,30 +59,32 @@ export const RoutePreferences: React.FC = () => {
         }
       />
       <Checkbox
-        label='Avoid main roads'
-        checked={routeOptions.avoidMainRoads}
-        disabled={routeOptions.stickToCycleRoutes}
+        label='Prefer bike-friendly roads'
+        checked={routeOptions.preferBikeFriendly}
+        disabled={routeOptions.preferCycleRoutes}
         onChange={(e) =>
-          updateRouteOptions({ avoidMainRoads: e.currentTarget.checked })
+          updateRouteOptions({ preferBikeFriendly: e.currentTarget.checked })
         }
       />
       <Checkbox
-        label='Prefer cycle routes and trails'
-        checked={routeOptions.stickToCycleRoutes}
+        label='Prefer dedicated cycle routes'
+        checked={routeOptions.preferCycleRoutes}
         onChange={(e) =>
           updateRouteOptions({
-            stickToCycleRoutes: e.currentTarget.checked,
-            avoidMainRoads: e.currentTarget.checked
+            preferCycleRoutes: e.currentTarget.checked,
+            preferBikeFriendly: e.currentTarget.checked
               ? true
-              : routeOptions.avoidMainRoads,
+              : routeOptions.preferBikeFriendly,
           })
         }
       />
       <Checkbox
         label='Prefer paved routes'
-        checked={routeOptions.preferPaved}
+        checked={routeOptions.surfacePreference === 'preferPaved'}
         onChange={(e) =>
-          updateRouteOptions({ preferPaved: e.currentTarget.checked })
+          updateRouteOptions({
+            surfacePreference: e.currentTarget.checked ? 'preferPaved' : 'none',
+          })
         }
       />
       <ComfortLevel routeOptions={routeOptions} />
@@ -111,9 +113,9 @@ const ComfortLevel: React.FC<{ routeOptions: RouteOptions }> = ({
   routeOptions,
 }) => {
   const theme = useMantineTheme();
-  const comfortLevel = routeOptions.stickToCycleRoutes
+  const comfortLevel = routeOptions.preferCycleRoutes
     ? 'High'
-    : routeOptions.avoidMainRoads
+    : routeOptions.preferBikeFriendly
     ? 'Medium'
     : 'Low';
 

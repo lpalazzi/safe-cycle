@@ -42,8 +42,10 @@ export const router = (app: express.Router) => {
 
       const data = await routerService.getRouteForUser(
         points,
-        nogoGroupIds,
-        regionIds,
+        nogoGroupIds.map(
+          (nogoGroupId) => new mongoose.Types.ObjectId(nogoGroupId)
+        ),
+        regionIds.map((regionId) => new mongoose.Types.ObjectId(regionId)),
         routeOptions
       );
       const route: GeoJSON.LineString = data.route;

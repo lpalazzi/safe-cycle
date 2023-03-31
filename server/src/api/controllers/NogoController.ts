@@ -2,7 +2,12 @@ import express from 'express';
 import mongoose from 'mongoose';
 import joi from 'joi';
 import { container } from 'tsyringe';
-import { NogoGroupService, NogoService, RegionService } from 'services';
+import {
+  NogoGroupService,
+  NogoService,
+  RegionService,
+  RouterService,
+} from 'services';
 import { INogoCreateDTO } from 'interfaces';
 import { checkAdmin, checkLoggedIn } from 'api/middlewares';
 import {
@@ -17,6 +22,7 @@ export const nogo = (app: express.Router) => {
   const nogoService = container.resolve(NogoService);
   const nogoGroupService = container.resolve(NogoGroupService);
   const regionService = container.resolve(RegionService);
+  const routerService = container.resolve(RouterService);
 
   route.get('/getAllByGroup/:groupId/:groupType', async (req, res, next) => {
     try {
@@ -106,11 +112,10 @@ export const nogo = (app: express.Router) => {
         );
 
       try {
-        const nogo = await nogoService.create(
-          nogoCreate.points,
-          nogoGroupId,
-          regionId
+        const { route } = await routerService.getRouteForNewNogo(
+          nogoCreate.points
         );
+        const nogo = await nogoService.create(route, nogoGroupId, regionId);
         if (!nogo) throw new Error('Nogo could not be created');
         return res.json({ nogo });
       } catch (error: any) {
