@@ -54,7 +54,13 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   const [editingGroupOrRegion, setEditingGroupOrRegion] = useState<
     NogoGroup | Region | null
   >(null);
-  const [routeOptions, setRouteOptions] = useState<RouteOptions>({});
+  const [routeOptions, setRouteOptions] = useState<RouteOptions>({
+    avoidNogos: true,
+    shortest: false,
+    preferBikeFriendly: true,
+    preferCycleRoutes: false,
+    surfacePreference: 'preferPaved',
+  });
   const [regions, setRegions] = useState<Region[]>([]);
 
   useEffect(() => {
