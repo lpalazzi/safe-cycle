@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "tsc && tsc-alias",
-    "build:watch": "tsc && (concurrently \"tsc -w\" \"tsc-alias -w\")",
+    "build": "tsc --project ./tsconfig.build.json && tsc-alias",
+    "build:watch": "tsc --project ./tsconfig.build.json && (concurrently \"tsc -w --project ./tsconfig.build.json\" \"tsc-alias -w\")",
     "test": "jest"
   },
   "dependencies": {

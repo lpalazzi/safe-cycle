@@ -46,7 +46,7 @@ export const user = (app: express.Router) => {
         }
         const userId = new mongoose.Types.ObjectId(req.params.userId);
         const user = await userService.getById(userId);
-        if (!user) throw new InternalServerError('User not found');
+        if (!user) throw new ModelNotFoundError('User not found');
         return res.json({ user });
       } catch (err) {
         next(err);
@@ -58,14 +58,10 @@ export const user = (app: express.Router) => {
     try {
       const userId = req.session?.userId;
 
-      if (!userId) {
+      if (!userId || !mongoose.isValidObjectId(userId)) {
         return res.json({
           user: null,
         });
-      }
-
-      if (!mongoose.isValidObjectId(req.session.userId)) {
-        throw new InternalServerError('Stored userId is not a valid ObjectId');
       }
 
       const user = await userService.getById(

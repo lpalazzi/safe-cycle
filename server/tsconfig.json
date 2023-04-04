@@ -9,6 +9,5 @@
     "outDir": "../build",
     "baseUrl": "./src"
   },
-  "include": ["."],
-  "exclude": ["./src/test/**/*", "./**/*.test.ts"]
+  "include": ["."]
 }

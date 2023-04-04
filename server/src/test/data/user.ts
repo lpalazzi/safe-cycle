@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import argon2 from 'argon2';
 import { IUser } from 'interfaces';
 import { UserModel } from 'models';
-import { UserRole } from 'types';
+import { NoID, UserRole } from 'types';
 
 export const createTestUser = async (role?: UserRole) => {
   var userObj: IUser;
@@ -49,4 +49,17 @@ export const createTestUser = async (role?: UserRole) => {
 
   const createdUser: IUser = await UserModel.create(userObj);
   return createdUser;
+};
+
+export const createMultipleTestUsers = async (number: number) => {
+  const userObjs: NoID<IUser>[] = Array.apply(null, Array(number)).map(() => ({
+    email: `${number}@email.com`,
+    passwordHash: 'password_hash',
+    name: {
+      first: 'User',
+      last: number.toString(),
+    },
+  }));
+  const createdUsers: IUser[] = await UserModel.create(...userObjs);
+  return createdUsers;
 };
