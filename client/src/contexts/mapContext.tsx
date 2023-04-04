@@ -206,16 +206,6 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
             })
           )
         ).flat();
-        if (routeOptions.avoidNogos) {
-          const fetchedRegionNogos: Nogo[] = (
-            await Promise.all(
-              regions.map(async (region) => {
-                return NogoApi.getAllByGroup(region._id, true);
-              })
-            )
-          ).flat();
-          fetchedNogos.push(...fetchedRegionNogos);
-        }
         setNogoRoutes(fetchedNogos);
       }
     } catch (error: any) {
@@ -232,7 +222,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     if (!editingGroupOrRegion) {
       clearNogoWaypoints();
     }
-  }, [editingGroupOrRegion, selectedNogoGroups, routeOptions.avoidNogos]);
+  }, [editingGroupOrRegion, selectedNogoGroups]);
 
   useEffect(() => {
     if (!loggedInUser) {
