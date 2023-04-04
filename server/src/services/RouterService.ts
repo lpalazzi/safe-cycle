@@ -76,10 +76,9 @@ export class RouterService {
     routeOptions: RouteOptions
   ) {
     const getSurfacePrefSuffix = () => {
-      if (routeOptions.surfacePreference === 'strictUnpaved') return '-stup';
       if (routeOptions.surfacePreference === 'preferUnpaved') return '-prup';
-      if (routeOptions.surfacePreference === 'strictPaved') return '-stp';
-      if (routeOptions.surfacePreference === 'preferPaved') return '-prp';
+      else if (routeOptions.surfacePreference === 'strictPaved') return '-stp';
+      else if (routeOptions.surfacePreference === 'preferPaved') return '-prp';
       else return '';
     };
 

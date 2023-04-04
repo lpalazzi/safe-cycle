@@ -11,5 +11,4 @@ export type SurfacePreference =
   | 'strictPaved'
   | 'preferPaved'
   | 'none'
-  | 'preferUnpaved'
-  | 'strictUnpaved';
+  | 'preferUnpaved';

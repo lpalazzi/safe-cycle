@@ -205,11 +205,10 @@ export const RoutePreferences: React.FC = () => {
             })
           }
           data={[
-            { label: 'No preference', value: 'none' },
-            { label: 'Strictly use paved surfaces', value: 'strictPaved' },
             { label: 'Prefer paved surfaces', value: 'preferPaved' },
+            { label: 'Only use paved surfaces', value: 'strictPaved' },
             { label: 'Prefer unpaved surfaces', value: 'preferUnpaved' },
-            { label: 'Strictly use unpaved surfaces', value: 'strictUnpaved' },
+            { label: 'No preference', value: 'none' },
           ]}
         />
       </Input.Wrapper>
