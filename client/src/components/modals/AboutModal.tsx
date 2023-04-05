@@ -105,7 +105,8 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
               roads that most cyclists should avoid.{' '}
               <i>
                 To apply our curated nogos, select the "Avoid nogos" checkbox in
-                your route preferences.
+                your custom route preferences. Medium and High Comfort levels
+                avoid nogos by default.
               </i>
             </Text>
             <Text align='center' fs='italic' fw='bold'>
@@ -154,9 +155,10 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
           </Accordion.Control>
           <Accordion.Panel>
             <Text>
-              In addition to nogos provided by local cyclists, users can create
-              custom nogos to use for personal use. This allows you to use nogos
-              that are tailored to your own cycling preferences.
+              In addition to nogos provided by our verified contributors, users
+              can create custom nogos to use for their own personal use. This
+              allows you to use nogos that are tailored to your own cycling
+              preferences.
             </Text>
             <Title order={5} mt='md' mb='xs'>
               How to add private nogos

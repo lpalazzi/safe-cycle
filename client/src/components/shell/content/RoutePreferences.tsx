@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  useMantineTheme,
   Stack,
   Checkbox,
   Input,
@@ -10,8 +11,6 @@ import {
   Image,
   Text,
   Paper,
-  useMantineTheme,
-  Box,
   Title,
   Select,
 } from '@mantine/core';
@@ -78,7 +77,7 @@ export const RoutePreferences: React.FC = () => {
               label: (
                 <Stack align='center' spacing={0}>
                   <Image src={LowestComfortIcon} width='2rem' />
-                  <Box>Lowest</Box>
+                  Lowest
                 </Stack>
               ),
             },
@@ -87,7 +86,7 @@ export const RoutePreferences: React.FC = () => {
               label: (
                 <Stack align='center' spacing={0}>
                   <Image src={LowComfortIcon} width='2rem' />
-                  <Box>Low</Box>
+                  Low
                 </Stack>
               ),
             },
@@ -96,7 +95,7 @@ export const RoutePreferences: React.FC = () => {
               label: (
                 <Stack align='center' spacing={0}>
                   <Image src={MediumComfortIcon} width='2rem' />
-                  <Box>Medium</Box>
+                  Medium
                 </Stack>
               ),
             },
@@ -105,7 +104,7 @@ export const RoutePreferences: React.FC = () => {
               label: (
                 <Stack align='center' spacing={0}>
                   <Image src={HighComfortIcon} width='2rem' />
-                  <Box>High</Box>
+                  High
                 </Stack>
               ),
             },
@@ -114,7 +113,7 @@ export const RoutePreferences: React.FC = () => {
               label: (
                 <Stack align='center' spacing={0}>
                   <IconUserCog size='2rem' />
-                  <Box>Custom</Box>
+                  Custom
                 </Stack>
               ),
             },
@@ -227,13 +226,13 @@ const ComfortLevel: React.FC<{ comfortLevel: string }> = React.memo(
       case 'High':
         imgSrc = HighComfortIcon;
         description =
-          'Prioritizes avoiding car traffic, and primarily routes the user via dedicated cycling infrastructure.';
+          'Prioritizes avoiding car traffic and nogos, and primarily routes the user via dedicated cycling infrastructure.';
         riderHint = 'Suitable for cyclists of all ages and abilities';
         break;
       case 'Medium':
         imgSrc = MediumComfortIcon;
         description =
-          'Makes an effort to avoid busy roads, but may still route the user on roads with some car traffic.';
+          'Makes an effort to avoid busy roads and nogos, but may still route the user on roads with light car traffic.';
         riderHint = 'Suitable for cyclists of most ages and abilities';
         break;
       case 'Low':
