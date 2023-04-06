@@ -296,10 +296,11 @@ const DraggableWaypointItem: React.FC<DraggableWaypointItemProps> = ({
       item.curIndex = index;
     },
   });
+  const [label, setLabel] = useState<string>();
 
-  const label =
-    waypoint.label ??
-    waypoint.latlng.lat.toFixed(6) + ', ' + waypoint.latlng.lng.toFixed(6);
+  useEffect(() => {
+    Promise.resolve(waypoint.label).then(setLabel);
+  }, [waypoint]);
 
   const [{ isHoverOutside }, drag, preview] = useDrag({
     type: 'waypoint',
@@ -329,7 +330,10 @@ const DraggableWaypointItem: React.FC<DraggableWaypointItemProps> = ({
     <Paper ref={ref} data-handler-id={handlerId} pt={8} pb={8}>
       <Group position='apart' noWrap style={{ opacity }}>
         <Text lineClamp={1} size='sm' style={{ lineHeight: '36px' }}>
-          {label}
+          {label ||
+            waypoint.latlng.lat.toFixed(6) +
+              ', ' +
+              waypoint.latlng.lng.toFixed(6)}
         </Text>
         <Group position='right' spacing='xs' noWrap>
           {disableDrag ? null : (

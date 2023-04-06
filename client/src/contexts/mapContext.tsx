@@ -67,35 +67,29 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   const [fetchingCount, setFetchingCount] = useState(0);
   const loadingRoute = fetchingCount > 0;
 
-  const addWaypoint = async (latlng: L.LatLng, label?: string) => {
-    const newWaypoint = {
+  const addWaypoint = (latlng: L.LatLng, label?: string) => {
+    const newWaypoint: Waypoint = {
       latlng,
-      label,
+      label: label ?? GeocodingApi.reverse(latlng),
     };
-    if (!label) {
-      newWaypoint.label = await GeocodingApi.reverse(latlng);
-    } else if (!editingGroupOrRegion) {
-      const bounds = new L.LatLngBounds(latlng, latlng);
-      waypoints.forEach((waypoint) => {
-        bounds.extend(waypoint.latlng);
-      });
-      map?.fitBounds(bounds, { maxZoom: 17 });
-    }
     if (!editingGroupOrRegion) {
       setWaypoints([...waypoints, newWaypoint]);
+      if (label) {
+        const bounds = new L.LatLngBounds(latlng, latlng);
+        waypoints.forEach((waypoint) => {
+          bounds.extend(waypoint.latlng);
+        });
+        map?.fitBounds(bounds, { maxZoom: 17 });
+      }
     } else {
       setNogoWaypoints([...nogoWaypoints, latlng]);
     }
   };
 
-  const updateWaypoint = async (
-    index: number,
-    latlng: L.LatLng,
-    label?: string
-  ) => {
+  const updateWaypoint = (index: number, latlng: L.LatLng, label?: string) => {
     const updatedWaypoint = {
       latlng,
-      label: label ?? (await GeocodingApi.reverse(latlng)),
+      label: label ?? GeocodingApi.reverse(latlng),
     };
     const newWaypoints = [...waypoints];
     newWaypoints.splice(index, 1, updatedWaypoint);
