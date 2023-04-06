@@ -76,7 +76,7 @@ export const RoutePreferences: React.FC = () => {
               value: 'Lowest',
               label: (
                 <Stack align='center' spacing={0}>
-                  <Image src={LowestComfortIcon} width='2rem' />
+                  <Image src={LowestComfortIcon} width='2rem' mih='2rem' />
                   Lowest
                 </Stack>
               ),
@@ -85,7 +85,7 @@ export const RoutePreferences: React.FC = () => {
               value: 'Low',
               label: (
                 <Stack align='center' spacing={0}>
-                  <Image src={LowComfortIcon} width='2rem' />
+                  <Image src={LowComfortIcon} width='2rem' mih='2rem' />
                   Low
                 </Stack>
               ),
@@ -94,7 +94,7 @@ export const RoutePreferences: React.FC = () => {
               value: 'Medium',
               label: (
                 <Stack align='center' spacing={0}>
-                  <Image src={MediumComfortIcon} width='2rem' />
+                  <Image src={MediumComfortIcon} width='2rem' mih='2rem' />
                   Medium
                 </Stack>
               ),
@@ -103,7 +103,7 @@ export const RoutePreferences: React.FC = () => {
               value: 'High',
               label: (
                 <Stack align='center' spacing={0}>
-                  <Image src={HighComfortIcon} width='2rem' />
+                  <Image src={HighComfortIcon} width='2rem' mih='2rem' />
                   High
                 </Stack>
               ),
