@@ -30,6 +30,8 @@ import { IconEditCircle, IconPlus } from '@tabler/icons-react';
 import LogoSvg from 'assets/brand/logo-name.svg';
 import ImgNogoWithout from 'assets/info/info-nogo-without.png';
 import ImgNogoWith from 'assets/info/info-nogo-with.png';
+import LogoXYZ from 'assets/sponsors/logo-xyz.png';
+import LogoSTR from 'assets/sponsors/logo-sharetheroad.png';
 import { useGlobalContext } from 'contexts/globalContext';
 import { Nogo } from 'models';
 import { EmailApi, NogoApi } from 'api';
@@ -258,6 +260,38 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
           </Accordion.Panel>
         </Accordion.Item>
       </Accordion>
+      <Text mt='md' ta='center'>
+        SafeCycle is made possible thanks to the following:
+      </Text>
+      <Group position='center' noWrap>
+        <Image
+          src={LogoXYZ}
+          caption='XYZ Digital Inc.'
+          height={75}
+          width='min(max-content, 100%)'
+          fit='contain'
+          withPlaceholder
+          style={{ cursor: 'pointer' }}
+          onClick={() => {
+            window.open('https://www.xyzdigital.com/', '_blank');
+          }}
+        />
+        <Image
+          src={LogoSTR}
+          caption='Share the Road Essex County'
+          height={150}
+          width='min(max-content, 100%)'
+          fit='contain'
+          withPlaceholder
+          style={{ cursor: 'pointer' }}
+          onClick={() => {
+            window.open(
+              'https://www.facebook.com/ShareTheRoadEssexCounty',
+              '_blank'
+            );
+          }}
+        />
+      </Group>
     </Container>
   );
 };
