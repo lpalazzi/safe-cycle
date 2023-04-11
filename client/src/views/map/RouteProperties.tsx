@@ -6,13 +6,15 @@ import { metresToDistanceString, secondsToTimeString } from 'utils/formatting';
 
 export const RouteProperties: React.FC = () => {
   const { isMobileSize, isNavbarOpen } = useGlobalContext();
-  const { routeProperties } = useMapContext();
+  const { routes, selectedRouteIndex } = useMapContext();
+
+  // if (!selectedRouteIndex && selectedRouteIndex !== 0) return null;
 
   const distanceStr = metresToDistanceString(
-    Number(routeProperties?.['track-length']) ?? 0
+    Number(routes?.[selectedRouteIndex ?? 0]?.properties?.['track-length']) ?? 0
   );
   const timeStr = secondsToTimeString(
-    Number(routeProperties?.['total-time']) ?? 0
+    Number(routes?.[selectedRouteIndex ?? 0]?.properties?.['total-time']) ?? 0
   );
 
   return (

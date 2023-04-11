@@ -1,3 +1,8 @@
+export interface RouteData {
+  lineString: GeoJSON.LineString;
+  properties: BrouterProperties;
+}
+
 export interface BrouterProperties {
   cost: string;
   creator: string;

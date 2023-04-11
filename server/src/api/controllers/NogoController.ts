@@ -112,10 +112,14 @@ export const nogo = (app: express.Router) => {
         );
 
       try {
-        const { route } = await routerService.getRouteForNewNogo(
+        const { lineString } = await routerService.getRouteForNewNogo(
           nogoCreate.points
         );
-        const nogo = await nogoService.create(route, nogoGroupId, regionId);
+        const nogo = await nogoService.create(
+          lineString,
+          nogoGroupId,
+          regionId
+        );
         if (!nogo) throw new Error('Nogo could not be created');
         return res.json({ nogo });
       } catch (error: any) {
@@ -127,6 +131,14 @@ export const nogo = (app: express.Router) => {
           ].includes(error.message)
         )
           throw new BadRequestError(error.message);
+        if (
+          String(error.message).includes(
+            'position not mapped in existing datafile'
+          )
+        )
+          throw new BadRequestError(
+            'One or more of your points are not close enough to a routable location. Please select another point.'
+          );
         throw error;
       }
     } catch (err) {

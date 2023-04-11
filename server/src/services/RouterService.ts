@@ -45,22 +45,14 @@ export class RouterService {
       })
       .then((res) => {
         const fc: GeoJSON.FeatureCollection = res.data;
-        const route = fc.features[0].geometry as GeoJSON.LineString;
+        const lineString = fc.features[0].geometry as GeoJSON.LineString;
         const properties = fc.features[0].properties;
-        return { route, properties };
+        return { lineString, properties };
       })
       .catch((error) => {
-        if (
-          String(error.response?.data).includes(
-            'position not mapped in existing datafile'
-          )
-        ) {
-          throw new Error(
-            'One or more of your points are not close enough to a routable location. Please select another point.'
-          );
-        }
-        console.log(error); // Log unhandled BRouter errors to console
-        throw new Error(error.response?.data ?? 'BRouter error');
+        throw new Error(
+          error.response?.data ?? error.message ?? 'BRouter error'
+        );
       });
   }
 
@@ -104,12 +96,18 @@ export class RouterService {
       )
     ).flat();
 
-    const route = await this.fetchRoute(
-      lonlats,
-      [...groupNogos, ...regionNogos],
-      profile,
-      routeOptions.alternativeidx
+    const alternativeidxs = [0, 1, 2] as (0 | 1 | 2 | 3)[];
+    const routes = await Promise.all(
+      alternativeidxs.map((alternativeidx) =>
+        this.fetchRoute(
+          lonlats,
+          [...groupNogos, ...regionNogos],
+          profile,
+          alternativeidx
+        )
+      )
     );
-    return route;
+
+    return routes;
   }
 }

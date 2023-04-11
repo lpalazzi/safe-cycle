@@ -32,7 +32,6 @@ export class TrackerApi {
       preferBikeFriendly: routeOptions.preferBikeFriendly ? 1 : 0,
       preferCycleRoutes: routeOptions.preferCycleRoutes ? 1 : 0,
       surfacePreference: routeOptions.surfacePreference ?? 'none',
-      alternativeidx: routeOptions.alternativeidx ?? 0,
       distance: Number(properties['track-length']),
       withPrivateNogos: nogoGroupIds.length > 0 ? 1 : 0,
     });

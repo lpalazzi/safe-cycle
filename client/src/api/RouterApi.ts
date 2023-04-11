@@ -2,7 +2,7 @@ import L from 'leaflet';
 import { ID, RouteOptions } from 'types';
 import { User } from 'models';
 import { TrackerApi } from 'api';
-import { BrouterProperties } from './interfaces/Router';
+import { RouteData } from 'api/interfaces/Router';
 import { makeRequest } from './reqHelpers';
 
 export class RouterApi {
@@ -29,15 +29,14 @@ export class RouterApi {
         routeOptions,
       }
     );
-    const route: GeoJSON.LineString = response.route;
-    const properties: BrouterProperties = response.properties;
+    const routes: RouteData[] = response.routes;
     TrackerApi.logRoute(
       waypoints,
       routeOptions,
-      properties,
+      routes[0].properties,
       user,
       nogoGroupIds
     );
-    return { route, properties };
+    return routes;
   }
 }

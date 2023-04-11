@@ -4,7 +4,7 @@ import { useGlobalContext } from './globalContext';
 import { ID, Location, Waypoint } from 'types';
 import { Nogo } from 'models';
 import { GeocodingApi, NogoApi, RouterApi } from 'api';
-import { BrouterProperties } from 'api/interfaces/Router';
+import { RouteData } from 'api/interfaces/Router';
 import { showNotification } from '@mantine/notifications';
 
 type MapContextType =
@@ -14,8 +14,8 @@ type MapContextType =
       currentLocation: Location | null;
       followUser: boolean;
       waypoints: Waypoint[];
-      route: GeoJSON.LineString | null;
-      routeProperties: BrouterProperties | null;
+      routes: RouteData[] | null;
+      selectedRouteIndex: number | null;
       nogoRoutes: Nogo[];
       lineToCursor: [L.LatLng, L.LatLng] | null;
       loadingRoute: boolean;
@@ -28,6 +28,8 @@ type MapContextType =
       reorderWaypoint: (sourceIndex: number, destIndex: number) => void;
       removeWaypoint: (index: number) => void;
       clearWaypoints: () => void;
+      fetchRoute: () => void;
+      selectRouteAlternative: (index: number) => void;
       deleteNogo: (nogoId: ID) => void;
       clearNogoWaypoints: () => void;
       refreshWaypointLineToCursor: (mousePosition: L.LatLng | null) => void;
@@ -57,9 +59,10 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   const [followUser, setFollowUser] = useState(false);
   const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
   const [nogoWaypoints, setNogoWaypoints] = useState<L.LatLng[]>([]);
-  const [route, setRoute] = useState<GeoJSON.LineString | null>(null);
-  const [routeProperties, setRouteProperties] =
-    useState<BrouterProperties | null>(null);
+  const [routes, setRoutes] = useState<RouteData[] | null>(null);
+  const [selectedRouteIndex, setSelectedRouteIndex] = useState<number | null>(
+    null
+  );
   const [lineToCursor, setLineToCursor] = useState<[L.LatLng, L.LatLng] | null>(
     null
   );
@@ -111,6 +114,8 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
 
   const clearWaypoints = () => {
     setWaypoints([]);
+    setRoutes(null);
+    setSelectedRouteIndex(null);
   };
 
   const clearNogoWaypoints = () => {
@@ -125,7 +130,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     }
   };
 
-  useEffect(() => {
+  const fetchRoute = () => {
     if (!editingGroupOrRegion && waypoints.length >= 2) {
       const regionIds: ID[] = routeOptions.avoidNogos
         ? regions.map((region) => region._id)
@@ -138,33 +143,64 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         routeOptions,
         loggedInUser
       )
-        .then((res) => {
-          setRoute(res.route);
-          setRouteProperties(res.properties);
+        .then((fetchedRoutes) => {
+          setRoutes(fetchedRoutes);
+          setSelectedRouteIndex(fetchedRoutes.length > 1 ? null : 0);
           setFetchingCount((prev) => prev - 1);
         })
         .catch((err) => {
           setFetchingCount((prev) => prev - 1);
-          if (
-            !String(err.message).includes(
-              'operation killed by thread-priority-watchdog'
-            )
-          ) {
-            showNotification({
-              title: 'Error fetching route',
-              message: err.message || 'Undefined error',
-              color: 'red',
-            });
-          }
+          setRoutes(null);
+          setSelectedRouteIndex(null);
+          showNotification({
+            title: 'Error fetching route',
+            message: err.message || 'Undefined error',
+            color: 'red',
+          });
         });
     } else {
-      setRoute(null);
-      setRouteProperties(null);
+      setRoutes(null);
+      setSelectedRouteIndex(null);
     }
-  }, [waypoints, selectedNogoGroups, editingGroupOrRegion, routeOptions]);
+  };
 
-  useEffect(() => {
-    if (nogoWaypoints.length >= 2 && editingGroupOrRegion) {
+  const refreshNogoRoutes = () => {
+    if (editingGroupOrRegion) {
+      NogoApi.getAllByGroup(
+        editingGroupOrRegion._id,
+        editingGroupOrRegion.isRegion
+      )
+        .then(setNogoRoutes)
+        .catch((error) =>
+          showNotification({
+            title: `Error fetching nogos for ${editingGroupOrRegion.name}`,
+            message: error.message || 'Undefined error',
+            color: 'red',
+          })
+        );
+    } else {
+      Promise.all(
+        selectedNogoGroups.map((selectedNogoGroup) =>
+          NogoApi.getAllByGroup(selectedNogoGroup, false)
+        )
+      )
+        .then((val) => setNogoRoutes(val.flat()))
+        .catch((error) =>
+          showNotification({
+            title: 'Error fetching private nogos',
+            message: error.message || 'Undefined error',
+            color: 'red',
+          })
+        );
+    }
+  };
+
+  const selectRouteAlternative = (index: number) => {
+    if (index !== selectedRouteIndex) setSelectedRouteIndex(index);
+  };
+
+  const createNogo = () => {
+    if (editingGroupOrRegion && nogoWaypoints.length >= 2) {
       NogoApi.create(
         nogoWaypoints,
         editingGroupOrRegion.isRegion ? undefined : editingGroupOrRegion._id,
@@ -183,40 +219,37 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
           });
         });
     }
-  }, [nogoWaypoints]);
+  };
 
-  const refreshNogoRoutes = async () => {
-    try {
-      if (editingGroupOrRegion) {
-        NogoApi.getAllByGroup(
-          editingGroupOrRegion._id,
-          editingGroupOrRegion.isRegion
-        ).then(setNogoRoutes);
-      } else {
-        const fetchedNogos: Nogo[] = (
-          await Promise.all(
-            selectedNogoGroups.map(async (selectedNogoGroup) => {
-              return NogoApi.getAllByGroup(selectedNogoGroup, false);
-            })
-          )
-        ).flat();
-        setNogoRoutes(fetchedNogos);
-      }
-    } catch (error: any) {
-      showNotification({
-        title: 'Error fetching n',
-        message: error.message || 'Undefined error',
-        color: 'red',
-      });
-    }
+  const deleteNogo = (nogoId: ID) => {
+    NogoApi.delete(nogoId)
+      .then(() => refreshNogoRoutes())
+      .catch((error) =>
+        showNotification({
+          title: 'Error deleting nogo',
+          message: error.message || 'Undefined error',
+          color: 'red',
+        })
+      );
   };
 
   useEffect(() => {
+    fetchRoute();
+  }, [waypoints, editingGroupOrRegion, selectedNogoGroups, routeOptions]);
+
+  useEffect(() => {
+    createNogo();
+  }, [editingGroupOrRegion, nogoWaypoints]);
+
+  useEffect(() => {
     refreshNogoRoutes();
-    if (!editingGroupOrRegion) {
-      clearNogoWaypoints();
-    }
-  }, [editingGroupOrRegion, selectedNogoGroups]);
+  }, [selectedNogoGroups]);
+
+  useEffect(() => {
+    refreshNogoRoutes();
+    if (!editingGroupOrRegion) clearNogoWaypoints();
+    if (routes) setRoutes(null);
+  }, [editingGroupOrRegion]);
 
   useEffect(() => {
     if (!loggedInUser) {
@@ -227,24 +260,6 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     }
   }, [loggedInUser]);
 
-  const deleteNogo = async (nogoId: ID) => {
-    try {
-      const deletedCount = await NogoApi.delete(nogoId);
-      showNotification({
-        message:
-          deletedCount > 0 ? '1 nogo was deleted' : 'Nogo was not deleted',
-        color: deletedCount > 0 ? 'green' : 'red',
-      });
-      refreshNogoRoutes();
-    } catch (error: any) {
-      showNotification({
-        title: 'Error deleting nogo',
-        message: error.message || 'Undefined error',
-        color: 'red',
-      });
-    }
-  };
-
   return (
     <MapContext.Provider
       value={{
@@ -252,8 +267,8 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         currentLocation,
         followUser,
         waypoints,
-        route,
-        routeProperties,
+        routes,
+        selectedRouteIndex,
         nogoRoutes,
         lineToCursor,
         loadingRoute,
@@ -265,6 +280,8 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         reorderWaypoint,
         removeWaypoint,
         clearWaypoints,
+        fetchRoute,
+        selectRouteAlternative,
         deleteNogo,
         clearNogoWaypoints,
         refreshWaypointLineToCursor,

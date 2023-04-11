@@ -19,13 +19,11 @@ import { Nogos } from './Nogos';
 import { Region } from './Region';
 import { EditingNogoIndicator } from './EditingNogoIndicator';
 import { RecenterButton } from './RecenterButton';
-import { LoadingIndicator } from './LoadingIndicator';
 import { RouteProperties } from './RouteProperties';
 
 export const Map: React.FC = () => {
-  const { editingGroupOrRegion, isNavModeOn, isNavbarOpen } =
-    useGlobalContext();
-  const { followUser, route, routeProperties, setMap } = useMapContext();
+  const { editingGroupOrRegion, isNavModeOn } = useGlobalContext();
+  const { followUser, routes, setMap } = useMapContext();
   return (
     <>
       <MapContainer
@@ -46,7 +44,6 @@ export const Map: React.FC = () => {
       >
         <TileLayer
           attribution='Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
-          // url='https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png'
           url='https://tile.openstreetmap.org/{z}/{x}/{y}.png'
           minZoom={0}
           maxZoom={19}
@@ -62,10 +59,8 @@ export const Map: React.FC = () => {
         ) : null}
         <Region />
         <Nogos />
-        {!isNavbarOpen ? <LoadingIndicator /> : null}
       </MapContainer>
-      {route && routeProperties ? <RouteProperties /> : null}
-      {isNavbarOpen ? <LoadingIndicator /> : null}
+      {routes ? <RouteProperties /> : null}
       {editingGroupOrRegion ? <EditingNogoIndicator /> : null}
       {isNavModeOn && !followUser ? <RecenterButton /> : null}
     </>
