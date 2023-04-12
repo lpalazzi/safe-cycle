@@ -50,9 +50,11 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     editingGroupOrRegion,
     selectedNogoGroups,
     routeOptions,
+    showAlternateRoutes,
     regions,
     clearSelectedNogoGroups,
     setEditingGroupOrRegion,
+    setShowAlternateRoutes,
   } = useGlobalContext();
 
   const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
@@ -140,7 +142,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         waypoints.map((waypoint) => waypoint.latlng),
         selectedNogoGroups,
         regionIds,
-        routeOptions,
+        { ...routeOptions, showAlternateRoutes },
         loggedInUser
       )
         .then((fetchedRoutes) => {
@@ -196,7 +198,8 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   };
 
   const selectRouteAlternative = (index: number) => {
-    if (index !== selectedRouteIndex) setSelectedRouteIndex(index);
+    setSelectedRouteIndex(index);
+    setShowAlternateRoutes(false);
   };
 
   const createNogo = () => {
@@ -236,6 +239,15 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   useEffect(() => {
     fetchRoute();
   }, [waypoints, editingGroupOrRegion, selectedNogoGroups, routeOptions]);
+
+  useEffect(() => {
+    if (showAlternateRoutes) {
+      if (routes && routes?.length > 1) setSelectedRouteIndex(null);
+      else fetchRoute();
+    } else {
+      if (!selectedRouteIndex && selectedRouteIndex !== 0) fetchRoute();
+    }
+  }, [showAlternateRoutes]);
 
   useEffect(() => {
     createNogo();

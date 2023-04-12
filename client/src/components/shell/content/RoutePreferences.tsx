@@ -54,7 +54,13 @@ const comfortPresets: { [key: string]: Partial<RouteOptions> } = {
 };
 
 export const RoutePreferences: React.FC = () => {
-  const { routeOptions, isMobileSize, updateRouteOptions } = useGlobalContext();
+  const {
+    routeOptions,
+    showAlternateRoutes,
+    isMobileSize,
+    updateRouteOptions,
+    setShowAlternateRoutes,
+  } = useGlobalContext();
   const { openModal } = useModals();
   const [comfortValue, setComfortValue] = useState('Medium');
 
@@ -211,6 +217,11 @@ export const RoutePreferences: React.FC = () => {
           ]}
         />
       </Input.Wrapper>
+      <Checkbox
+        label='Show alternate routes'
+        checked={showAlternateRoutes}
+        onChange={(e) => setShowAlternateRoutes(e.currentTarget.checked)}
+      />
     </Stack>
   );
 };

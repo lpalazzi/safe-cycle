@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import L from 'leaflet';
 import { GeoJSON, Tooltip } from 'react-leaflet';
 import { useMapContext } from '../../contexts/mapContext';
@@ -9,15 +9,33 @@ export const Route: React.FC = () => {
   const { routes, selectedRouteIndex, selectRouteAlternative } =
     useMapContext();
   const theme = useMantineTheme();
+  const [hoveredRouteIndex, setHoveredRouteIndex] = useState<number | null>(
+    null
+  );
+
+  let shortestDistance: number;
+  const shortestRouteIndex =
+    routes?.reduce((acc, route, idx) => {
+      const routeDistance = Number(route.properties['track-length']);
+      if (!shortestDistance || routeDistance < shortestDistance) {
+        shortestDistance = routeDistance;
+        return idx;
+      }
+      return acc;
+    }, 0) ?? 0;
 
   return routes ? (
     <>
       {selectedRouteIndex || selectedRouteIndex === 0 ? (
         <GeoJSON
-          key={routes[selectedRouteIndex].properties.times.reduce(
-            (acc, a) => acc + a,
-            0
-          )}
+          key={
+            999 +
+            routes.length +
+            routes[selectedRouteIndex].properties.times.reduce(
+              (acc, a) => acc + a,
+              0
+            )
+          }
           data={routes[selectedRouteIndex].lineString}
           style={{
             color: theme.colors.blue[9],
@@ -26,8 +44,10 @@ export const Route: React.FC = () => {
           }}
         />
       ) : (
-        routes
+        [...routes]
           .map((route, index) => {
+            const isHovered = hoveredRouteIndex === index;
+            const isShortestRoute = shortestRouteIndex === index;
             const isDefaultRoute = index === 0;
             const distanceStr = metresToDistanceString(
               Number(route.properties['track-length']) ?? 0
@@ -38,7 +58,9 @@ export const Route: React.FC = () => {
             return (
               <GeoJSON
                 key={
-                  index + route.properties.times.reduce((acc, a) => acc + a, 0)
+                  routes.length +
+                  index +
+                  route.properties.times.reduce((acc, a) => acc + a, 0)
                 }
                 data={route.lineString}
                 style={{
@@ -54,8 +76,7 @@ export const Route: React.FC = () => {
                     selectRouteAlternative(index);
                   },
                   mouseover: (e) => {
-                    // if (!isDefaultRoute)
-                    //   e.sourceTarget.getTooltip().setLatLng(e.latlng);
+                    setHoveredRouteIndex(index);
                     e.sourceTarget.bringToFront();
                     e.sourceTarget.setStyle({
                       color: isDefaultRoute
@@ -66,6 +87,7 @@ export const Route: React.FC = () => {
                     });
                   },
                   mouseout: (e) => {
+                    setHoveredRouteIndex(null);
                     if (!isDefaultRoute) e.sourceTarget.bringToBack();
                     e.sourceTarget.setStyle({
                       color: isDefaultRoute
@@ -77,18 +99,38 @@ export const Route: React.FC = () => {
                   },
                 }}
               >
-                {isDefaultRoute ? null : (
-                  <Tooltip>
-                    <Stack align='center' spacing='xs'>
-                      {distanceStr ? (
-                        <Property label='Distance' value={distanceStr} />
-                      ) : null}
-                      {timeStr ? (
-                        <Property label='Travel time' value={timeStr} />
-                      ) : null}
-                    </Stack>
-                  </Tooltip>
-                )}
+                <Tooltip permanent={isShortestRoute}>
+                  <Stack align='center' spacing={0}>
+                    {isShortestRoute && !isHovered ? (
+                      <Text size='xs' fw='bold' c={theme.colors.green[7]}>
+                        Shortest
+                      </Text>
+                    ) : (
+                      <>
+                        {isDefaultRoute ? (
+                          <Text
+                            size='xs'
+                            fw='bold'
+                            italic
+                            c={theme.colors.blue[9]}
+                          >
+                            Recommended
+                          </Text>
+                        ) : null}
+                        {distanceStr ? (
+                          <Text fw={700} size='xs'>
+                            {distanceStr}
+                          </Text>
+                        ) : null}
+                        {timeStr ? (
+                          <Text fw={700} size='xs'>
+                            {timeStr}
+                          </Text>
+                        ) : null}
+                      </>
+                    )}
+                  </Stack>
+                </Tooltip>
               </GeoJSON>
             );
           })
@@ -96,18 +138,4 @@ export const Route: React.FC = () => {
       )}
     </>
   ) : null;
-};
-
-const Property: React.FC<{ label: string; value: string }> = ({
-  label,
-  value,
-}) => {
-  return (
-    <Text fw={700} size='xs'>
-      {label}:{' '}
-      <Text span c='blue' inherit>
-        {value}
-      </Text>
-    </Text>
-  );
 };

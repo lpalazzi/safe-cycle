@@ -8,8 +8,6 @@ export const RouteProperties: React.FC = () => {
   const { isMobileSize, isNavbarOpen } = useGlobalContext();
   const { routes, selectedRouteIndex } = useMapContext();
 
-  // if (!selectedRouteIndex && selectedRouteIndex !== 0) return null;
-
   const distanceStr = metresToDistanceString(
     Number(routes?.[selectedRouteIndex ?? 0]?.properties?.['track-length']) ?? 0
   );
@@ -35,10 +33,18 @@ export const RouteProperties: React.FC = () => {
         e.stopPropagation();
       }}
     >
-      <Group position='center' noWrap>
-        {distanceStr ? <Property label='Distance' value={distanceStr} /> : null}
-        {timeStr ? <Property label='Travel time' value={timeStr} /> : null}
-      </Group>
+      {selectedRouteIndex || selectedRouteIndex === 0 ? (
+        <Group position='center' noWrap>
+          {distanceStr ? (
+            <Property label='Distance' value={distanceStr} />
+          ) : null}
+          {timeStr ? <Property label='Travel time' value={timeStr} /> : null}
+        </Group>
+      ) : (
+        <Text fw={700} size='sm' c='blue'>
+          Click a route option to select it
+        </Text>
+      )}
     </Paper>
   );
 };
