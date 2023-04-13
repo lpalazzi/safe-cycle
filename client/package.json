@@ -28,6 +28,7 @@
     "leaflet": "^1.9.3",
     "leaflet-easybutton": "^2.4.0",
     "leaflet-marker-rotation": "^0.4.0",
+    "leaflet-touch-helper": "^2.0.0",
     "leaflet.awesome-markers": "^2.0.5",
     "lodash.debounce": "^4.0.8",
     "prop-types": "^15.7.2",

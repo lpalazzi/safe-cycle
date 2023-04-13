@@ -34,14 +34,14 @@ export const RouteProperties: React.FC = () => {
       }}
     >
       {selectedRouteIndex || selectedRouteIndex === 0 ? (
-        <Group position='center' noWrap>
+        <Group position='center' spacing='xs'>
           {distanceStr ? (
             <Property label='Distance' value={distanceStr} />
           ) : null}
           {timeStr ? <Property label='Travel time' value={timeStr} /> : null}
         </Group>
       ) : (
-        <Text fw={700} size='sm' c='blue'>
+        <Text fw={700} size='sm' c='blue' align='center'>
           Click a route option to select it
         </Text>
       )}

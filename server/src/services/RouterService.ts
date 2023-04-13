@@ -96,9 +96,10 @@ export class RouterService {
       )
     ).flat();
 
-    const alternativeidxs: (0 | 1 | 2 | 3)[] = routeOptions.showAlternateRoutes
-      ? [0, 1, 2]
-      : [0];
+    const alternativeidxs: (0 | 1 | 2 | 3)[] =
+      routeOptions.showAlternateRoutes && !routeOptions.shortest
+        ? [0, 1, 2]
+        : [0];
     const routes = await Promise.all(
       alternativeidxs.map((alternativeidx) =>
         this.fetchRoute(

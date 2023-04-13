@@ -4033,6 +4033,11 @@ leaflet-marker-rotation@^0.4.0:
   resolved "https://registry.yarnpkg.com/leaflet-marker-rotation/-/leaflet-marker-rotation-0.4.0.tgz#c375db65e8e8f0ef7449c5d7ffb9d96d475e41de"
   integrity sha512-7I+l/Ky3mP7LQ+nfVA+Gzjl5NOb02mph3v9SD2dPoCEQ/vV3zuZp+7Sewm2Pgk2zH9Aa4+mPqNTSSSLe3D7lmg==
 
+leaflet-touch-helper@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/leaflet-touch-helper/-/leaflet-touch-helper-2.0.0.tgz#d9f374da05bb79834c9e1516acf74d18c255c906"
+  integrity sha512-uZNBa3wJ0BWpMLsV1anm4g3V23SoMZsmNtqmD7FPhtr8G/dj9EVdg9tSspNPr80TH8m3kwJV67/9+QPx3E7kBA==
+
 leaflet.awesome-markers@^2.0.5:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/leaflet.awesome-markers/-/leaflet.awesome-markers-2.0.5.tgz#b7b0210d87e2566359bf478c1ab3ab07c7246f30"

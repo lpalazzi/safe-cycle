@@ -13,9 +13,10 @@ import {
   Paper,
   Title,
   Select,
+  Switch,
 } from '@mantine/core';
 import { useModals } from '@mantine/modals';
-import { IconInfoCircle, IconUserCog } from '@tabler/icons-react';
+import { IconInfoCircle, IconRoute2, IconUserCog } from '@tabler/icons-react';
 import { RouteOptions, SurfacePreference } from 'types';
 import { useGlobalContext } from 'contexts/globalContext';
 import { SidebarTitle } from '../common/SidebarTitle';
@@ -27,26 +28,22 @@ import MediumComfortIcon from 'assets/comfortlevels/3-medium.png';
 import HighComfortIcon from 'assets/comfortlevels/4-high.png';
 
 const comfortPresets: { [key: string]: Partial<RouteOptions> } = {
-  Lowest: {
-    avoidNogos: false,
+  Shortest: {
     shortest: true,
     preferBikeFriendly: false,
     preferCycleRoutes: false,
   },
   Low: {
-    avoidNogos: false,
     shortest: false,
     preferBikeFriendly: false,
     preferCycleRoutes: false,
   },
   Medium: {
-    avoidNogos: true,
     shortest: false,
     preferBikeFriendly: true,
     preferCycleRoutes: false,
   },
   High: {
-    avoidNogos: true,
     shortest: false,
     preferBikeFriendly: true,
     preferCycleRoutes: true,
@@ -72,21 +69,43 @@ export const RoutePreferences: React.FC = () => {
   return (
     <Stack spacing='xs'>
       <SidebarTitle title='Route Preferences' />
+      <Switch
+        label={
+          <div style={{ display: 'flex' }}>
+            Avoid nogos
+            <Space w='xs' />
+            <Tooltip
+              withArrow
+              transition='fade'
+              transitionDuration={200}
+              label='Learn more'
+            >
+              <IconInfoCircle
+                size={16}
+                style={{
+                  lineHeight: 1.55,
+                  margin: 'auto',
+                  cursor: 'pointer',
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  openModal(AboutModal('about', isMobileSize));
+                }}
+              />
+            </Tooltip>
+          </div>
+        }
+        checked={routeOptions.avoidNogos}
+        onChange={(e) =>
+          updateRouteOptions({ avoidNogos: e.currentTarget.checked })
+        }
+      />
       <Input.Wrapper label='Select a comfort level'>
         <SegmentedControl
           fullWidth
           value={comfortValue}
           onChange={handleComfortLevelSelected}
           data={[
-            {
-              value: 'Lowest',
-              label: (
-                <Stack align='center' spacing={0}>
-                  <Image src={LowestComfortIcon} width='2rem' mih='2rem' />
-                  Lowest
-                </Stack>
-              ),
-            },
             {
               value: 'Low',
               label: (
@@ -115,6 +134,15 @@ export const RoutePreferences: React.FC = () => {
               ),
             },
             {
+              value: 'Shortest',
+              label: (
+                <Stack align='center' spacing={0}>
+                  <IconRoute2 size='2rem' />
+                  Shortest
+                </Stack>
+              ),
+            },
+            {
               value: 'Custom',
               label: (
                 <Stack align='center' spacing={0}>
@@ -128,37 +156,6 @@ export const RoutePreferences: React.FC = () => {
       </Input.Wrapper>
       {comfortValue === 'Custom' ? (
         <>
-          <Checkbox
-            label={
-              <div style={{ display: 'flex' }}>
-                Avoid nogos
-                <Space w='xs' />
-                <Tooltip
-                  withArrow
-                  transition='fade'
-                  transitionDuration={200}
-                  label='Learn more'
-                >
-                  <IconInfoCircle
-                    size={16}
-                    style={{
-                      lineHeight: 1.55,
-                      margin: 'auto',
-                      cursor: 'pointer',
-                    }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      openModal(AboutModal('about', isMobileSize));
-                    }}
-                  />
-                </Tooltip>
-              </div>
-            }
-            checked={routeOptions.avoidNogos}
-            onChange={(e) =>
-              updateRouteOptions({ avoidNogos: e.currentTarget.checked })
-            }
-          />
           <Checkbox
             label='Prefer bike-friendly roads'
             checked={routeOptions.preferBikeFriendly}
@@ -221,6 +218,7 @@ export const RoutePreferences: React.FC = () => {
         label='Show alternate routes'
         checked={showAlternateRoutes}
         onChange={(e) => setShowAlternateRoutes(e.currentTarget.checked)}
+        disabled={routeOptions.shortest}
       />
     </Stack>
   );
@@ -237,40 +235,45 @@ const ComfortLevel: React.FC<{ comfortLevel: string }> = React.memo(
       case 'High':
         imgSrc = HighComfortIcon;
         description =
-          'Prioritizes avoiding car traffic and nogos, and primarily routes the user via dedicated cycling infrastructure.';
+          'Prioritizes avoiding most car traffic, and primarily routes the user via dedicated cycling infrastructure.';
         riderHint = 'Suitable for cyclists of all ages and abilities';
         break;
       case 'Medium':
         imgSrc = MediumComfortIcon;
         description =
-          'Makes an effort to avoid busy roads and nogos, but may still route the user on roads with light car traffic.';
+          'Prioritizes routing on bike-friendly roads, but may still route the user on roads with light car traffic.';
         riderHint = 'Suitable for cyclists of most ages and abilities';
         break;
       case 'Low':
         imgSrc = LowComfortIcon;
         description =
           'Prioritizes arriving to the destination efficiently, and may route the user on roads with considerable car traffic.';
-        riderHint = 'Suitable for experienced cyclists';
+        riderHint = 'Suitable for experienced and risk-tolerant cyclists';
         break;
-      case 'Lowest':
-        imgSrc = LowestComfortIcon;
+      case 'Shortest':
         description =
           'Prioritizes finding the shortest route available, and will likely route the user on roads with considerable car traffic.';
-        riderHint = 'Only recommended for experienced cyclists';
+        riderHint = 'Only recommended if used while avoiding nogos';
         break;
     }
 
     return (
       <Paper shadow='sm' radius='md' p='sm' bg={theme.colors.gray[1]}>
         <Title order={6} align='center'>
-          {comfortLevel + ' Comfort'}
+          {comfortLevel === 'Shortest'
+            ? 'Shortest Available'
+            : comfortLevel + ' Comfort'}
         </Title>
         <Grid align='center' gutter={0} mih={100}>
           <Grid.Col span={5}>
             <div
               style={{ width: '60%', marginLeft: 'auto', marginRight: 'auto' }}
             >
-              <Image src={imgSrc} />
+              {comfortLevel === 'Shortest' ? (
+                <IconRoute2 size='80%' />
+              ) : (
+                <Image src={imgSrc} />
+              )}
             </div>
           </Grid.Col>
           <Grid.Col span={7}>

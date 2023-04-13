@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import L from 'leaflet';
+import 'leaflet-touch-helper';
 import { GeoJSON, Tooltip } from 'react-leaflet';
 import { useMapContext } from '../../contexts/mapContext';
 import { useMantineTheme, Text, Stack } from '@mantine/core';
 import { metresToDistanceString, secondsToTimeString } from 'utils/formatting';
 
 export const Route: React.FC = () => {
-  const { routes, selectedRouteIndex, selectRouteAlternative } =
+  const { map, routes, selectedRouteIndex, selectRouteAlternative } =
     useMapContext();
   const theme = useMantineTheme();
   const [hoveredRouteIndex, setHoveredRouteIndex] = useState<number | null>(
@@ -71,18 +72,23 @@ export const Route: React.FC = () => {
                   opacity: 1.0,
                 }}
                 eventHandlers={{
+                  add: (e) => {
+                    (L as any).path
+                      .touchHelper(e.sourceTarget, { extraWeight: 50 })
+                      .addTo(map);
+                  },
                   click: (e) => {
                     L.DomEvent.stopPropagation(e);
                     selectRouteAlternative(index);
                   },
-                  mouseover: (e) => {
+                  mousemove: (e) => {
                     setHoveredRouteIndex(index);
                     e.sourceTarget.bringToFront();
                     e.sourceTarget.setStyle({
                       color: isDefaultRoute
                         ? theme.colors.blue[9]
                         : theme.colors.gray[7],
-                      weight: 7,
+                      weight: 8,
                       opacity: 1.0,
                     });
                   },

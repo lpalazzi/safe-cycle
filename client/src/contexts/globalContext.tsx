@@ -57,7 +57,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     NogoGroup | Region | null
   >(null);
   const [routeOptions, setRouteOptions] = useState<RouteOptions>({
-    avoidNogos: true,
+    avoidNogos: false,
     shortest: false,
     preferBikeFriendly: true,
     preferCycleRoutes: false,
