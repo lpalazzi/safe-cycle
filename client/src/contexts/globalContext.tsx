@@ -61,7 +61,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     shortest: false,
     preferBikeFriendly: true,
     preferCycleRoutes: false,
-    surfacePreference: 'preferPaved',
+    surfacePreference: 'none',
   });
   const [showAlternateRoutes, setShowAlternateRoutes] = useState(false);
   const [regions, setRegions] = useState<Region[]>([]);
