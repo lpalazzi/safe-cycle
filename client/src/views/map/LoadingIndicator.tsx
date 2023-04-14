@@ -9,7 +9,7 @@ export const LoadingIndicator: React.FC = () => {
       style={{
         width: '100%',
         height: '100%',
-        position: 'relative',
+        position: 'absolute',
         cursor: loadingRoute ? 'wait' : 'unset',
       }}
     >
@@ -19,6 +19,7 @@ export const LoadingIndicator: React.FC = () => {
         radius='lg'
         transitionDuration={500}
         loaderProps={{ size: 'xl' }}
+        zIndex={10000}
       />
     </div>
   );

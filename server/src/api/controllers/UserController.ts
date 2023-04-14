@@ -1,20 +1,22 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import joi from 'joi';
+import argon2 from 'argon2';
 import { container } from 'tsyringe';
-import { UserService } from 'services';
 import {
   ModelNotFoundError,
   BadRequestError,
   InternalServerError,
+  DataNotFoundError,
 } from 'api/errors';
+import { checkLoggedIn, checkAdmin } from 'api/middlewares';
+import { UserService } from 'services';
 import { UserRole, UserSettings } from 'types';
 import {
   IUserChangePasswordDTO,
   IUserLoginDTO,
   IUserSignupDTO,
 } from 'interfaces';
-import { checkLoggedIn, checkAdmin } from 'api/middlewares';
 
 export const user = (app: express.Router) => {
   const route = express.Router();
@@ -38,15 +40,13 @@ export const user = (app: express.Router) => {
     checkAdmin,
     async (req, res, next) => {
       try {
-        if (!req.params.userId) {
+        if (!req.params.userId)
           throw new BadRequestError('userId not provided');
-        }
-        if (!mongoose.isValidObjectId(req.params.userId)) {
+        if (!mongoose.isValidObjectId(req.params.userId))
           throw new BadRequestError('userId is not a valid ObjectId');
-        }
         const userId = new mongoose.Types.ObjectId(req.params.userId);
         const user = await userService.getById(userId);
-        if (!user) throw new InternalServerError('User not found');
+        if (!user) throw new ModelNotFoundError('User not found');
         return res.json({ user });
       } catch (err) {
         next(err);
@@ -57,24 +57,16 @@ export const user = (app: express.Router) => {
   route.get('/getActiveUser', async (req, res, next) => {
     try {
       const userId = req.session?.userId;
-
-      if (!userId) {
+      if (!userId || !mongoose.isValidObjectId(userId)) {
         return res.json({
           user: null,
         });
       }
 
-      if (!mongoose.isValidObjectId(req.session.userId)) {
-        throw new InternalServerError('Stored userId is not a valid ObjectId');
-      }
-
       const user = await userService.getById(
         new mongoose.Types.ObjectId(userId)
       );
-
-      if (!user) {
-        throw new ModelNotFoundError('User not found');
-      }
+      if (!user) throw new ModelNotFoundError('User not found');
 
       return res.json({
         user,
@@ -87,13 +79,31 @@ export const user = (app: express.Router) => {
   route.post('/signup', async (req, res, next) => {
     try {
       const userSignup: IUserSignupDTO = req.body.userSignup;
-      const { user, error } = await userService.signup(userSignup);
+      const { error } = joi
+        .object({
+          email: joi.string().email().required(),
+          password: joi.string().min(8).max(64).required(),
+          name: joi
+            .object({
+              first: joi.string().required(),
+              last: joi.string().required(),
+            })
+            .required(),
+        })
+        .required()
+        .validate(userSignup);
+      if (error) throw new BadRequestError(error.message);
 
-      if (error) {
-        throw new BadRequestError(error);
-      } else if (!user) {
-        throw new InternalServerError('User could not be created');
-      }
+      const userExistsWithEmail = await userService.existsByEmail(
+        userSignup.email
+      );
+      if (userExistsWithEmail)
+        throw new BadRequestError('A user already exists with this email');
+
+      const { password, ...userToCreate } = userSignup;
+      const passwordHash = await argon2.hash(password);
+      const user = await userService.create({ ...userToCreate, passwordHash });
+      if (!user) throw new InternalServerError('User could not be created');
 
       req.session.userId = user._id.toString();
       return res.json({ user });
@@ -105,13 +115,25 @@ export const user = (app: express.Router) => {
   route.post('/login', async (req, res, next) => {
     try {
       const userLogin: IUserLoginDTO = req.body.userLogin;
-      const { user, error } = await userService.login(userLogin);
+      const { error } = joi
+        .object({
+          email: joi.string().required(),
+          password: joi.string().required(),
+        })
+        .required()
+        .validate(userLogin);
+      if (error) throw new BadRequestError(error.message);
 
-      if (error) {
-        throw new BadRequestError(error);
-      } else if (!user) {
-        throw new InternalServerError('Could not sign in user');
-      }
+      const user = await userService.getByEmail(userLogin.email);
+      if (!user)
+        throw new ModelNotFoundError(
+          `User with email ${userLogin.email} not found`
+        );
+      const passwordHash = await userService.getHashById(user._id);
+      if (!passwordHash)
+        throw new DataNotFoundError('User does not have a password');
+      const verified = await argon2.verify(passwordHash, userLogin.password);
+      if (!verified) throw new BadRequestError('Incorrect password');
 
       req.session.userId = user._id.toString();
       return res.json({ user });
@@ -137,14 +159,33 @@ export const user = (app: express.Router) => {
       const userId = new mongoose.Types.ObjectId(req.session.userId);
       const changePasswordDTO: IUserChangePasswordDTO =
         req.body.changePasswordDTO;
-
-      const { success, error } = await userService.changePassword(
-        userId,
-        changePasswordDTO
+      const { error } = joi
+        .object({
+          currentPassword: joi.string().required(),
+          newPassword: joi.string().min(8).max(64).required(),
+        })
+        .required()
+        .validate(changePasswordDTO);
+      if (error) throw new BadRequestError(error.message);
+      const user = await userService.getById(userId);
+      if (!user)
+        throw new ModelNotFoundError(
+          `No user found with id=${userId.toString()}`
+        );
+      const { currentPassword, newPassword } = changePasswordDTO;
+      const currentPasswordHash = await userService.getHashById(user._id);
+      const correctCurrentPassword = await argon2.verify(
+        currentPasswordHash ?? '',
+        currentPassword
       );
+      if (!correctCurrentPassword)
+        throw new BadRequestError('Incorrect current password');
 
-      if (error) throw new BadRequestError(error);
-
+      const newPasswordHash = await argon2.hash(newPassword);
+      const success = await userService.changeUserPassword(
+        user._id,
+        newPasswordHash
+      );
       return res.json({ success });
     } catch (err) {
       next(err);
@@ -157,26 +198,17 @@ export const user = (app: express.Router) => {
     checkAdmin,
     async (req, res, next) => {
       try {
-        if (!req.body.userId) {
-          throw new BadRequestError('userId not provided');
-        }
-        if (!mongoose.isValidObjectId(req.body.userId)) {
+        if (!req.body.userId) throw new BadRequestError('userId not provided');
+        if (!mongoose.isValidObjectId(req.body.userId))
           throw new BadRequestError('userId is not a valid ObjectId');
-        }
+
         const userId = new mongoose.Types.ObjectId(req.body.userId);
         const role: UserRole = req.body.role;
         if (![null, 'admin', 'verified contributor'].includes(role))
           throw new BadRequestError('Role must be a valid role');
 
         const success = await userService.updateUserRole(userId, role);
-        if (!success) {
-          throw new InternalServerError(
-            'Role could not be updated for this user'
-          );
-        }
-        return res.json({
-          success: true,
-        });
+        return res.json({ success });
       } catch (err) {
         next(err);
       }
@@ -202,12 +234,7 @@ export const user = (app: express.Router) => {
         userId,
         userSettings
       );
-      if (!success) {
-        throw new InternalServerError('User settings could not be updated');
-      }
-      return res.json({
-        success: true,
-      });
+      return res.json({ success });
     } catch (err) {
       next(err);
     }

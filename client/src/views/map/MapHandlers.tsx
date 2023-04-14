@@ -18,12 +18,13 @@ export const MapHandlers: React.FC = () => {
     clearWaypoints,
     clearNogoWaypoints,
   } = useMapContext();
-  const { isNavModeOn } = useGlobalContext();
+  const { editingGroupOrRegion, isNavModeOn } = useGlobalContext();
   const [navMarker, setNavMarker] = useState<L.RotatedMarker | null>(null);
 
   const map = useMapEvents({
     click: (e) => {
-      if (!loadingRoute) addWaypoint(e.latlng);
+      if (!loadingRoute)
+        addWaypoint(e.latlng, editingGroupOrRegion ? 'nogo' : undefined);
     },
     mousemove: (e) => {
       refreshWaypointLineToCursor(e.latlng);

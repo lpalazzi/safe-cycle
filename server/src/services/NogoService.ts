@@ -1,15 +1,14 @@
 import mongoose from 'mongoose';
 import { injectable, inject } from 'tsyringe';
-import { NogoDao, RegionDao } from 'daos';
-import { NogoGroupService, RegionService, RouterService } from 'services';
+import { NogoDao } from 'daos';
+import { NogoGroupService, RegionService } from 'services';
 
 @injectable()
 export class NogoService {
   constructor(
     private nogoDao: NogoDao,
     @inject('NogoGroupService') private nogoGroupService: NogoGroupService,
-    @inject('RegionService') private regionService: RegionService,
-    @inject('RouterService') private routerService: RouterService
+    @inject('RegionService') private regionService: RegionService
   ) {}
 
   async getAllByGroup(groupId: mongoose.Types.ObjectId, isRegion?: boolean) {
@@ -53,7 +52,7 @@ export class NogoService {
   }
 
   async create(
-    points: [GeoJSON.Position, GeoJSON.Position],
+    route: GeoJSON.LineString,
     nogoGroupId?: mongoose.Types.ObjectId,
     regionId?: mongoose.Types.ObjectId
   ) {
@@ -61,8 +60,6 @@ export class NogoService {
       throw new Error('Only one of nogoGroupId or regionId can be provided');
     if (!nogoGroupId && !regionId)
       throw new Error('Either nogoGroupId or regionId must be provided');
-
-    const { route } = await this.routerService.getRouteForNewNogo(points);
 
     const routeIsOutsideRegion =
       regionId &&

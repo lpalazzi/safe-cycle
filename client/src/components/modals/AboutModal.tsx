@@ -30,6 +30,8 @@ import { IconEditCircle, IconPlus } from '@tabler/icons-react';
 import LogoSvg from 'assets/brand/logo-name.svg';
 import ImgNogoWithout from 'assets/info/info-nogo-without.png';
 import ImgNogoWith from 'assets/info/info-nogo-with.png';
+import LogoXYZ from 'assets/sponsors/logo-xyz.png';
+import LogoSTR from 'assets/sponsors/logo-sharetheroad.png';
 import { useGlobalContext } from 'contexts/globalContext';
 import { Nogo } from 'models';
 import { EmailApi, NogoApi } from 'api';
@@ -105,7 +107,8 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
               roads that most cyclists should avoid.{' '}
               <i>
                 To apply our curated nogos, select the "Avoid nogos" checkbox in
-                your route preferences.
+                your custom route preferences. Medium and High Comfort levels
+                avoid nogos by default.
               </i>
             </Text>
             <Text align='center' fs='italic' fw='bold'>
@@ -154,9 +157,10 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
           </Accordion.Control>
           <Accordion.Panel>
             <Text>
-              In addition to nogos provided by local cyclists, users can create
-              custom nogos to use for personal use. This allows you to use nogos
-              that are tailored to your own cycling preferences.
+              In addition to nogos provided by our verified contributors, users
+              can create custom nogos to use for their own personal use. This
+              allows you to use nogos that are tailored to your own cycling
+              preferences.
             </Text>
             <Title order={5} mt='md' mb='xs'>
               How to add private nogos
@@ -256,6 +260,38 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
           </Accordion.Panel>
         </Accordion.Item>
       </Accordion>
+      <Text mt='md' ta='center'>
+        SafeCycle is made possible thanks to the following:
+      </Text>
+      <Group position='center' noWrap>
+        <Image
+          src={LogoXYZ}
+          caption='XYZ Digital Inc.'
+          height={75}
+          width='min(max-content, 100%)'
+          fit='contain'
+          withPlaceholder
+          style={{ cursor: 'pointer' }}
+          onClick={() => {
+            window.open('https://www.xyzdigital.com/', '_blank');
+          }}
+        />
+        <Image
+          src={LogoSTR}
+          caption='Share the Road Essex County'
+          height={150}
+          width='min(max-content, 100%)'
+          fit='contain'
+          withPlaceholder
+          style={{ cursor: 'pointer' }}
+          onClick={() => {
+            window.open(
+              'https://www.facebook.com/ShareTheRoadEssexCounty',
+              '_blank'
+            );
+          }}
+        />
+      </Group>
     </Container>
   );
 };

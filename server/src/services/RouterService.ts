@@ -1,11 +1,14 @@
 import axios from 'axios';
-import { injectable } from 'tsyringe';
+import mongoose from 'mongoose';
+import { injectable, inject } from 'tsyringe';
 import config from 'config';
 import { RouteOptions } from 'types';
+import { NogoService } from 'services';
+import { INogo, INogoReturnDTO } from 'interfaces';
 
 @injectable()
 export class RouterService {
-  constructor() {}
+  constructor(@inject('NogoService') private nogoService: NogoService) {}
 
   private brouterUrl = config.brouterUrl;
 
@@ -17,26 +20,24 @@ export class RouterService {
     return positions.map(this.positionToString).join('|');
   }
 
+  private nogosToParamString(nogos: INogo[]) {
+    return nogos.reduce((accumulated, nogo, index) => {
+      const trail = nogos.length - 1 === index ? '' : '|';
+      return (accumulated +=
+        nogo.lineString.coordinates.map(this.positionToString) + trail);
+    }, '');
+  }
+
   private async fetchRoute(
     lonlats: GeoJSON.Position[],
-    nogoGroupIds: string[],
-    regionIds: string[],
-    profile:
-      | 'safecycle'
-      | 'safecycle-avoidMainRoads'
-      | 'safecycle-avoidMainRoads-preferPaved'
-      | 'safecycle-avoidMainRoads-preferCycleRoutes'
-      | 'safecycle-avoidMainRoads-preferCycleRoutes-preferPaved'
-      | 'safecycle-preferPaved'
-      | 'safecycle-preferCycleRoutes'
-      | 'safecycle-preferCycleRoutes-preferPaved'
-      | 'all',
+    nogos: INogoReturnDTO[],
+    profile: string,
     alternativeidx: 0 | 1 | 2 | 3 = 0
   ) {
     const url = `${this.brouterUrl}?lonlats=${this.positionsToParamString(
       lonlats
-    )}&nogoGroupIds=${nogoGroupIds.join('|')}&regionIds=${regionIds.join(
-      '|'
+    )}&polylines=${this.nogosToParamString(
+      nogos
     )}&profile=${profile}&alternativeidx=${alternativeidx}&format=geojson`;
     return axios
       .get(url, {
@@ -44,45 +45,72 @@ export class RouterService {
       })
       .then((res) => {
         const fc: GeoJSON.FeatureCollection = res.data;
-        const route = fc.features[0].geometry as GeoJSON.LineString;
+        const lineString = fc.features[0].geometry as GeoJSON.LineString;
         const properties = fc.features[0].properties;
-        return { route, properties };
+        return { lineString, properties };
       })
       .catch((error) => {
-        if (
-          String(error.response?.data).includes(
-            'position not mapped in existing datafile'
-          )
-        ) {
-          throw new Error(
-            'One or more of your points are not close enough to a routable location. Please select another point.'
-          );
-        }
-        console.log(error); // Log unhandled BRouter errors to console
-        throw new Error(error.response?.data ?? 'BRouter error');
+        throw new Error(
+          error.response?.data ?? error.message ?? 'BRouter error'
+        );
       });
   }
 
   async getRouteForNewNogo(lonlats: [GeoJSON.Position, GeoJSON.Position]) {
-    const route = await this.fetchRoute(lonlats, [], [], 'all');
+    const route = await this.fetchRoute(lonlats, [], 'all');
     return route;
   }
 
   async getRouteForUser(
     lonlats: GeoJSON.Position[],
-    nogoGroupIds: string[],
-    regionIds: string[],
+    nogoGroupIds: mongoose.Types.ObjectId[],
+    regionIds: mongoose.Types.ObjectId[],
     routeOptions: RouteOptions
   ) {
-    const route = await this.fetchRoute(
-      lonlats,
-      nogoGroupIds,
-      regionIds,
-      `safecycle${routeOptions.avoidMainRoads ? '-avoidMainRoads' : ''}${
-        routeOptions.stickToCycleRoutes ? '-preferCycleRoutes' : ''
-      }${routeOptions.preferPaved ? '-preferPaved' : ''}`,
-      routeOptions.alternativeidx
+    const getSurfacePrefSuffix = () => {
+      if (routeOptions.surfacePreference === 'preferUnpaved') return '-prup';
+      else if (routeOptions.surfacePreference === 'strictPaved') return '-stp';
+      else if (routeOptions.surfacePreference === 'preferPaved') return '-prp';
+      else return '';
+    };
+
+    const profile = routeOptions.shortest
+      ? 'shortest'
+      : `safecycle${routeOptions.preferBikeFriendly ? '-pbf' : ''}${
+          routeOptions.preferCycleRoutes ? '-pcr' : ''
+        }${getSurfacePrefSuffix()}`;
+
+    const groupNogos = (
+      await Promise.all(
+        nogoGroupIds.map((nogoGroupId) =>
+          this.nogoService.getAllByGroup(nogoGroupId, false)
+        )
+      )
+    ).flat();
+
+    const regionNogos = (
+      await Promise.all(
+        regionIds.map((regionId) =>
+          this.nogoService.getAllByGroup(regionId, true)
+        )
+      )
+    ).flat();
+
+    const alternativeidxs: (0 | 1 | 2 | 3)[] =
+      routeOptions.showAlternateRoutes && !routeOptions.shortest
+        ? [0, 1, 2]
+        : [0];
+    const routes = await Promise.all(
+      alternativeidxs.map((alternativeidx) =>
+        this.fetchRoute(
+          lonlats,
+          [...groupNogos, ...regionNogos],
+          profile,
+          alternativeidx
+        )
+      )
     );
-    return route;
+
+    return routes;
   }
 }

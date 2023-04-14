@@ -18,6 +18,7 @@ type GlobalContextType =
       selectedNogoGroups: ID[];
       editingGroupOrRegion: NogoGroup | Region | null;
       routeOptions: RouteOptions;
+      showAlternateRoutes: boolean;
       regions: Region[];
       // functions
       updateLoggedInUser: () => void;
@@ -29,6 +30,7 @@ type GlobalContextType =
       clearSelectedNogoGroups: () => void;
       setEditingGroupOrRegion: (nogoGroup: NogoGroup | Region | null) => void;
       updateRouteOptions: (update: Partial<RouteOptions>) => void;
+      setShowAlternateRoutes: (val: boolean) => void;
       refreshRegions: () => void;
     }
   | undefined;
@@ -54,7 +56,14 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   const [editingGroupOrRegion, setEditingGroupOrRegion] = useState<
     NogoGroup | Region | null
   >(null);
-  const [routeOptions, setRouteOptions] = useState<RouteOptions>({});
+  const [routeOptions, setRouteOptions] = useState<RouteOptions>({
+    avoidNogos: false,
+    shortest: false,
+    preferBikeFriendly: true,
+    preferCycleRoutes: false,
+    surfacePreference: 'none',
+  });
+  const [showAlternateRoutes, setShowAlternateRoutes] = useState(false);
   const [regions, setRegions] = useState<Region[]>([]);
 
   useEffect(() => {
@@ -181,6 +190,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         selectedNogoGroups,
         editingGroupOrRegion,
         routeOptions,
+        showAlternateRoutes,
         regions,
         updateLoggedInUser,
         logoutUser,
@@ -191,6 +201,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         clearSelectedNogoGroups,
         setEditingGroupOrRegion: handleSetEditingGroupOrRegion,
         updateRouteOptions,
+        setShowAlternateRoutes,
         refreshRegions,
       }}
     >

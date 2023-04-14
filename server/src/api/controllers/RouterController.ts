@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import { container } from 'tsyringe';
 import { RouterService } from 'services';
 import { RouteOptions } from 'types';
-import { BadRequestError } from 'api/errors';
+import { BadRequestError, ServiceUnavailableError } from 'api/errors';
 
 export const router = (app: express.Router) => {
   const route = express.Router();
@@ -22,11 +22,6 @@ export const router = (app: express.Router) => {
       if (points.length < 2)
         throw new BadRequestError('Route request must have at least 2 points');
 
-      if (![undefined, 0, 1, 2, 3].includes(routeOptions.alternativeidx))
-        throw new BadRequestError(
-          'alternativeidx must be a valid integer from 0 to 3'
-        );
-
       const invalidNogoGroupId = nogoGroupIds.find(
         (nogoGroupId) => !mongoose.isValidObjectId(nogoGroupId)
       );
@@ -40,16 +35,39 @@ export const router = (app: express.Router) => {
         throw new BadRequestError(`${errorText} is not a valid ObjectId`);
       }
 
-      const data = await routerService.getRouteForUser(
-        points,
-        nogoGroupIds,
-        regionIds,
-        routeOptions
-      );
-      const route: GeoJSON.LineString = data.route;
-      const properties: GeoJSON.GeoJsonProperties = data.properties;
+      try {
+        const routes = await routerService.getRouteForUser(
+          points,
+          nogoGroupIds.map(
+            (nogoGroupId) => new mongoose.Types.ObjectId(nogoGroupId)
+          ),
+          regionIds.map((regionId) => new mongoose.Types.ObjectId(regionId)),
+          routeOptions
+        );
 
-      return res.json({ route, properties });
+        return res.json({ routes });
+      } catch (error: any) {
+        if (
+          String(error.message).includes(
+            'position not mapped in existing datafile'
+          )
+        )
+          throw new BadRequestError(
+            'One or more of your points are not close enough to a routable location. Please select another point.'
+          );
+
+        if (
+          String(error.message).includes(
+            'operation killed by thread-priority-watchdog'
+          )
+        )
+          throw new ServiceUnavailableError(
+            'Routing service is busy, please try again'
+          );
+
+        console.log(error.message); // Log unhandled BRouter errors to console
+        throw new Error(error.message ?? 'BRouter error');
+      }
     } catch (err) {
       next(err);
     }

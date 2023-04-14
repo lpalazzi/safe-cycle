@@ -5,6 +5,7 @@ import { Shell } from 'components/shell/Shell';
 import { MapContextProvider } from 'contexts/mapContext';
 import { GlobalContextProvider } from 'contexts/globalContext';
 import { Map } from 'views/map/Map';
+import { LoadingIndicator } from 'views/map/LoadingIndicator';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <NotificationsProvider position='top-right' zIndex={100000}>
           <ModalsProvider modalProps={{ zIndex: 10000 }}>
             <MapContextProvider>
+              <LoadingIndicator />
               <Shell>
                 <Map />
               </Shell>

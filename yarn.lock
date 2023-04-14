@@ -1912,17 +1912,18 @@
   dependencies:
     "@sinonjs/commons" "^2.0.0"
 
-"@tabler/icons-react@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@tabler/icons-react/-/icons-react-2.0.0.tgz#7500c3ad1821bde11e742fc3e6d010b2fc0c16a6"
-  integrity sha512-KUgJtVS+HDLQuFfqIdgYMDAbUlfG6LqfPwomc26cS6BEL9v01YptZtBU+KVaP6QZ+kleKrHMzFJajOtK9xIXDw==
+"@tabler/icons-react@^2.13.0":
+  version "2.13.2"
+  resolved "https://registry.yarnpkg.com/@tabler/icons-react/-/icons-react-2.13.2.tgz#21a463147087526ec68a6fb509edc9f90c959c74"
+  integrity sha512-orkRLOOA3jpHE5prNhBzKEBlVCc5sO5SuRBRk9mjNen2uqoIeBJTkJqquhWIIR2uHqmhP+PUls0MtEqW+qjbIA==
   dependencies:
-    "@tabler/icons" "2.0.0"
+    "@tabler/icons" "2.13.2"
+    prop-types "^15.7.2"
 
-"@tabler/icons@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@tabler/icons/-/icons-2.0.0.tgz#051d769b23560af3d04389041072c0a299bd0742"
-  integrity sha512-ye93cVD8baCwJJ7J3GKlUM3FN+qW6lsEz4uaH8bHCwC8un2R4p+ZzyRNc/ksqVgMQJ4PKQ8xbYpv4dnbbRffsA==
+"@tabler/icons@2.13.2":
+  version "2.13.2"
+  resolved "https://registry.yarnpkg.com/@tabler/icons/-/icons-2.13.2.tgz#caba1546f78deda5f2002912632dca66f106c745"
+  integrity sha512-sMqkSTAwkLIYIV+Uu/B7MdomR7tHPpwE9YzMtBJgqhK/seiUk5iPoQbTHdS7lbEHqNluAsx2velLCVtM7QilWw==
 
 "@turf/bbox@^6.5.0":
   version "6.5.0"
@@ -4031,6 +4032,11 @@ leaflet-marker-rotation@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/leaflet-marker-rotation/-/leaflet-marker-rotation-0.4.0.tgz#c375db65e8e8f0ef7449c5d7ffb9d96d475e41de"
   integrity sha512-7I+l/Ky3mP7LQ+nfVA+Gzjl5NOb02mph3v9SD2dPoCEQ/vV3zuZp+7Sewm2Pgk2zH9Aa4+mPqNTSSSLe3D7lmg==
+
+leaflet-touch-helper@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/leaflet-touch-helper/-/leaflet-touch-helper-2.0.0.tgz#d9f374da05bb79834c9e1516acf74d18c255c906"
+  integrity sha512-uZNBa3wJ0BWpMLsV1anm4g3V23SoMZsmNtqmD7FPhtr8G/dj9EVdg9tSspNPr80TH8m3kwJV67/9+QPx3E7kBA==
 
 leaflet.awesome-markers@^2.0.5:
   version "2.0.5"

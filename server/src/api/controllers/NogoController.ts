@@ -2,7 +2,12 @@ import express from 'express';
 import mongoose from 'mongoose';
 import joi from 'joi';
 import { container } from 'tsyringe';
-import { NogoGroupService, NogoService, RegionService } from 'services';
+import {
+  NogoGroupService,
+  NogoService,
+  RegionService,
+  RouterService,
+} from 'services';
 import { INogoCreateDTO } from 'interfaces';
 import { checkAdmin, checkLoggedIn } from 'api/middlewares';
 import {
@@ -17,6 +22,7 @@ export const nogo = (app: express.Router) => {
   const nogoService = container.resolve(NogoService);
   const nogoGroupService = container.resolve(NogoGroupService);
   const regionService = container.resolve(RegionService);
+  const routerService = container.resolve(RouterService);
 
   route.get('/getAllByGroup/:groupId/:groupType', async (req, res, next) => {
     try {
@@ -106,8 +112,11 @@ export const nogo = (app: express.Router) => {
         );
 
       try {
+        const { lineString } = await routerService.getRouteForNewNogo(
+          nogoCreate.points
+        );
         const nogo = await nogoService.create(
-          nogoCreate.points,
+          lineString,
           nogoGroupId,
           regionId
         );
@@ -122,6 +131,14 @@ export const nogo = (app: express.Router) => {
           ].includes(error.message)
         )
           throw new BadRequestError(error.message);
+        if (
+          String(error.message).includes(
+            'position not mapped in existing datafile'
+          )
+        )
+          throw new BadRequestError(
+            'One or more of your points are not close enough to a routable location. Please select another point.'
+          );
         throw error;
       }
     } catch (err) {

@@ -1,6 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 import expressLoader from 'loaders/express';
+import { IUserLoginDTO } from 'interfaces';
 
 export const makeRequest = async (options: {
   url: string;
@@ -36,4 +37,14 @@ export const makeRequest = async (options: {
   } else {
     return agent.get(options.url);
   }
+};
+
+export const makeLoginRequest = async (userLogin: Partial<IUserLoginDTO>) => {
+  const app = express();
+  expressLoader(app);
+  const agent = request.agent(app);
+  return agent
+    .post('/user/login')
+    .send({ userLogin })
+    .set('Content-Type', 'application/json');
 };
