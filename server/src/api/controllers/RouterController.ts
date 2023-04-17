@@ -53,7 +53,12 @@ export const router = (app: express.Router) => {
           )
         )
           throw new BadRequestError(
-            'One or more of your points are not close enough to a routable location. Please select another point.'
+            'One of your points is not close enough to a routable location. Please select another point.'
+          );
+
+        if (String(error.message).includes('target island detected'))
+          throw new BadRequestError(
+            'Nogos are blocking a route to one of your waypoints. Please select another point or disable "Avoid nogos".'
           );
 
         if (
@@ -62,7 +67,7 @@ export const router = (app: express.Router) => {
           )
         )
           throw new ServiceUnavailableError(
-            'Routing service is busy, please try again'
+            'Our servers are currently busy, please try again.'
           );
 
         console.log(error.message); // Log unhandled BRouter errors to console
