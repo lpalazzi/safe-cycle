@@ -3,6 +3,7 @@ import L from 'leaflet';
 import { MapContainer, TileLayer, GeoJSON, Tooltip } from 'react-leaflet';
 import bbox from '@turf/bbox';
 import { BBox, feature, featureCollection } from '@turf/helpers';
+import { Tooltip as MantineTooltip } from '@mantine/core';
 import { ModalSettings } from '@mantine/modals/lib/context';
 import { useForm } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
@@ -38,13 +39,20 @@ import { EmailApi, NogoApi } from 'api';
 import { IContactFormDTO as ContactFormValues } from 'api/interfaces/Email';
 import { validateEmail } from 'utils/validation';
 
-type ViewType = 'about' | 'howto' | 'regions';
+type ViewType =
+  | 'about'
+  | 'nogos'
+  | 'regions'
+  | 'howto'
+  | 'updating'
+  | 'contact';
 
 export const AboutModal = (initialView: ViewType, isMobileSize: boolean) => {
   return {
     children: <AboutModalContent initialView={initialView} />,
     size: '1000px',
     fullScreen: isMobileSize,
+    styles: { inner: { overflowY: 'scroll' } },
   } as ModalSettings;
 };
 
@@ -73,10 +81,30 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
           </Accordion.Control>
           <Accordion.Panel>
             <Text mb='sm'>
-              <b>SafeCycle</b> is a bike route planning tool and navigation app
-              with a unique "nogo" feature which enables you to generate routes
-              that avoid traffic stressed or low comfort roads.
+              SafeCycle is a bike route planning tool and navigation app with a
+              primary focus on finding safe and comfortable bike routes for
+              users.
             </Text>
+
+            <Text mb='sm'>
+              Using a combination of comfort-focused preferences and a unique{' '}
+              <Anchor onClick={() => setView('nogos')}>"nogo" feature</Anchor>,
+              SafeCycle can guide cyclists of all ages and abilities, even in
+              regions with poor cycling infrastructure and high levels of motor
+              vehicle traffic.
+            </Text>
+          </Accordion.Panel>
+        </Accordion.Item>
+        <Accordion.Item value='nogos'>
+          <Accordion.Control>
+            <b>What are nogos?</b>
+          </Accordion.Control>
+          <Accordion.Panel>
+            <Text mb='sm'>
+              A <b>nogo</b> is a section of a roadway that SafeCycle completely
+              avoids when creating a route.
+            </Text>
+
             <Group spacing='xl' position='center' mb='sm'>
               <Image
                 radius='md'
@@ -95,39 +123,31 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
                 withPlaceholder
               />
             </Group>
+
             <Text mb='sm'>
-              A <b>nogo</b> is a section of a roadway that SafeCycle completely
-              avoids when creating a route. Nogos are contributed by
-              knowledgeable cyclists in each of our{' '}
-              <Anchor onClick={() => setView('regions')}>
-                supported regions
-              </Anchor>
-              . Using their extensive regional knowledge of local roads and
-              cycling routes, our contributors carefully curate nogos based on
-              roads that most cyclists should avoid.{' '}
-              <i>
-                To apply our curated nogos, select the "Avoid nogos" checkbox in
-                your custom route preferences. Medium and High Comfort levels
-                avoid nogos by default.
-              </i>
+              SafeCycle works with knowledgeable cyclists in various{' '}
+              <Anchor onClick={() => setView('regions')}>regions</Anchor> to add
+              nogos and keep them up-to-date. Using their extensive regional
+              knowledge of local roads and cycling routes, our contributors
+              carefully curate nogos based on roads that most cyclists should
+              avoid.
             </Text>
-            <Text align='center' fs='italic' fw='bold'>
-              Roadway conditions are ever changing. Although SafeCycle can help
-              make your route choices safer, users bear full responsibility for
-              their own safety. Ride at your own risk.
+            <Text mb='sm' italic align='center'>
+              To apply our curated nogos, select the "Avoid nogos" checkbox in
+              your route preferences.
             </Text>
           </Accordion.Panel>
         </Accordion.Item>
         <Accordion.Item value='regions'>
           <Accordion.Control>
-            <b>Supported regions</b>
+            <b>Regions supported with nogos</b>
           </Accordion.Control>
           <Accordion.Panel>
             <Text mb='md'>
-              SafeCycle currently only supports a handful of regions. If you
-              live in an unsupported region, you can still use SafeCycle to
-              explore cycling routes in your area by using our other available
-              route preferences. You can also{' '}
+              SafeCycle currently only supports nogos in a handful of regions.
+              If you live in an unsupported region, you can still use SafeCycle
+              to explore cycling routes in your area by using the comfort
+              settings and other available route preferences. You can also{' '}
               <Anchor onClick={() => setView('howto')}>
                 create your own private nogos
               </Anchor>{' '}
@@ -169,6 +189,9 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
               <List.Item>
                 First you must enable private nogos from your account settings.
                 <List type='ordered' withPadding maw='90%'>
+                  <List.Item>
+                    Create an account and sign in if you haven't already.
+                  </List.Item>
                   <List.Item>
                     Click "Manage account" from the user menu at the bottom of
                     the sidebar.
@@ -260,38 +283,45 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
           </Accordion.Panel>
         </Accordion.Item>
       </Accordion>
-      <Text mt='md' ta='center'>
+      <Text mt='lg' ta='center'>
         SafeCycle is made possible thanks to the following:
       </Text>
-      <Group position='center' noWrap>
-        <Image
-          src={LogoXYZ}
-          caption='XYZ Digital Inc.'
-          height={75}
-          width='min(max-content, 100%)'
-          fit='contain'
-          withPlaceholder
-          style={{ cursor: 'pointer' }}
-          onClick={() => {
-            window.open('https://www.xyzdigital.com/', '_blank');
-          }}
-        />
-        <Image
-          src={LogoSTR}
-          caption='Share the Road Essex County'
-          height={150}
-          width='min(max-content, 100%)'
-          fit='contain'
-          withPlaceholder
-          style={{ cursor: 'pointer' }}
-          onClick={() => {
-            window.open(
-              'https://www.facebook.com/ShareTheRoadEssexCounty',
-              '_blank'
-            );
-          }}
-        />
+      <Group position='center' mt='md' spacing='xl'>
+        <MantineTooltip label='XYZ Digital Inc.'>
+          <Image
+            src={LogoXYZ}
+            height={75}
+            width='min(max-content, 100%)'
+            fit='contain'
+            withPlaceholder
+            style={{ cursor: 'pointer' }}
+            onClick={() => {
+              window.open('https://www.xyzdigital.com/', '_blank');
+            }}
+          />
+        </MantineTooltip>
+        <MantineTooltip label='Share the Road Essex County'>
+          <Image
+            src={LogoSTR}
+            height={150}
+            width='min(max-content, 100%)'
+            fit='contain'
+            withPlaceholder
+            style={{ cursor: 'pointer' }}
+            onClick={() => {
+              window.open(
+                'https://www.facebook.com/ShareTheRoadEssexCounty',
+                '_blank'
+              );
+            }}
+          />
+        </MantineTooltip>
       </Group>
+      <Text align='center' fs='italic' mt='xl'>
+        Roadway conditions are ever changing. Although SafeCycle can help make
+        your route choices safer, users bear full responsibility for their own
+        safety. Ride at your own risk.
+      </Text>
     </Container>
   );
 };
@@ -456,7 +486,6 @@ const SupportedRegionsMap: React.FC<{
         [boundingBox[1], boundingBox[0]],
         [boundingBox[3], boundingBox[2]]
       ).pad(0.2)}
-      scrollWheelZoom={false}
       style={{
         height: '500px',
         maxHeight: '50vw',

@@ -22,7 +22,6 @@ import { useGlobalContext } from 'contexts/globalContext';
 import { SidebarTitle } from '../common/SidebarTitle';
 import { AboutModal } from 'components/modals/AboutModal';
 
-import LowestComfortIcon from 'assets/comfortlevels/1-lowest.png';
 import LowComfortIcon from 'assets/comfortlevels/2-low.png';
 import MediumComfortIcon from 'assets/comfortlevels/3-medium.png';
 import HighComfortIcon from 'assets/comfortlevels/4-high.png';
@@ -78,7 +77,7 @@ export const RoutePreferences: React.FC = () => {
               withArrow
               transition='fade'
               transitionDuration={200}
-              label='Learn more'
+              label='What are nogos?'
             >
               <IconInfoCircle
                 size={16}
@@ -89,7 +88,7 @@ export const RoutePreferences: React.FC = () => {
                 }}
                 onClick={(e) => {
                   e.preventDefault();
-                  openModal(AboutModal('about', isMobileSize));
+                  openModal(AboutModal('nogos', isMobileSize));
                 }}
               />
             </Tooltip>
@@ -241,7 +240,7 @@ const ComfortLevel: React.FC<{ comfortLevel: string }> = React.memo(
       case 'Medium':
         imgSrc = MediumComfortIcon;
         description =
-          'Prioritizes routing on bike-friendly roads, but may still route the user on roads with light car traffic.';
+          'Prioritizes routing on bike-friendly roads, but may still route the user on some roads with light car traffic.';
         riderHint = 'Suitable for cyclists of most ages and abilities';
         break;
       case 'Low':
