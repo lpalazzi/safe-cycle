@@ -34,7 +34,7 @@ import ImgNogoWith from 'assets/info/info-nogo-with.png';
 import LogoXYZ from 'assets/sponsors/logo-xyz.png';
 import LogoSTR from 'assets/sponsors/logo-sharetheroad.png';
 import { useGlobalContext } from 'contexts/globalContext';
-import { Nogo } from 'models';
+import { Nogo, Region } from 'models';
 import { EmailApi, NogoApi } from 'api';
 import { IContactFormDTO as ContactFormValues } from 'api/interfaces/Email';
 import { validateEmail } from 'utils/validation';
@@ -61,9 +61,7 @@ type AboutModalProps = {
 };
 
 const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
-  const { isMobileSize } = useGlobalContext();
   const [view, setView] = useState<string | null>(initialView);
-  const [map, setMap] = useState<L.Map | null>(null);
   return (
     <Container>
       <Image
@@ -102,7 +100,8 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
           <Accordion.Panel>
             <Text mb='sm'>
               A <b>nogo</b> is a section of a roadway that SafeCycle completely
-              avoids when creating a route.
+              avoids when creating a route due to unsafe conditions or high
+              levels of motor vehicle traffic.
             </Text>
 
             <Group spacing='xl' position='center' mb='sm'>
@@ -153,14 +152,7 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
               </Anchor>{' '}
               for personal use.
             </Text>
-            <Group position='apart' noWrap={isMobileSize ? false : true}>
-              <SupportedRegionsMap
-                open={view === 'regions'}
-                map={map}
-                setMap={setMap}
-              />
-              <SupportedRegionsList map={map} />
-            </Group>
+            <SupportedRegions open={view === 'regions'} />
             <Text align='center' fs='italic' mt='md'>
               If you are a knowledgeable cyclist and interested in becoming a
               contributor for either an existing or unsupported region,{' '}
@@ -445,31 +437,43 @@ const ContactForm: React.FC = () => {
   );
 };
 
-const SupportedRegionsMap: React.FC<{
-  open: boolean;
-  map: L.Map | null;
-  setMap: (map: L.Map) => void;
-}> = ({ open, map, setMap }) => {
+const SupportedRegions: React.FC<{ open: boolean }> = ({ open }) => {
+  const { isMobileSize } = useGlobalContext();
   const { regions } = useGlobalContext();
+  const theme = useMantineTheme();
+
+  const [map, setMap] = useState<L.Map | null>(null);
   const [displayMap, setDisplayMap] = useState(false);
+  const [allRegionsProcessed, setAllRegionsProcessed] = useState(false);
+  const [supportedRegions, setSupportedRegions] = useState<Region[]>([]);
   const [nogos, setNogos] = useState<Nogo[]>([]);
   const [boundingBox, setBoundingBox] = useState<BBox | undefined>(undefined);
-  const theme = useMantineTheme();
 
   useEffect(() => {
     if (regions.length > 0) {
-      regions.forEach((region) =>
-        NogoApi.getAllByGroup(region._id, true).then((nogos) =>
-          setNogos((prevNogos) => [...prevNogos, ...nogos])
-        )
+      regions.forEach((region, index) =>
+        NogoApi.getAllByGroup(region._id, true).then((nogos) => {
+          if (nogos.length > 15) {
+            setSupportedRegions((prevRegions) => [...prevRegions, region]);
+            setNogos((prevNogos) => [...prevNogos, ...nogos]);
+          }
+          if (regions.length === index + 1) setAllRegionsProcessed(true);
+        })
       );
+    }
+  }, []);
+
+  useEffect(() => {
+    if (allRegionsProcessed) {
       setBoundingBox(
         bbox(
-          featureCollection(regions.map((region) => feature(region.polygon)))
+          featureCollection(
+            supportedRegions.map((region) => feature(region.polygon))
+          )
         )
       );
     }
-  }, [regions]);
+  }, [supportedRegions, allRegionsProcessed]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -479,130 +483,132 @@ const SupportedRegionsMap: React.FC<{
     }, 300);
   }, [open]);
 
-  return displayMap && boundingBox ? (
-    <MapContainer
-      ref={setMap}
-      bounds={new L.LatLngBounds(
-        [boundingBox[1], boundingBox[0]],
-        [boundingBox[3], boundingBox[2]]
-      ).pad(0.2)}
-      style={{
-        height: '500px',
-        maxHeight: '50vw',
-        width: '100%',
-        borderRadius: '12px',
-      }}
-    >
-      <TileLayer
-        attribution='Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
-        url='https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-        minZoom={0}
-        maxZoom={19}
-      />
-      {nogos.map((nogo) => (
-        <GeoJSON
-          key={nogo._id}
-          data={nogo.lineString}
+  return (
+    <Group position='apart' noWrap={isMobileSize ? false : true}>
+      {displayMap && boundingBox ? (
+        <MapContainer
+          ref={setMap}
+          bounds={new L.LatLngBounds(
+            [boundingBox[1], boundingBox[0]],
+            [boundingBox[3], boundingBox[2]]
+          ).pad(0.2)}
           style={{
-            color: theme.colors.red[7],
-            weight: 3,
-            opacity: 1,
-          }}
-          interactive={false}
-        />
-      ))}
-      {regions.map((region) => (
-        <GeoJSON
-          key={region._id}
-          data={region.polygon}
-          style={{
-            color: 'grey',
-            weight: 4,
-            opacity: 1.0,
-            fillOpacity: 0.1,
-          }}
-          eventHandlers={{
-            click: (e) => {
-              map?.flyToBounds((e.target as L.GeoJSON).getBounds().pad(0.2), {
-                duration: 0.8,
-              });
-            },
+            height: '500px',
+            maxHeight: '50vw',
+            width: '100%',
+            borderRadius: '12px',
           }}
         >
-          <Tooltip direction='top' sticky={true}>
-            <Title order={4} align='center'>
-              {region.name}
-            </Title>
-            <Group position='center' spacing='xs' noWrap>
-              <Text>Contributors:</Text>
-              <div>
-                {region.contributors.map((contributor) => (
-                  <Text>
-                    {contributor.name.first + ' ' + contributor.name.last}
-                  </Text>
-                ))}
-              </div>
-            </Group>
-          </Tooltip>
-        </GeoJSON>
-      ))}
-    </MapContainer>
-  ) : (
-    <Flex
-      justify='center'
-      align='center'
-      style={{
-        height: '500px',
-        maxHeight: '50vw',
-        width: '100%',
-        borderRadius: '12px',
-        backgroundColor: theme.colors.gray[3],
-      }}
-    >
-      <Loader />
-    </Flex>
-  );
-};
-
-const SupportedRegionsList: React.FC<{ map: L.Map | null }> = ({ map }) => {
-  const { regions, isMobileSize } = useGlobalContext();
-  return (
-    <ScrollArea
-      style={{
-        height: '500px',
-        maxHeight: '50vw',
-        width: isMobileSize ? '100%' : '400px',
-        backgroundColor: 'unset',
-      }}
-    >
-      <Button.Group orientation='vertical'>
-        {regions.map((region) => {
-          const boundingBox = bbox(feature(region.polygon));
-          return (
-            <Button
-              variant='default'
-              onClick={() =>
-                map?.flyToBounds(
-                  new L.LatLngBounds(
-                    [boundingBox[1], boundingBox[0]],
-                    [boundingBox[3], boundingBox[2]]
-                  ).pad(0.2),
-                  {
-                    animate: false,
-                  }
-                )
-              }
-              styles={{
-                inner: {
-                  justifyContent: 'flex-start',
+          <TileLayer
+            attribution='Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+            url='https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+            minZoom={0}
+            maxZoom={19}
+          />
+          {nogos.map((nogo) => (
+            <GeoJSON
+              key={nogo._id}
+              data={nogo.lineString}
+              style={{
+                color: theme.colors.red[7],
+                weight: 3,
+                opacity: 1,
+              }}
+              interactive={false}
+            />
+          ))}
+          {supportedRegions.map((region) => (
+            <GeoJSON
+              key={region._id}
+              data={region.polygon}
+              style={{
+                color: 'grey',
+                weight: 4,
+                opacity: 1.0,
+                fillOpacity: 0.1,
+              }}
+              eventHandlers={{
+                click: (e) => {
+                  map?.flyToBounds(
+                    (e.target as L.GeoJSON).getBounds().pad(0.2),
+                    {
+                      duration: 0.8,
+                    }
+                  );
                 },
               }}
             >
-              {region.name}
-            </Button>
-          );
-        })}
-      </Button.Group>
-    </ScrollArea>
+              <Tooltip direction='top' sticky={true}>
+                <Title order={4} align='center'>
+                  {region.name}
+                </Title>
+                <Group position='center' spacing='xs' noWrap>
+                  <Text>Contributors:</Text>
+                  <div>
+                    {region.contributors.map((contributor) => (
+                      <Text>
+                        {contributor.name.first + ' ' + contributor.name.last}
+                      </Text>
+                    ))}
+                  </div>
+                </Group>
+              </Tooltip>
+            </GeoJSON>
+          ))}
+        </MapContainer>
+      ) : (
+        <Flex
+          justify='center'
+          align='center'
+          style={{
+            height: '500px',
+            maxHeight: '50vw',
+            width: '100%',
+            borderRadius: '12px',
+            backgroundColor: theme.colors.gray[3],
+          }}
+        >
+          <Loader />
+        </Flex>
+      )}
+
+      <ScrollArea
+        style={{
+          height: '500px',
+          maxHeight: '50vw',
+          width: isMobileSize ? '100%' : '400px',
+          backgroundColor: 'unset',
+        }}
+      >
+        <Button.Group orientation='vertical'>
+          {supportedRegions.map((region) => {
+            const boundingBox = bbox(feature(region.polygon));
+            return (
+              <Button
+                variant='default'
+                onClick={() =>
+                  map?.flyToBounds(
+                    new L.LatLngBounds(
+                      [boundingBox[1], boundingBox[0]],
+                      [boundingBox[3], boundingBox[2]]
+                    ).pad(0.2),
+                    {
+                      animate: false,
+                    }
+                  )
+                }
+                styles={{
+                  inner: {
+                    justifyContent: 'flex-start',
+                  },
+                }}
+              >
+                {region.name}
+              </Button>
+            );
+          })}
+        </Button.Group>
+      </ScrollArea>
+    </Group>
   );
 };
