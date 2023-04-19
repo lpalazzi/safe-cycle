@@ -1,15 +1,20 @@
 declare var umami: umami.umami;
 
 // Based on https://umami.is/docs/tracker-functions
-declare namespace umami {
+declare module umami {
   interface umami {
-    (event_value: string): void;
-    trackEvent(
-      event_value: string,
-      event_data?: any,
-      url?: string,
-      website_id?: string
+    track(
+      event_name?: string,
+      event_data?: {
+        data: any;
+        hostname?: string;
+        language?: string;
+        referrer?: string;
+        screen?: string;
+        title?: string;
+        url?: string;
+        website?: string;
+      }
     ): void;
-    trackView(url: string, referrer?: string, website_id?: string): void;
   }
 }
