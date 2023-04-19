@@ -4,6 +4,7 @@ import { Name, UserRole } from 'types';
 export interface IRegion {
   _id: mongoose.Types.ObjectId;
   name: string;
+  iso31662: string;
   polygon: GeoJSON.Polygon;
   contributors: mongoose.Types.ObjectId[];
 }

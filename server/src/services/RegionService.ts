@@ -45,6 +45,7 @@ export class RegionService {
         .object({
           name: joi.string().required(),
           polygon: joi.geojson().polygon().required(),
+          iso31662: joi.string().required(),
         })
         .required()
         .validate(newRegion);

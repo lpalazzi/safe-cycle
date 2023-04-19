@@ -16,6 +16,10 @@ const RegionSchema = new mongoose.Schema<IRegion>({
     required: true,
     ref: 'User',
   },
+  iso31662: {
+    type: String,
+    required: true,
+  },
 });
 
 export const RegionModel = mongoose.model<IRegion>('Region', RegionSchema);

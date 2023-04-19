@@ -8,6 +8,7 @@ export const createTestRegion = async (
   const createdRegion: IRegion = await RegionModel.create({
     _id: new mongoose.Types.ObjectId(),
     name: 'Windsor-Essex County',
+    iso31662: 'CA-ON',
     contributors: contributors ?? [],
     polygon: {
       type: 'Polygon',

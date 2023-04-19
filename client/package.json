@@ -25,6 +25,7 @@
     "@types/react-dom": "^18.0.9",
     "esbuild": "^0.16.7",
     "esbuild-plugin-inline-image": "^0.0.9",
+    "iso-3166": "^4.2.0",
     "leaflet": "^1.9.3",
     "leaflet-easybutton": "^2.4.0",
     "leaflet-marker-rotation": "^0.4.0",

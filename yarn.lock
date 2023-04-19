@@ -3557,6 +3557,11 @@ isexe@^2.0.0:
   resolved "https://registry.yarnpkg.com/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
   integrity sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==
 
+iso-3166@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/iso-3166/-/iso-3166-4.2.0.tgz#0afbf09ff36ce8022cb52cd4a3962a5b0d6e3926"
+  integrity sha512-5G+RqnIYIbgQwNmL3bslEbG0apSPJqu4g3wTaQOOYx2VANv1m6I4PM1KtlvcG5OubW1QmDNpk6icwkS7B+lT1g==
+
 istanbul-lib-coverage@^3.0.0, istanbul-lib-coverage@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/istanbul-lib-coverage/-/istanbul-lib-coverage-3.2.0.tgz#189e7909d0a39fa5a3dfad5b03f71947770191d3"

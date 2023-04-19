@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { groupBy } from 'lodash';
 import L from 'leaflet';
 import { MapContainer, TileLayer, GeoJSON, Tooltip } from 'react-leaflet';
 import bbox from '@turf/bbox';
@@ -483,6 +484,11 @@ const SupportedRegions: React.FC<{ open: boolean }> = ({ open }) => {
     }, 300);
   }, [open]);
 
+  const groupedSupportedRegions = useMemo(
+    () => groupBy(supportedRegions, 'iso31662.nameWithCountry'),
+    [supportedRegions]
+  );
+
   return (
     <Group position='apart' noWrap={isMobileSize ? false : true}>
       {displayMap && boundingBox ? (
@@ -580,34 +586,41 @@ const SupportedRegions: React.FC<{ open: boolean }> = ({ open }) => {
           backgroundColor: 'unset',
         }}
       >
-        <Button.Group orientation='vertical'>
-          {supportedRegions.map((region) => {
-            const boundingBox = bbox(feature(region.polygon));
-            return (
-              <Button
-                variant='default'
-                onClick={() =>
-                  map?.flyToBounds(
-                    new L.LatLngBounds(
-                      [boundingBox[1], boundingBox[0]],
-                      [boundingBox[3], boundingBox[2]]
-                    ).pad(0.2),
-                    {
-                      animate: false,
-                    }
-                  )
-                }
-                styles={{
-                  inner: {
-                    justifyContent: 'flex-start',
-                  },
-                }}
-              >
-                {region.name}
-              </Button>
-            );
-          })}
-        </Button.Group>
+        {Object.entries(groupedSupportedRegions).map(([label, regions]) => {
+          return (
+            <Container p={0} mb='sm'>
+              <Title order={6}>{label}</Title>
+              <Button.Group orientation='vertical'>
+                {regions.map((region) => {
+                  const boundingBox = bbox(feature(region.polygon));
+                  return (
+                    <Button
+                      variant='default'
+                      onClick={() =>
+                        map?.flyToBounds(
+                          new L.LatLngBounds(
+                            [boundingBox[1], boundingBox[0]],
+                            [boundingBox[3], boundingBox[2]]
+                          ).pad(0.2),
+                          {
+                            animate: false,
+                          }
+                        )
+                      }
+                      styles={{
+                        inner: {
+                          justifyContent: 'flex-start',
+                        },
+                      }}
+                    >
+                      {region.name}
+                    </Button>
+                  );
+                })}
+              </Button.Group>
+            </Container>
+          );
+        })}
       </ScrollArea>
     </Group>
   );

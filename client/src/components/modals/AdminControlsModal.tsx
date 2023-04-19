@@ -1,4 +1,5 @@
-import React, { useEffect, useState, forwardRef } from 'react';
+import React, { useEffect, useState, forwardRef, useMemo } from 'react';
+import { iso31661, iso31662 } from 'iso-3166';
 import {
   Accordion,
   ActionIcon,
@@ -14,14 +15,15 @@ import {
 import { useForm } from '@mantine/form';
 import { ModalSettings } from '@mantine/modals/lib/context';
 import { showNotification } from '@mantine/notifications';
+import { IconX } from '@tabler/icons-react';
 
 import { useGlobalContext } from 'contexts/globalContext';
+import { ID, UserRole } from 'types';
 import { NogoGroup, Region, User } from 'models';
 import { NogoApi, NogoGroupApi, RegionApi, UserApi } from 'api';
 import { IRegionCreateDTO } from 'api/interfaces/Region';
 import { validatePolygonStr } from 'utils/validation';
-import { ID, UserRole } from 'types';
-import { IconX } from '@tabler/icons-react';
+import { getSubdivisionNameWithCountry } from 'utils/iso3166';
 
 const AddRegionForm: React.FC = () => {
   const { refreshRegions } = useGlobalContext();
@@ -29,14 +31,19 @@ const AddRegionForm: React.FC = () => {
   const form = useForm({
     initialValues: {
       name: '',
+      iso31662: '',
       polygon: '',
     } as {
       name: string;
+      iso31662: string;
       polygon: string;
     },
     validate: {
       name: (value) => {
         if (!value || value === '') return 'Name is required';
+      },
+      iso31662: (value) => {
+        if (!value || value === '') return 'Country/Subdivision is required';
       },
       polygon: (value) => {
         if (!value || value === '') return 'Polygon is required';
@@ -45,7 +52,11 @@ const AddRegionForm: React.FC = () => {
     },
   });
 
-  const handleSubmit = async (values: { name: string; polygon: string }) => {
+  const handleSubmit = async (values: {
+    name: string;
+    iso31662: string;
+    polygon: string;
+  }) => {
     try {
       const regionToCreate: IRegionCreateDTO = {
         ...values,
@@ -70,6 +81,15 @@ const AddRegionForm: React.FC = () => {
     }
   };
 
+  const countrySubdivisionOptions = useMemo(
+    () =>
+      iso31662.map((subdivision) => ({
+        value: subdivision.code,
+        label: getSubdivisionNameWithCountry(subdivision),
+      })),
+    [iso31661, iso31662]
+  );
+
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack spacing='xs'>
@@ -78,6 +98,13 @@ const AddRegionForm: React.FC = () => {
           label='Name'
           placeholder='Enter a name for this region'
           {...form.getInputProps('name')}
+        />
+        <Select
+          label='Country/Subdivision'
+          placeholder='Select a a country and subdivision'
+          data={countrySubdivisionOptions}
+          searchable
+          {...form.getInputProps('iso31662')}
         />
         <Textarea
           withAsterisk
