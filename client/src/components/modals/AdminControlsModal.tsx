@@ -100,6 +100,7 @@ const AddRegionForm: React.FC = () => {
           {...form.getInputProps('name')}
         />
         <Select
+          withAsterisk
           label='Country/Subdivision'
           placeholder='Select a a country and subdivision'
           data={countrySubdivisionOptions}
