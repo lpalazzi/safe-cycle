@@ -235,7 +235,7 @@ const ComfortLevel: React.FC<{ comfortLevel: string }> = React.memo(
         imgSrc = HighComfortIcon;
         description =
           'Prioritizes avoiding most car traffic, and primarily routes the user via dedicated cycling infrastructure.';
-        riderHint = 'Suitable for cyclists of all ages and abilities';
+        riderHint = 'Seeks the most comfortable ride available';
         break;
       case 'Medium':
         imgSrc = MediumComfortIcon;
