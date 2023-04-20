@@ -20,6 +20,7 @@ type GlobalContextType =
       routeOptions: RouteOptions;
       showAlternateRoutes: boolean;
       regions: Region[];
+      showTour: boolean;
       // functions
       updateLoggedInUser: () => void;
       logoutUser: () => void;
@@ -32,6 +33,7 @@ type GlobalContextType =
       updateRouteOptions: (update: Partial<RouteOptions>) => void;
       setShowAlternateRoutes: (val: boolean) => void;
       refreshRegions: () => void;
+      setShowTour: (val: boolean) => void;
     }
   | undefined;
 
@@ -50,6 +52,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     `(max-width: ${theme.breakpoints.sm - 1}px)`
   );
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
+  const [showTour, setShowTour] = useState(false);
   const [isNavbarOpen, setIsNavbarOpen] = useState(!isMobileSize);
   const [isNavModeOn, setIsNavModeOn] = useState(false);
   const [selectedNogoGroups, setSelectedNogoGroups] = useState<ID[]>([]);
@@ -192,6 +195,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         routeOptions,
         showAlternateRoutes,
         regions,
+        showTour,
         updateLoggedInUser,
         logoutUser,
         toggleNavbar,
@@ -203,6 +207,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         updateRouteOptions,
         setShowAlternateRoutes,
         refreshRegions,
+        setShowTour,
       }}
     >
       {props.children}

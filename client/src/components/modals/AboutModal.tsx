@@ -7,6 +7,7 @@ import { BBox, feature, featureCollection } from '@turf/helpers';
 import { Checkbox, Tooltip as MantineTooltip } from '@mantine/core';
 import { ModalSettings } from '@mantine/modals/lib/context';
 import { useForm } from '@mantine/form';
+import { closeAllModals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import {
   Container,
@@ -62,16 +63,32 @@ type AboutModalProps = {
 };
 
 const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
+  const { isMobileSize, setShowTour } = useGlobalContext();
   const [view, setView] = useState<string | null>(initialView);
   return (
     <Container>
-      <Image
-        src={LogoSvg}
-        height={75}
-        fit='contain'
-        alt='SafeCycle'
-        withPlaceholder
-      />
+      <Group align='center' position='center' spacing='xl'>
+        <Image
+          width='unset'
+          src={LogoSvg}
+          height={75}
+          fit='contain'
+          alt='SafeCycle'
+          withPlaceholder
+        />
+        {isMobileSize ? null : (
+          <Button
+            size='lg'
+            onClick={() => {
+              closeAllModals();
+              setShowTour(true);
+            }}
+            color='green.9'
+          >
+            Take the tour
+          </Button>
+        )}
+      </Group>
       <Space h='md' />
       <Accordion value={view} onChange={setView} variant='contained'>
         <Accordion.Item value='about'>

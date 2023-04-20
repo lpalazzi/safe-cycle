@@ -164,7 +164,7 @@ export const WaypointsList: React.FC = () => {
 
   return (
     <DndProvider backend={MultiBackend} options={HTML5toTouch}>
-      <Stack spacing='xl'>
+      <Stack spacing='xl' className='waypoints'>
         <Text size='sm'>
           Search for your destination, or select points on the map.
         </Text>

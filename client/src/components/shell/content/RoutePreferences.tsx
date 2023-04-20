@@ -69,6 +69,7 @@ export const RoutePreferences: React.FC = () => {
     <Stack spacing='xs'>
       <SidebarTitle title='Route Preferences' />
       <Switch
+        className='avoid-nogos'
         label={
           <div style={{ display: 'flex' }}>
             Avoid nogos
@@ -99,126 +100,130 @@ export const RoutePreferences: React.FC = () => {
           updateRouteOptions({ avoidNogos: e.currentTarget.checked })
         }
       />
-      <Input.Wrapper label='Select a comfort level'>
-        <SegmentedControl
-          fullWidth
-          value={comfortValue}
-          onChange={handleComfortLevelSelected}
-          data={[
-            {
-              value: 'Low',
-              label: (
-                <Stack align='center' spacing={0}>
-                  <Image src={LowComfortIcon} width='2rem' mih='2rem' />
-                  Low
-                </Stack>
-              ),
-            },
-            {
-              value: 'Medium',
-              label: (
-                <Stack align='center' spacing={0}>
-                  <Image src={MediumComfortIcon} width='2rem' mih='2rem' />
-                  Medium
-                </Stack>
-              ),
-            },
-            {
-              value: 'High',
-              label: (
-                <Stack align='center' spacing={0}>
-                  <Image src={HighComfortIcon} width='2rem' mih='2rem' />
-                  High
-                </Stack>
-              ),
-            },
-            {
-              value: 'Shortest',
-              label: (
-                <Stack align='center' spacing={0}>
-                  <IconRoute2 size='2rem' />
-                  Shortest
-                </Stack>
-              ),
-            },
-            {
-              value: 'Custom',
-              label: (
-                <Stack align='center' spacing={0}>
-                  <IconUserCog size='2rem' />
-                  Custom
-                </Stack>
-              ),
-            },
-          ]}
+      <Stack spacing='xs' className='comfort-level'>
+        <Input.Wrapper label='Select a comfort level'>
+          <SegmentedControl
+            fullWidth
+            value={comfortValue}
+            onChange={handleComfortLevelSelected}
+            data={[
+              {
+                value: 'Low',
+                label: (
+                  <Stack align='center' spacing={0}>
+                    <Image src={LowComfortIcon} width='2rem' mih='2rem' />
+                    Low
+                  </Stack>
+                ),
+              },
+              {
+                value: 'Medium',
+                label: (
+                  <Stack align='center' spacing={0}>
+                    <Image src={MediumComfortIcon} width='2rem' mih='2rem' />
+                    Medium
+                  </Stack>
+                ),
+              },
+              {
+                value: 'High',
+                label: (
+                  <Stack align='center' spacing={0}>
+                    <Image src={HighComfortIcon} width='2rem' mih='2rem' />
+                    High
+                  </Stack>
+                ),
+              },
+              {
+                value: 'Shortest',
+                label: (
+                  <Stack align='center' spacing={0}>
+                    <IconRoute2 size='2rem' />
+                    Shortest
+                  </Stack>
+                ),
+              },
+              {
+                value: 'Custom',
+                label: (
+                  <Stack align='center' spacing={0}>
+                    <IconUserCog size='2rem' />
+                    Custom
+                  </Stack>
+                ),
+              },
+            ]}
+          />
+        </Input.Wrapper>
+        {comfortValue === 'Custom' ? (
+          <>
+            <Checkbox
+              label='Prefer bike-friendly roads'
+              checked={routeOptions.preferBikeFriendly}
+              disabled={routeOptions.preferCycleRoutes || routeOptions.shortest}
+              onChange={(e) =>
+                updateRouteOptions({
+                  preferBikeFriendly: e.currentTarget.checked,
+                })
+              }
+            />
+            <Checkbox
+              label='Prefer dedicated cycle routes'
+              checked={routeOptions.preferCycleRoutes}
+              disabled={routeOptions.shortest}
+              onChange={(e) =>
+                updateRouteOptions({
+                  preferCycleRoutes: e.currentTarget.checked,
+                  preferBikeFriendly: e.currentTarget.checked
+                    ? true
+                    : routeOptions.preferBikeFriendly,
+                })
+              }
+            />
+            <Checkbox
+              label='Find shortest available route'
+              checked={routeOptions.shortest}
+              onChange={(e) =>
+                updateRouteOptions({
+                  shortest: e.currentTarget.checked,
+                  preferBikeFriendly: e.currentTarget.checked
+                    ? false
+                    : routeOptions.preferBikeFriendly,
+                  preferCycleRoutes: e.currentTarget.checked
+                    ? false
+                    : routeOptions.preferCycleRoutes,
+                })
+              }
+            />
+          </>
+        ) : (
+          <ComfortLevel comfortLevel={comfortValue} />
+        )}
+      </Stack>
+      <Stack spacing='xs' className='additional-preferences'>
+        <Input.Wrapper label='Surface preference'>
+          <Select
+            value={routeOptions.surfacePreference || 'none'}
+            onChange={(val) =>
+              updateRouteOptions({
+                surfacePreference: val as SurfacePreference,
+              })
+            }
+            data={[
+              { label: 'No preference', value: 'none' },
+              { label: 'Prefer paved surfaces', value: 'preferPaved' },
+              { label: 'Only use paved surfaces', value: 'strictPaved' },
+              { label: 'Prefer unpaved surfaces', value: 'preferUnpaved' },
+            ]}
+          />
+        </Input.Wrapper>
+        <Checkbox
+          label='Show alternate routes'
+          checked={showAlternateRoutes}
+          onChange={(e) => setShowAlternateRoutes(e.currentTarget.checked)}
+          disabled={routeOptions.shortest}
         />
-      </Input.Wrapper>
-      {comfortValue === 'Custom' ? (
-        <>
-          <Checkbox
-            label='Prefer bike-friendly roads'
-            checked={routeOptions.preferBikeFriendly}
-            disabled={routeOptions.preferCycleRoutes || routeOptions.shortest}
-            onChange={(e) =>
-              updateRouteOptions({
-                preferBikeFriendly: e.currentTarget.checked,
-              })
-            }
-          />
-          <Checkbox
-            label='Prefer dedicated cycle routes'
-            checked={routeOptions.preferCycleRoutes}
-            disabled={routeOptions.shortest}
-            onChange={(e) =>
-              updateRouteOptions({
-                preferCycleRoutes: e.currentTarget.checked,
-                preferBikeFriendly: e.currentTarget.checked
-                  ? true
-                  : routeOptions.preferBikeFriendly,
-              })
-            }
-          />
-          <Checkbox
-            label='Find shortest available route'
-            checked={routeOptions.shortest}
-            onChange={(e) =>
-              updateRouteOptions({
-                shortest: e.currentTarget.checked,
-                preferBikeFriendly: e.currentTarget.checked
-                  ? false
-                  : routeOptions.preferBikeFriendly,
-                preferCycleRoutes: e.currentTarget.checked
-                  ? false
-                  : routeOptions.preferCycleRoutes,
-              })
-            }
-          />
-        </>
-      ) : (
-        <ComfortLevel comfortLevel={comfortValue} />
-      )}
-      <Input.Wrapper label='Surface preference'>
-        <Select
-          value={routeOptions.surfacePreference || 'none'}
-          onChange={(val) =>
-            updateRouteOptions({
-              surfacePreference: val as SurfacePreference,
-            })
-          }
-          data={[
-            { label: 'No preference', value: 'none' },
-            { label: 'Prefer paved surfaces', value: 'preferPaved' },
-            { label: 'Only use paved surfaces', value: 'strictPaved' },
-            { label: 'Prefer unpaved surfaces', value: 'preferUnpaved' },
-          ]}
-        />
-      </Input.Wrapper>
-      <Checkbox
-        label='Show alternate routes'
-        checked={showAlternateRoutes}
-        onChange={(e) => setShowAlternateRoutes(e.currentTarget.checked)}
-        disabled={routeOptions.shortest}
-      />
+      </Stack>
     </Stack>
   );
 };
