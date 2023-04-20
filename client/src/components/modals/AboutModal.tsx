@@ -4,7 +4,7 @@ import L from 'leaflet';
 import { MapContainer, TileLayer, GeoJSON, Tooltip } from 'react-leaflet';
 import bbox from '@turf/bbox';
 import { BBox, feature, featureCollection } from '@turf/helpers';
-import { Tooltip as MantineTooltip } from '@mantine/core';
+import { Checkbox, Tooltip as MantineTooltip } from '@mantine/core';
 import { ModalSettings } from '@mantine/modals/lib/context';
 import { useForm } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
@@ -439,7 +439,7 @@ const ContactForm: React.FC = () => {
 };
 
 const SupportedRegions: React.FC<{ open: boolean }> = ({ open }) => {
-  const { isMobileSize } = useGlobalContext();
+  const { isMobileSize, loggedInUser } = useGlobalContext();
   const { regions } = useGlobalContext();
   const theme = useMantineTheme();
 
@@ -449,12 +449,14 @@ const SupportedRegions: React.FC<{ open: boolean }> = ({ open }) => {
   const [supportedRegions, setSupportedRegions] = useState<Region[]>([]);
   const [nogos, setNogos] = useState<Nogo[]>([]);
   const [boundingBox, setBoundingBox] = useState<BBox | undefined>(undefined);
+  const [showHidden, setShowHidden] = useState(false);
 
   useEffect(() => {
+    setSupportedRegions([]);
     if (regions.length > 0) {
       regions.forEach((region, index) =>
         NogoApi.getAllByGroup(region._id, true).then((nogos) => {
-          if (nogos.length > 15) {
+          if (showHidden || nogos.length > 15) {
             setSupportedRegions((prevRegions) => [...prevRegions, region]);
             setNogos((prevNogos) => [...prevNogos, ...nogos]);
           }
@@ -462,7 +464,7 @@ const SupportedRegions: React.FC<{ open: boolean }> = ({ open }) => {
         })
       );
     }
-  }, []);
+  }, [showHidden]);
 
   useEffect(() => {
     if (allRegionsProcessed) {
@@ -490,138 +492,147 @@ const SupportedRegions: React.FC<{ open: boolean }> = ({ open }) => {
   );
 
   return (
-    <Group position='apart' noWrap={isMobileSize ? false : true}>
-      {displayMap && boundingBox ? (
-        <MapContainer
-          ref={setMap}
-          bounds={new L.LatLngBounds(
-            [boundingBox[1], boundingBox[0]],
-            [boundingBox[3], boundingBox[2]]
-          ).pad(0.2)}
-          style={{
-            height: '500px',
-            maxHeight: '50vw',
-            width: '100%',
-            borderRadius: '12px',
-          }}
-        >
-          <TileLayer
-            attribution='Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
-            url='https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-            minZoom={0}
-            maxZoom={19}
-          />
-          {nogos.map((nogo) => (
-            <GeoJSON
-              key={nogo._id}
-              data={nogo.lineString}
-              style={{
-                color: theme.colors.red[7],
-                weight: 3,
-                opacity: 1,
-              }}
-              interactive={false}
+    <>
+      {loggedInUser?.role === 'admin' ? (
+        <Checkbox
+          label='Show hidden'
+          checked={showHidden}
+          onChange={(e) => setShowHidden(e.currentTarget.checked)}
+        />
+      ) : null}
+      <Group position='apart' noWrap={isMobileSize ? false : true}>
+        {displayMap && boundingBox ? (
+          <MapContainer
+            ref={setMap}
+            bounds={new L.LatLngBounds(
+              [boundingBox[1], boundingBox[0]],
+              [boundingBox[3], boundingBox[2]]
+            ).pad(0.2)}
+            style={{
+              height: '500px',
+              maxHeight: '50vw',
+              width: '100%',
+              borderRadius: '12px',
+            }}
+          >
+            <TileLayer
+              attribution='Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+              url='https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+              minZoom={0}
+              maxZoom={19}
             />
-          ))}
-          {supportedRegions.map((region) => (
-            <GeoJSON
-              key={region._id}
-              data={region.polygon}
-              style={{
-                color: 'grey',
-                weight: 4,
-                opacity: 1.0,
-                fillOpacity: 0.1,
-              }}
-              eventHandlers={{
-                click: (e) => {
-                  map?.flyToBounds(
-                    (e.target as L.GeoJSON).getBounds().pad(0.2),
-                    {
-                      duration: 0.8,
-                    }
-                  );
-                },
-              }}
-            >
-              <Tooltip direction='top' sticky={true}>
-                <Title order={4} align='center'>
-                  {region.name}
-                </Title>
-                <Group position='center' spacing='xs' noWrap>
-                  <Text>Contributors:</Text>
-                  <div>
-                    {region.contributors.map((contributor) => (
-                      <Text>
-                        {contributor.name.first + ' ' + contributor.name.last}
-                      </Text>
-                    ))}
-                  </div>
-                </Group>
-              </Tooltip>
-            </GeoJSON>
-          ))}
-        </MapContainer>
-      ) : (
-        <Flex
-          justify='center'
-          align='center'
+            {nogos.map((nogo) => (
+              <GeoJSON
+                key={nogo._id}
+                data={nogo.lineString}
+                style={{
+                  color: theme.colors.red[7],
+                  weight: 3,
+                  opacity: 1,
+                }}
+                interactive={false}
+              />
+            ))}
+            {supportedRegions.map((region) => (
+              <GeoJSON
+                key={region._id}
+                data={region.polygon}
+                style={{
+                  color: 'grey',
+                  weight: 4,
+                  opacity: 1.0,
+                  fillOpacity: 0.1,
+                }}
+                eventHandlers={{
+                  click: (e) => {
+                    map?.flyToBounds(
+                      (e.target as L.GeoJSON).getBounds().pad(0.2),
+                      {
+                        duration: 0.8,
+                      }
+                    );
+                  },
+                }}
+              >
+                <Tooltip direction='top' sticky={true}>
+                  <Title order={4} align='center'>
+                    {region.name}
+                  </Title>
+                  <Group position='center' spacing='xs' noWrap>
+                    <Text>Contributors:</Text>
+                    <div>
+                      {region.contributors.map((contributor) => (
+                        <Text>
+                          {contributor.name.first + ' ' + contributor.name.last}
+                        </Text>
+                      ))}
+                    </div>
+                  </Group>
+                </Tooltip>
+              </GeoJSON>
+            ))}
+          </MapContainer>
+        ) : (
+          <Flex
+            justify='center'
+            align='center'
+            style={{
+              height: '500px',
+              maxHeight: '50vw',
+              width: '100%',
+              borderRadius: '12px',
+              backgroundColor: theme.colors.gray[3],
+            }}
+          >
+            <Loader />
+          </Flex>
+        )}
+
+        <ScrollArea
           style={{
             height: '500px',
             maxHeight: '50vw',
-            width: '100%',
-            borderRadius: '12px',
-            backgroundColor: theme.colors.gray[3],
+            width: isMobileSize ? '100%' : '400px',
+            backgroundColor: 'unset',
           }}
         >
-          <Loader />
-        </Flex>
-      )}
-
-      <ScrollArea
-        style={{
-          height: '500px',
-          maxHeight: '50vw',
-          width: isMobileSize ? '100%' : '400px',
-          backgroundColor: 'unset',
-        }}
-      >
-        {Object.entries(groupedSupportedRegions).map(([label, regions]) => {
-          return (
-            <Container p={0} mb='sm'>
-              <Title order={6}>{label}</Title>
-              <Button.Group orientation='vertical'>
-                {regions.map((region) => {
-                  const boundingBox = bbox(feature(region.polygon));
-                  return (
-                    <Button
-                      variant='default'
-                      onClick={() =>
-                        map?.flyToBounds(
-                          new L.LatLngBounds(
-                            [boundingBox[1], boundingBox[0]],
-                            [boundingBox[3], boundingBox[2]]
-                          ).pad(0.2),
-                          {
-                            animate: false,
-                          }
-                        )
-                      }
-                      styles={{
-                        inner: {
-                          justifyContent: 'flex-start',
-                        },
-                      }}
-                    >
-                      {region.name}
-                    </Button>
-                  );
-                })}
-              </Button.Group>
-            </Container>
-          );
-        })}
-      </ScrollArea>
-    </Group>
+          {Object.entries(groupedSupportedRegions).map(([label, regions]) => {
+            return (
+              <Container p={0} mb='sm'>
+                <Title order={6}>{label}</Title>
+                <Button.Group orientation='vertical'>
+                  {regions.map((region) => {
+                    const boundingBox = bbox(feature(region.polygon));
+                    return (
+                      <Button
+                        variant='default'
+                        onClick={() =>
+                          map?.flyToBounds(
+                            new L.LatLngBounds(
+                              [boundingBox[1], boundingBox[0]],
+                              [boundingBox[3], boundingBox[2]]
+                            ).pad(0.2),
+                            {
+                              animate: false,
+                            }
+                          )
+                        }
+                        styles={{
+                          inner: {
+                            justifyContent: 'flex-start',
+                          },
+                        }}
+                      >
+                        {region.name}
+                      </Button>
+                    );
+                  })}
+                </Button.Group>
+              </Container>
+            );
+          })}
+        </ScrollArea>
+      </Group>
+    </>
   );
 };
