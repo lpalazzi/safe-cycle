@@ -481,7 +481,7 @@ const SupportedRegions: React.FC<{ open: boolean }> = ({ open }) => {
         })
       );
     }
-  }, [showHidden]);
+  }, [showHidden, regions]);
 
   useEffect(() => {
     if (allRegionsProcessed) {
