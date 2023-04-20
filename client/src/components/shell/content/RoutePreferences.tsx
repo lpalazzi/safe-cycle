@@ -58,7 +58,7 @@ export const RoutePreferences: React.FC = () => {
     setShowAlternateRoutes,
   } = useGlobalContext();
   const { openModal } = useModals();
-  const [comfortValue, setComfortValue] = useState('Medium');
+  const [comfortValue, setComfortValue] = useState('High');
 
   const handleComfortLevelSelected = (value: string) => {
     setComfortValue(value);
