@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import joi from 'joi';
 import geojsonWithin from '@turf/boolean-within';
 import { injectable } from 'tsyringe';
 import { NoID } from 'types';
@@ -18,14 +17,16 @@ export class RegionService {
     return this.regionDao.exists({ _id: regionId });
   }
 
+  async existsWithName(name: string) {
+    return this.regionDao.exists({ name });
+  }
+
   async isLineStringInRegion(
     lineString: GeoJSON.LineString,
     regionId: mongoose.Types.ObjectId
   ) {
     const region = await this.regionDao.getById(regionId);
-    if (!region) {
-      throw new Error(`No region found for regionId=${regionId}`);
-    }
+    if (!region) return false;
     return geojsonWithin(lineString, region.polygon);
   }
 
@@ -40,44 +41,17 @@ export class RegionService {
   }
 
   async create(newRegion: IRegionCreateDTO) {
-    try {
-      const { error } = joi
-        .object({
-          name: joi.string().required(),
-          polygon: joi.geojson().polygon().required(),
-          iso31662: joi.string().required(),
-        })
-        .required()
-        .validate(newRegion);
+    const regionToCreate: NoID<IRegion> = {
+      ...newRegion,
+      name: newRegion.name.trim(),
+      contributors: [],
+    };
 
-      if (error) {
-        throw new Error(error.message);
-      }
+    const nameIsTaken = await this.existsWithName(regionToCreate.name);
+    if (nameIsTaken)
+      throw new Error(`Name \"${regionToCreate.name}\" is already taken`);
 
-      const regionToCreate: NoID<IRegion> = {
-        ...newRegion,
-        contributors: [],
-      };
-
-      const nameIsTaken = await this.regionDao.exists({
-        name: regionToCreate.name,
-      });
-      if (nameIsTaken) {
-        throw new Error(`Name \"${regionToCreate.name}\" is already taken`);
-      }
-
-      const region = await this.regionDao.create(regionToCreate);
-
-      return {
-        region,
-        error: null,
-      };
-    } catch (err: any) {
-      return {
-        region: null,
-        error: err.message || 'Unhandled error',
-      };
-    }
+    return this.regionDao.create(regionToCreate);
   }
 
   async addContributorToRegion(

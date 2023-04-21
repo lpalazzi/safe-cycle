@@ -1,5 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import joi from 'joi';
 import { container } from 'tsyringe';
 import { RegionService } from 'services';
 import { IRegionCreateDTO } from 'interfaces';
@@ -25,13 +26,30 @@ export const region = (app: express.Router) => {
   route.post('/create', checkLoggedIn, checkAdmin, async (req, res, next) => {
     try {
       const newRegion: IRegionCreateDTO = req.body.region;
-      const { region, error } = await regionService.create(newRegion);
+      const { error } = joi
+        .object({
+          name: joi.string().required(),
+          polygon: joi.geojson().polygon().required(),
+          iso31662: joi.string().required(),
+        })
+        .required()
+        .validate(newRegion);
 
-      if (error) {
-        throw new BadRequestError(error);
-      } else if (!region) {
-        throw new InternalServerError('Region could not be created');
-      }
+      if (error)
+        throw new BadRequestError(
+          error.message || 'Request was not formatted correctly'
+        );
+
+      const nameIsTaken = await regionService.existsWithName(
+        newRegion.name.trim()
+      );
+      if (nameIsTaken)
+        throw new BadRequestError(
+          `Name \"${newRegion.name}\" is already taken`
+        );
+
+      const region = await regionService.create(newRegion);
+      if (!region) throw new InternalServerError('Region could not be created');
 
       return res.json({ region });
     } catch (err) {
