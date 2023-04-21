@@ -73,6 +73,8 @@ describe('POST /nogoGroup/create', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body?.nogoGroup?._id).toBeTruthy();
     expect(res.body?.nogoGroup?.name).toBe('Nogo Group');
+    const nogoGroupsInDB = await NogoGroupModel.find();
+    expect(nogoGroupsInDB.length).toBe(1);
   });
 
   test('throws BadRequestError when called with incorrect format', async () => {
@@ -87,6 +89,32 @@ describe('POST /nogoGroup/create', () => {
       loggedInUserEmail: user.email,
     });
     expect(res.statusCode).toBe(400);
+  });
+
+  test('throws BadRequestError if name is already taken', async () => {
+    const user = await createTestUser();
+    const nogoGroup: INogoGroupCreateDTO = {
+      name: 'Nogo Group',
+    };
+    const res1 = await makeRequest({
+      url: '/nogoGroup/create',
+      method: 'POST',
+      data: { nogoGroup },
+      loggedInUserEmail: user.email,
+    });
+    expect(res1.statusCode).toBe(200);
+    const res2 = await makeRequest({
+      url: '/nogoGroup/create',
+      method: 'POST',
+      data: { nogoGroup },
+      loggedInUserEmail: user.email,
+    });
+    expect(res2.statusCode).toBe(400);
+    const nogoGroups: INogoGroup[] = await NogoGroupModel.find({
+      name: 'Nogo Group',
+      user: user._id,
+    });
+    expect(nogoGroups.length).toBe(1);
   });
 
   test('throws UnauthorizedError when not logged in', async () => {
