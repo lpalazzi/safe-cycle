@@ -7,7 +7,6 @@ import {
 } from 'interfaces';
 import { NogoDao, NogoGroupDao } from 'daos';
 import { NoID } from 'types';
-import { BadRequestError } from 'api/errors';
 
 @injectable()
 export class NogoGroupService {
@@ -25,6 +24,10 @@ export class NogoGroupService {
     return this.nogoGroupDao.exists({ _id: nogoGroupId });
   }
 
+  async existsWithName(name: string, userId: mongoose.Types.ObjectId) {
+    return this.nogoGroupDao.exists({ name, user: userId });
+  }
+
   async create(
     newNogoGroup: INogoGroupCreateDTO,
     userId: mongoose.Types.ObjectId
@@ -35,16 +38,12 @@ export class NogoGroupService {
       user: userId,
     };
 
-    const nameIsTaken = await this.nogoGroupDao.exists({
-      name: nogoGroupToCreate.name,
-      user: nogoGroupToCreate.user,
-    });
-
-    if (nameIsTaken) {
-      throw new BadRequestError(
-        `Name \"${nogoGroupToCreate.name}\" is already taken`
-      );
-    }
+    const nameIsTaken = await this.existsWithName(
+      nogoGroupToCreate.name,
+      userId
+    );
+    if (nameIsTaken)
+      throw new Error(`Name \"${nogoGroupToCreate.name}\" is already taken`);
 
     return this.nogoGroupDao.create(nogoGroupToCreate);
   }

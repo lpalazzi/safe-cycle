@@ -56,8 +56,16 @@ export const nogoGroup = (app: express.Router) => {
           error.message || 'Request was not formatted correctly'
         );
 
-      const nogoGroup = await nogoGroupService.create(newNogoGroup, userId);
+      const nameIsTaken = await nogoGroupService.existsWithName(
+        newNogoGroup.name.trim(),
+        userId
+      );
+      if (nameIsTaken)
+        throw new BadRequestError(
+          `Name \"${newNogoGroup.name}\" is already taken`
+        );
 
+      const nogoGroup = await nogoGroupService.create(newNogoGroup, userId);
       if (!nogoGroup)
         throw new InternalServerError('Nogo Group could not be created');
 
