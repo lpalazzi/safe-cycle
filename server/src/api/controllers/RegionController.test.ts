@@ -261,6 +261,22 @@ describe('POST /region/addContributorToRegion', () => {
     const regionInDB: IRegion | null = await RegionModel.findById(region._id);
     expect(regionInDB?.contributors?.length).toBe(0);
   });
+
+  test('throws BadRequestError if user is already a contributor on region', async () => {
+    const adminUser = await createTestUser('admin');
+    const user = await createTestUser('verified contributor');
+    const region = await createTestRegion([user._id]);
+    const res = await makeRequest({
+      url: '/region/addContributorToRegion',
+      method: 'POST',
+      data: { userId: user._id, regionId: region._id },
+      loggedInUserEmail: adminUser.email,
+    });
+    expect(res.statusCode).toBe(400);
+    expect(res.body?.success).toBeFalsy();
+    const regionInDB: IRegion | null = await RegionModel.findById(region._id);
+    expect(regionInDB?.contributors?.length).toBe(1);
+  });
 });
 
 describe('POST /region/removeContributorFromRegion', () => {

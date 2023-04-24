@@ -73,16 +73,18 @@ export const region = (app: express.Router) => {
 
         const userId = new mongoose.Types.ObjectId(req.body.userId);
         const regionId = new mongoose.Types.ObjectId(req.body.regionId);
-        const success = await regionService.addContributorToRegion(
-          regionId,
-          userId
-        );
-        if (!success) {
-          throw new InternalServerError(
-            'User could not be added as a contributor'
+
+        try {
+          const success = await regionService.addContributorToRegion(
+            regionId,
+            userId
           );
+          return res.json({ success });
+        } catch (error: any) {
+          if (error.message === 'User is already a contributor on this region')
+            throw new BadRequestError(error.message);
+          throw error;
         }
-        return res.json({ success: true });
       } catch (err) {
         next(err);
       }
