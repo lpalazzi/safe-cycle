@@ -10,7 +10,7 @@ export default (app: express.Express) => {
       new Sentry.Integrations.Http({ tracing: true }),
       new Tracing.Integrations.Express({ app }),
     ],
-    tracesSampleRate: 1.0,
+    tracesSampleRate: 0.0,
   });
   app.use(Sentry.Handlers.requestHandler());
   app.use(Sentry.Handlers.tracingHandler());
