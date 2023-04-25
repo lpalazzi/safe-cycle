@@ -19,7 +19,6 @@ import { useGlobalContext } from 'contexts/globalContext';
 export const GuidedTour: React.FC = () => {
   const { isMobileSize, showTour, setShowTour } = useGlobalContext();
   const theme = useMantineTheme();
-  const [key, setKey] = useState(0);
   const [steps] = useState<Step[]>([
     {
       target: '.waypoints',
@@ -57,28 +56,26 @@ export const GuidedTour: React.FC = () => {
       data.action === ACTIONS.CLOSE ||
       data.status === STATUS.FINISHED ||
       data.status === STATUS.SKIPPED
-    ) {
+    )
       setShowTour(false);
-      setKey(key + 1);
-    }
   };
 
-  return isMobileSize ? null : (
+  return showTour ? (
     <Joyride
-      key={key}
       steps={steps}
       run={showTour}
       hideCloseButton
       continuous
       showProgress
       showSkipButton
+      scrollOffset={85}
       styles={{
-        options: { zIndex: 99999999999, primaryColor: theme.colors.blue[6] },
+        options: { zIndex: 1000, primaryColor: theme.colors.blue[6] },
       }}
       callback={handleJoyrideCallback}
       tooltipComponent={Tooltip}
     />
-  );
+  ) : null;
 };
 
 const Tooltip: (data: TooltipRenderProps) => JSX.Element = ({

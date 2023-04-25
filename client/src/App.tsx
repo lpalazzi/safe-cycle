@@ -10,33 +10,31 @@ import { LoadingIndicator } from 'views/map/LoadingIndicator';
 
 function App() {
   return (
-    <>
-      <GlobalContextProvider>
-        <MantineProvider
-          withGlobalStyles
-          withNormalizeCSS
-          theme={{
-            fontFamily: 'Noto Sans, sans-serif',
-            headings: { fontFamily: 'Noto Sans, sans-serif' },
-            components: {
-              Accordion: { styles: { control: { lineHeight: 1.55 } } },
-            },
-          }}
-        >
-          <GuidedTour />
-          <NotificationsProvider position='top-right' zIndex={100000}>
-            <ModalsProvider modalProps={{ zIndex: 10000 }}>
-              <MapContextProvider>
-                <LoadingIndicator />
-                <Shell>
-                  <Map />
-                </Shell>
-              </MapContextProvider>
-            </ModalsProvider>
-          </NotificationsProvider>
-        </MantineProvider>
-      </GlobalContextProvider>
-    </>
+    <GlobalContextProvider>
+      <MantineProvider
+        withGlobalStyles
+        withNormalizeCSS
+        theme={{
+          fontFamily: 'Noto Sans, sans-serif',
+          headings: { fontFamily: 'Noto Sans, sans-serif' },
+          components: {
+            Accordion: { styles: { control: { lineHeight: 1.55 } } },
+          },
+        }}
+      >
+        <GuidedTour />
+        <NotificationsProvider position='top-right' zIndex={100000}>
+          <ModalsProvider modalProps={{ zIndex: 10000 }}>
+            <MapContextProvider>
+              <LoadingIndicator />
+              <Shell>
+                <Map />
+              </Shell>
+            </MapContextProvider>
+          </ModalsProvider>
+        </NotificationsProvider>
+      </MantineProvider>
+    </GlobalContextProvider>
   );
 }
 
