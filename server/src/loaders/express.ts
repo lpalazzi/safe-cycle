@@ -26,7 +26,7 @@ export default (app: express.Express) => {
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: config.test ? false : true,
+        secure: config.dev ? false : true,
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       },
       store: MongoStore.create({

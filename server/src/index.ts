@@ -12,7 +12,7 @@ async function start() {
   const app = express();
   await loaders.load(app);
   if (
-    config.test ||
+    config.dev ||
     !(config.https.cert && config.https.key && config.https.ca)
   ) {
     app.listen(config.port, () => {

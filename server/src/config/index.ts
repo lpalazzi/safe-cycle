@@ -1,5 +1,5 @@
 export default {
-  test: process.env.TEST === '1' ?? 0,
+  dev: process.env.DEV === '1' ?? 0,
   port: Number(process.env.PORT) ?? 8000,
   https: {
     key: process.env.HTTPS_KEY,
