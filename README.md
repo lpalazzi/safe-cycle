@@ -16,6 +16,12 @@ BROUTER_URL=http://localhost:17777/brouter
 SESSION_SECRET=your_secret # generate your own secret to put here
 ```
 
+Also create a `.env.client` at the same location with the following content:
+
+```
+NODE_ENV=development
+```
+
 Run `yarn` to install the required packages.
 
 Run `git submodule update --init` to populate/update the `./brouter` submodule folder.
