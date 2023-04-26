@@ -38,7 +38,7 @@ export class RouterService {
       lonlats
     )}&polylines=${this.nogosToParamString(
       nogos
-    )}&profile=${profile}&alternativeidx=${alternativeidx}&format=geojson`;
+    )}&profile=${profile}&alternativeidx=${alternativeidx}&format=geojson&timode=1`;
     return axios
       .get(url, {
         insecureHTTPParser: true,
