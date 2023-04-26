@@ -40,8 +40,8 @@ export const Route: React.FC = () => {
           data={routes[selectedRouteIndex].lineString}
           style={{
             color: theme.colors.blue[9],
-            weight: 5,
-            opacity: 1.0,
+            weight: 8,
+            opacity: 0.5,
           }}
         />
       ) : (
@@ -68,8 +68,8 @@ export const Route: React.FC = () => {
                   color: isDefaultRoute
                     ? theme.colors.blue[9]
                     : theme.colors.gray[6],
-                  weight: 5,
-                  opacity: 1.0,
+                  weight: 8,
+                  opacity: 0.5,
                 }}
                 eventHandlers={{
                   add: (e) => {
@@ -99,8 +99,8 @@ export const Route: React.FC = () => {
                       color: isDefaultRoute
                         ? theme.colors.blue[9]
                         : theme.colors.gray[6],
-                      weight: 5,
-                      opacity: 1.0,
+                      weight: 8,
+                      opacity: 0.5,
                     });
                   },
                 }}

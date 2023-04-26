@@ -71,6 +71,7 @@ export const Markers: React.FC = () => {
             key={index + waypoint.latlng.lat + waypoint.latlng.lng}
             position={waypoint.latlng}
             draggable={draggable}
+            opacity={0.8}
             icon={createMarker(
               draggable ? (
                 <IconArrowsMove
@@ -117,6 +118,7 @@ export const Markers: React.FC = () => {
         <Marker
           key={currentLocation.latlng.lat + currentLocation.latlng.lng}
           position={currentLocation.latlng}
+          opacity={0.8}
           icon={createMarker(
             <IconUser color='black' style={{ verticalAlign: 'middle' }} />,
             'orange'
