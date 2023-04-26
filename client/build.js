@@ -13,8 +13,7 @@ esbuild
     bundle: true,
     plugins: [inlineImage()],
     define: {
-      'process.env.NODE_ENV':
-        JSON.stringify(process.env.NODE_ENV) ?? 'development',
+      'process.env.DEV': JSON.stringify(process.env.DEV === '1') ?? 'false',
       'process.env.SENTRY_DSN':
         JSON.stringify(process.env.SENTRY_DSN) ?? 'undefined',
     },

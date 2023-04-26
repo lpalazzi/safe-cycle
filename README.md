@@ -19,7 +19,7 @@ SESSION_SECRET=your_secret # generate your own secret to put here
 Also create a `.env.client` at the same location with the following content:
 
 ```
-NODE_ENV=development
+DEV=1 # include for a local dev environment, omit for production
 ```
 
 Run `yarn` to install the required packages.
