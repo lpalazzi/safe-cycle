@@ -465,6 +465,9 @@ const SupportedRegions: React.FC<{ open: boolean }> = ({ open }) => {
   const [allRegionsProcessed, setAllRegionsProcessed] = useState(false);
   const [supportedRegions, setSupportedRegions] = useState<Region[]>([]);
   const [nogos, setNogos] = useState<Nogo[]>([]);
+  const [regionNogoLengths, setRegionNogoLengths] = useState<{
+    [id: string]: number;
+  }>({});
   const [boundingBox, setBoundingBox] = useState<BBox | undefined>(undefined);
   const [showHidden, setShowHidden] = useState(false);
 
@@ -476,6 +479,13 @@ const SupportedRegions: React.FC<{ open: boolean }> = ({ open }) => {
           if (showHidden || nogos.length > 15) {
             setSupportedRegions((prevRegions) => [...prevRegions, region]);
             setNogos((prevNogos) => [...prevNogos, ...nogos]);
+            const totalNogoLength = nogos
+              .map((nogo) => nogo.getLength())
+              .reduce((partialSum, a) => partialSum + a, 0);
+            setRegionNogoLengths((prev) => ({
+              ...prev,
+              [region._id]: totalNogoLength,
+            }));
           }
           if (regions.length === index + 1) setAllRegionsProcessed(true);
         })
@@ -575,6 +585,17 @@ const SupportedRegions: React.FC<{ open: boolean }> = ({ open }) => {
                   <Title order={4} align='center'>
                     {region.name}
                   </Title>
+                  <Group position='center' spacing='xs' noWrap>
+                    <Text>Total nogos:</Text>
+                    <div>
+                      <Text>
+                        {regionNogoLengths[region._id] >= 1000
+                          ? (regionNogoLengths[region._id] / 1000).toFixed(1) +
+                            'km'
+                          : regionNogoLengths[region._id].toFixed(0) + 'm'}
+                      </Text>
+                    </div>
+                  </Group>
                   <Group position='center' spacing='xs' noWrap>
                     <Text>Contributors:</Text>
                     <div>

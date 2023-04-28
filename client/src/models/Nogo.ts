@@ -1,4 +1,5 @@
 import { ID } from 'types';
+import { getLengthForLineString } from 'utils/geojson';
 
 interface NogoParams {
   _id: ID;
@@ -18,5 +19,9 @@ export class Nogo {
     this.lineString = params.lineString;
     this.nogoGroup = params.nogoGroup;
     this.region = params.region;
+  }
+
+  public getLength() {
+    return getLengthForLineString(this.lineString);
   }
 }
