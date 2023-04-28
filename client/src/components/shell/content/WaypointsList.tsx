@@ -296,7 +296,7 @@ const DraggableWaypointItem: React.FC<DraggableWaypointItemProps> = ({
       item.curIndex = index;
     },
   });
-  const [label, setLabel] = useState<string>();
+  const [label, setLabel] = useState<string | null>();
 
   useEffect(() => {
     Promise.resolve(waypoint.label).then(setLabel);

@@ -4,3 +4,4 @@ export * from './404_DataNotFoundError';
 export * from './404_ModelNotFoundError';
 export * from './500_InternalServerError';
 export * from './503_ServiceUnavailableError';
+export * from './504_GatewayTimeoutError';

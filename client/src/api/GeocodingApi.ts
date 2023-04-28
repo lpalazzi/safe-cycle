@@ -49,9 +49,14 @@ export class GeocodingApi {
   }
 
   static async reverse(latlng: L.LatLng) {
-    const response = await makeRequest(
-      `${this.baseUrl}/reverse/${latlng.lat}/${latlng.lng}`
-    );
-    return response.label as string;
+    try {
+      const response = await makeRequest(
+        `${this.baseUrl}/reverse/${latlng.lat}/${latlng.lng}`
+      );
+      return response.label as string;
+    } catch (error: any) {
+      if (error.message === 'Reverse geo search timed out') return null;
+      throw error;
+    }
   }
 }
