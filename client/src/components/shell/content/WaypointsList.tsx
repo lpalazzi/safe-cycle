@@ -108,22 +108,24 @@ export const WaypointsList: React.FC = () => {
       (geoSearchResult) => geoSearchResult.label === value
     );
     if (selectedGeoSearchResult) {
-      const latlng =
-        selectedGeoSearchResult.latlng ??
-        (await GeocodingApi.geocode(selectedGeoSearchResult.label));
+      try {
+        const latlng =
+          selectedGeoSearchResult.latlng ??
+          (await GeocodingApi.geocode(selectedGeoSearchResult.label));
 
-      if (!latlng) {
+        if (!latlng) throw new Error('Unable to locate selected search result');
+
+        addWaypoint(
+          new LatLng(Number(latlng.lat), Number(latlng.lng)),
+          selectedGeoSearchResult.label
+        );
+      } catch (error: any) {
         showNotification({
           title: 'Geocoding error',
-          message: 'Unable to locate selected search result',
+          message: error.message || 'Unable to locate selected search result',
           color: 'red',
         });
-        return;
       }
-      addWaypoint(
-        new LatLng(Number(latlng.lat), Number(latlng.lng)),
-        selectedGeoSearchResult.label
-      );
     }
   };
 
