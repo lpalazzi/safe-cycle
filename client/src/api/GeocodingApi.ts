@@ -23,7 +23,9 @@ export class GeocodingApi {
       : undefined;
 
     const response = await makeRequest(
-      `${this.baseUrl}/search/${query}?viewbox=${viewboxStr}${
+      `${this.baseUrl}/search/${encodeURIComponent(
+        query
+      )}?viewbox=${viewboxStr}${
         userLocationStr ? '&userLocation=' + userLocationStr : ''
       }`
     );
@@ -43,7 +45,9 @@ export class GeocodingApi {
   }
 
   static async geocode(query: string) {
-    const response = await makeRequest(`${this.baseUrl}/geocode/${query}`);
+    const response = await makeRequest(
+      `${this.baseUrl}/geocode/${encodeURIComponent(query)}`
+    );
     const position: { latitude: number; longitude: number } = response.position;
     return new L.LatLng(position.latitude, position.longitude);
   }
