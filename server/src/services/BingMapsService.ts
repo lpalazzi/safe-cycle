@@ -13,7 +13,9 @@ export class BingMapsService {
     if (!config.bingMapsApiKey) return null;
 
     const { data } = await axios.get<BingLocationResult>(
-      `${this.bingMapsBaseUrl}/Locations/${query}?maxResults=1&key=${config.bingMapsApiKey}`
+      `${this.bingMapsBaseUrl}/Locations?query=${encodeURIComponent(
+        query
+      )}&maxResults=1&key=${config.bingMapsApiKey}`
     );
 
     const coordinates =
