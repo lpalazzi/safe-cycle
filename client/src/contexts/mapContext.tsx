@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import L from 'leaflet';
 import { useGlobalContext } from './globalContext';
-import { ID, Location, Waypoint } from 'types';
+import { ID, Location, TurnInstruction, Waypoint } from 'types';
 import { Nogo } from 'models';
 import { GeocodingApi, NogoApi, RouterApi } from 'api';
 import { RouteData } from 'api/interfaces/Router';
@@ -16,6 +16,7 @@ type MapContextType =
       waypoints: Waypoint[];
       routes: RouteData[] | null;
       selectedRouteIndex: number | null;
+      turnInstructions: TurnInstruction[] | null;
       nogoRoutes: Nogo[];
       lineToCursor: [L.LatLng, L.LatLng] | null;
       loadingRoute: boolean;
@@ -65,6 +66,9 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   const [selectedRouteIndex, setSelectedRouteIndex] = useState<number | null>(
     null
   );
+  const [turnInstructions, setTurnInstructions] = useState<
+    TurnInstruction[] | null
+  >(null);
   const [lineToCursor, setLineToCursor] = useState<[L.LatLng, L.LatLng] | null>(
     null
   );
@@ -75,7 +79,8 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   const addWaypoint = (latlng: L.LatLng, label?: string) => {
     const newWaypoint: Waypoint = {
       latlng,
-      label: label ?? GeocodingApi.reverse(latlng),
+      label:
+        label ?? GeocodingApi.reverse(latlng).then((res) => res?.label ?? null),
     };
     if (!editingGroupOrRegion) {
       setWaypoints([...waypoints, newWaypoint]);
@@ -92,9 +97,10 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   };
 
   const updateWaypoint = (index: number, latlng: L.LatLng, label?: string) => {
-    const updatedWaypoint = {
+    const updatedWaypoint: Waypoint = {
       latlng,
-      label: label ?? GeocodingApi.reverse(latlng),
+      label:
+        label ?? GeocodingApi.reverse(latlng).then((res) => res?.label ?? null),
     };
     const newWaypoints = [...waypoints];
     newWaypoints.splice(index, 1, updatedWaypoint);
@@ -163,6 +169,35 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     } else {
       setRoutes(null);
       setSelectedRouteIndex(null);
+    }
+  };
+
+  const calculateTurnInstructions = async () => {
+    if (!routes || !selectedRouteIndex) setTurnInstructions(null);
+    if (routes && (selectedRouteIndex || selectedRouteIndex === 0)) {
+      const route = routes[selectedRouteIndex];
+      const voiceHints = route.properties.voicehints;
+      const newTurnInstructions = await Promise.all(
+        voiceHints.map(async (voiceHint) => {
+          const command = voiceHint[1];
+          const position: GeoJSON.Position =
+            route.lineString.coordinates[
+              voiceHint[0] + (command === 1 ? 0 : 1)
+            ];
+          const latLng = new L.LatLng(position[1], position[0]);
+          const streetName = (await GeocodingApi.reverse(latLng))?.address.road;
+          const distanceAfter = voiceHint[3];
+          const roundaboutExit = voiceHint[2];
+          return {
+            command,
+            streetName,
+            latLng,
+            distanceAfter,
+            roundaboutExit,
+          } as TurnInstruction;
+        })
+      );
+      setTurnInstructions(newTurnInstructions);
     }
   };
 
@@ -281,6 +316,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         waypoints,
         routes,
         selectedRouteIndex,
+        turnInstructions,
         nogoRoutes,
         lineToCursor,
         loadingRoute,

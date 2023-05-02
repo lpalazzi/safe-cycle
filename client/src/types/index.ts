@@ -5,3 +5,4 @@ export * from './Location';
 export * from './Waypoint';
 export * from './UserTypes';
 export * from './Geocoding';
+export * from './TurnInstruction';

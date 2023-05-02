@@ -5,3 +5,10 @@ export interface IGeocodeSearchResult {
     longitude: number;
   };
 }
+
+export interface IReverseGeocodeResult {
+  label: string;
+  address: {
+    road?: string;
+  };
+}

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { injectable } from 'tsyringe';
 import { Position, Viewbox } from 'types';
-import { IGeocodeSearchResult } from 'interfaces';
+import { IGeocodeSearchResult, IReverseGeocodeResult } from 'interfaces';
 
 @injectable()
 export class NominatimService {
@@ -12,7 +12,12 @@ export class NominatimService {
     const { data } = await axios.get<NominatimSearchResult>(
       `${this.nominatimBaseUrl}/reverse?lat=${position.latitude}&lon=${position.longitude}&format=json`
     );
-    return data.display_name;
+    return {
+      label: data.display_name,
+      address: {
+        road: data.address?.road,
+      },
+    } as IReverseGeocodeResult;
   }
 
   public async search(query: string, viewbox: Viewbox) {

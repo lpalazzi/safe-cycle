@@ -14,4 +14,5 @@ export interface BrouterProperties {
   'total-energy': string;
   'total-time': string;
   'track-length': string;
+  voicehints: [number, number, number, number, number][];
 }
