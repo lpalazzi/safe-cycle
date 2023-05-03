@@ -2,7 +2,7 @@ export const getLengthForLineString = (lineString: GeoJSON.LineString) => {
   if (lineString.coordinates.length < 2) return 0;
   var result = 0;
   for (var i = 1; i < lineString.coordinates.length; i++)
-    result += distanceBetweenLatLons(
+    result += distanceBetweenCoords(
       lineString.coordinates[i - 1][0],
       lineString.coordinates[i - 1][1],
       lineString.coordinates[i][0],
@@ -16,7 +16,7 @@ export const getLengthForLineString = (lineString: GeoJSON.LineString) => {
  * © Chris Veness, MIT-licensed,
  * http://www.movable-type.co.uk/scripts/latlong.html#equirectangular
  */
-export const distanceBetweenLatLons = (
+export const distanceBetweenCoords = (
   lon1: number,
   lat1: number,
   lon2: number,

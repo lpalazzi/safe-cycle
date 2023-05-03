@@ -8,15 +8,18 @@ export class NominatimService {
   constructor() {}
   private nominatimBaseUrl = 'https://nominatim.openstreetmap.org';
 
-  public async reverse(position: Position) {
+  public async reverse(position: Position, zoom: number) {
     const { data } = await axios.get<NominatimSearchResult>(
-      `${this.nominatimBaseUrl}/reverse?lat=${position.latitude}&lon=${position.longitude}&format=json`
+      `${this.nominatimBaseUrl}/reverse?lat=${position.latitude}&lon=${
+        position.longitude
+      }&format=json&zoom=${zoom.toString()}`
     );
     return {
       label: data.display_name,
       address: {
         road: data.address?.road,
       },
+      position: { latitude: +data.lat, longitude: +data.lon },
     } as IReverseGeocodeResult;
   }
 

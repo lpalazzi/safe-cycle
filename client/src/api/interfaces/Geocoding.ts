@@ -11,4 +11,8 @@ export interface IReverseGeocodeResult {
   address: {
     road?: string;
   };
+  position: {
+    latitude: number;
+    longitude: number;
+  };
 }

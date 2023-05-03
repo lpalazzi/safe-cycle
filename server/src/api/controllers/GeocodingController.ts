@@ -88,7 +88,7 @@ export const geocoding = (app: express.Router) => {
     }
   });
 
-  route.get('/reverse/:lat/:lng', async (req, res, next) => {
+  route.get('/reverse/:lat/:lng/:zoom', async (req, res, next) => {
     try {
       const lat = req.params.lat;
       const lng = req.params.lng;
@@ -96,6 +96,9 @@ export const geocoding = (app: express.Router) => {
         latitude: Number(lat),
         longitude: Number(lng),
       };
+      const zoom = +req.params.zoom;
+      if (zoom < 0 || zoom > 18)
+        throw new BadRequestError('zoom must be an integer from 0-18');
       const { error } = joi
         .geocoding()
         .position()
@@ -104,8 +107,8 @@ export const geocoding = (app: express.Router) => {
       if (error) throw new BadRequestError(error.message);
       try {
         const result = await asyncCallWithTimeout<IReverseGeocodeResult>(
-          nominatimService.reverse(position),
-          3000
+          nominatimService.reverse(position, zoom),
+          5000
         );
         return res.json({ result });
       } catch (error: any) {

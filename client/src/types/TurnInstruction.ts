@@ -1,28 +1,27 @@
 import L from 'leaflet';
 
-export enum TurnCommands {
-  'Continue' = 1,
-  'Turn left',
-  'Turn slightly left',
-  'Turn sharply left',
-  'Turn right',
-  'Turn slightly right',
-  'Turn sharply right',
-  'Keep left',
-  'Keep right',
-  'U-turn',
-  '180 degree u-turn',
-  'Right U-turn',
-  'Off route',
-  'Roundabout',
-  'Roundabout left',
-  'Beeline routing',
-}
+export type TurnCommand =
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5
+  | 6
+  | 7
+  | 8
+  | 9
+  | 10
+  | 11
+  | 12
+  | 13
+  | 14
+  | 15
+  | 16;
 
 export type TurnInstruction = {
-  command: number;
-  streetName: string;
+  command: TurnCommand;
   latLng: L.LatLng;
   distanceAfter: number;
   roundaboutExit: number;
+  streetName: string | null | Promise<string | null>;
 };

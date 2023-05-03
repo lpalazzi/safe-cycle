@@ -55,10 +55,10 @@ export class GeocodingApi {
     return new L.LatLng(position.latitude, position.longitude);
   }
 
-  static async reverse(latlng: L.LatLng) {
+  static async reverse(latlng: L.LatLng, zoom?: number) {
     try {
       const response = await makeRequest(
-        `${this.baseUrl}/reverse/${latlng.lat}/${latlng.lng}`
+        `${this.baseUrl}/reverse/${latlng.lat}/${latlng.lng}/${zoom ?? 18}`
       );
       return response.result as IReverseGeocodeResult;
     } catch (error: any) {

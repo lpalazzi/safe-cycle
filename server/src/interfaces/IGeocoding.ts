@@ -10,4 +10,5 @@ export interface IReverseGeocodeResult {
   address: {
     road?: string;
   };
+  position: Position;
 }

@@ -1,11 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import L from 'leaflet';
+import midpoint from '@turf/midpoint';
+import { showNotification } from '@mantine/notifications';
 import { useGlobalContext } from './globalContext';
 import { ID, Location, TurnInstruction, Waypoint } from 'types';
 import { Nogo } from 'models';
 import { GeocodingApi, NogoApi, RouterApi } from 'api';
 import { RouteData } from 'api/interfaces/Router';
-import { showNotification } from '@mantine/notifications';
+import { IReverseGeocodeResult } from 'api/interfaces/Geocoding';
+import { distanceBetweenCoords } from 'utils/geojson';
 
 type MapContextType =
   | {
@@ -173,30 +176,53 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   };
 
   const calculateTurnInstructions = async () => {
-    if (!routes || !selectedRouteIndex) setTurnInstructions(null);
+    if (!routes || !selectedRouteIndex || editingGroupOrRegion)
+      setTurnInstructions(null);
     if (routes && (selectedRouteIndex || selectedRouteIndex === 0)) {
       const route = routes[selectedRouteIndex];
       const voiceHints = route.properties.voicehints;
-      const newTurnInstructions = await Promise.all(
-        voiceHints.map(async (voiceHint) => {
-          const command = voiceHint[1];
-          const position: GeoJSON.Position =
-            route.lineString.coordinates[
-              voiceHint[0] + (command === 1 ? 0 : 1)
-            ];
-          const latLng = new L.LatLng(position[1], position[0]);
-          const streetName = (await GeocodingApi.reverse(latLng))?.address.road;
-          const distanceAfter = voiceHint[3];
-          const roundaboutExit = voiceHint[2];
-          return {
-            command,
-            streetName,
-            latLng,
-            distanceAfter,
-            roundaboutExit,
-          } as TurnInstruction;
-        })
-      );
+      const newTurnInstructions = voiceHints.map((voiceHint) => {
+        const command = voiceHint[1];
+        const position = route.lineString.coordinates[voiceHint[0]];
+        const nextPosition = route.lineString.coordinates[voiceHint[0] + 1];
+        const mid = midpoint(position, nextPosition).geometry.coordinates;
+        const latLng = new L.LatLng(mid[1], mid[0]);
+        const streetName = new Promise<string | null>(async (resolve) => {
+          let tries = 0;
+          let result: IReverseGeocodeResult | null = null;
+          while (tries < 3 && !result) {
+            tries++;
+            try {
+              result = await GeocodingApi.reverse(latLng, 16);
+            } catch (error) {
+              result = null;
+            }
+          }
+          if (
+            result &&
+            distanceBetweenCoords(
+              latLng.lng,
+              latLng.lat,
+              result.position.longitude,
+              result.position.latitude
+            ) < 5
+          ) {
+            resolve(result.address.road ?? null);
+          } else {
+            resolve(null);
+          }
+        });
+        const distanceAfter = voiceHint[3];
+        const roundaboutExit = voiceHint[2];
+        const turnInstruction: TurnInstruction = {
+          command,
+          latLng,
+          distanceAfter,
+          roundaboutExit,
+          streetName,
+        };
+        return turnInstruction;
+      });
       setTurnInstructions(newTurnInstructions);
     }
   };
@@ -274,6 +300,10 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   useEffect(() => {
     fetchRoute();
   }, [waypoints, editingGroupOrRegion, selectedNogoGroups, routeOptions]);
+
+  useEffect(() => {
+    calculateTurnInstructions();
+  }, [routes, selectedRouteIndex, editingGroupOrRegion]);
 
   useEffect(() => {
     if (showAlternateRoutes) {
