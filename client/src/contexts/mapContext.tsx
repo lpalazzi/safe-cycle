@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import L from 'leaflet';
+import { showNotification } from '@mantine/notifications';
 import { useGlobalContext } from './globalContext';
 import { ID, Location, Waypoint } from 'types';
-import { Nogo } from 'models';
+import { Nogo, TurnInstruction } from 'models';
 import { GeocodingApi, NogoApi, RouterApi } from 'api';
 import { RouteData } from 'api/interfaces/Router';
-import { showNotification } from '@mantine/notifications';
+import { FeatureFlags } from 'featureFlags';
 
 type MapContextType =
   | {
@@ -16,6 +17,7 @@ type MapContextType =
       waypoints: Waypoint[];
       routes: RouteData[] | null;
       selectedRouteIndex: number | null;
+      turnInstructions: TurnInstruction[] | null;
       nogoRoutes: Nogo[];
       lineToCursor: [L.LatLng, L.LatLng] | null;
       loadingRoute: boolean;
@@ -33,6 +35,7 @@ type MapContextType =
       deleteNogo: (nogoId: ID) => void;
       clearNogoWaypoints: () => void;
       refreshWaypointLineToCursor: (mousePosition: L.LatLng | null) => void;
+      downloadGPX: () => void;
     }
   | undefined;
 
@@ -65,6 +68,9 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   const [selectedRouteIndex, setSelectedRouteIndex] = useState<number | null>(
     null
   );
+  const [turnInstructions, setTurnInstructions] = useState<
+    TurnInstruction[] | null
+  >(null);
   const [lineToCursor, setLineToCursor] = useState<[L.LatLng, L.LatLng] | null>(
     null
   );
@@ -75,7 +81,8 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   const addWaypoint = (latlng: L.LatLng, label?: string) => {
     const newWaypoint: Waypoint = {
       latlng,
-      label: label ?? GeocodingApi.reverse(latlng),
+      label:
+        label ?? GeocodingApi.reverse(latlng).then((res) => res?.label ?? null),
     };
     if (!editingGroupOrRegion) {
       setWaypoints([...waypoints, newWaypoint]);
@@ -92,9 +99,10 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   };
 
   const updateWaypoint = (index: number, latlng: L.LatLng, label?: string) => {
-    const updatedWaypoint = {
+    const updatedWaypoint: Waypoint = {
       latlng,
-      label: label ?? GeocodingApi.reverse(latlng),
+      label:
+        label ?? GeocodingApi.reverse(latlng).then((res) => res?.label ?? null),
     };
     const newWaypoints = [...waypoints];
     newWaypoints.splice(index, 1, updatedWaypoint);
@@ -164,6 +172,42 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
       setRoutes(null);
       setSelectedRouteIndex(null);
     }
+  };
+
+  const downloadGPX = () => {
+    const regionIds: ID[] = routeOptions.avoidNogos
+      ? regions.map((region) => region._id)
+      : [];
+    RouterApi.downloadGPX(
+      waypoints.map((waypoint) => waypoint.latlng),
+      selectedNogoGroups,
+      regionIds,
+      { ...routeOptions, showAlternateRoutes: false },
+      loggedInUser,
+      selectedRouteIndex ?? 0
+    ).catch((err) => {
+      showNotification({
+        title: 'Error fetching route',
+        message: err.message || 'Undefined error',
+        color: 'red',
+      });
+    });
+  };
+
+  const calculateTurnInstructions = async () => {
+    if (
+      FeatureFlags.TurnInstructions.isEnabledForUser(loggedInUser?._id) &&
+      !editingGroupOrRegion &&
+      routes &&
+      (selectedRouteIndex || selectedRouteIndex === 0)
+    ) {
+      const route = routes[selectedRouteIndex];
+      const voiceHints = route.properties.voicehints;
+      const newTurnInstructions = voiceHints.map((voiceHint) => {
+        return new TurnInstruction(voiceHint, route.lineString);
+      });
+      setTurnInstructions(newTurnInstructions);
+    } else setTurnInstructions(null);
   };
 
   const refreshNogoRoutes = () => {
@@ -241,6 +285,10 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   }, [waypoints, editingGroupOrRegion, selectedNogoGroups, routeOptions]);
 
   useEffect(() => {
+    calculateTurnInstructions();
+  }, [routes, selectedRouteIndex, editingGroupOrRegion]);
+
+  useEffect(() => {
     if (showAlternateRoutes) {
       if (routes && routes?.length > 1) setSelectedRouteIndex(null);
       else fetchRoute();
@@ -281,6 +329,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         waypoints,
         routes,
         selectedRouteIndex,
+        turnInstructions,
         nogoRoutes,
         lineToCursor,
         loadingRoute,
@@ -297,6 +346,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         deleteNogo,
         clearNogoWaypoints,
         refreshWaypointLineToCursor,
+        downloadGPX,
       }}
     >
       {props.children}

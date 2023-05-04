@@ -1,18 +1,26 @@
 import axios from 'axios';
 import { injectable } from 'tsyringe';
 import { Position, Viewbox } from 'types';
-import { IGeocodeSearchResult } from 'interfaces';
+import { IGeocodeSearchResult, IReverseGeocodeResult } from 'interfaces';
 
 @injectable()
 export class NominatimService {
   constructor() {}
   private nominatimBaseUrl = 'https://nominatim.openstreetmap.org';
 
-  public async reverse(position: Position) {
+  public async reverse(position: Position, zoom: number) {
     const { data } = await axios.get<NominatimSearchResult>(
-      `${this.nominatimBaseUrl}/reverse?lat=${position.latitude}&lon=${position.longitude}&format=json`
+      `${this.nominatimBaseUrl}/reverse?lat=${position.latitude}&lon=${
+        position.longitude
+      }&format=json&zoom=${zoom.toString()}`
     );
-    return data.display_name;
+    return {
+      label: data.display_name,
+      address: {
+        road: data.address?.road,
+      },
+      position: { latitude: +data.lat, longitude: +data.lon },
+    } as IReverseGeocodeResult;
   }
 
   public async search(query: string, viewbox: Viewbox) {

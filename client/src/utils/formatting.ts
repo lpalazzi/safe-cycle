@@ -1,7 +1,10 @@
-export const metresToDistanceString = (metres: number) => {
+export const metresToDistanceString = (
+  metres: number,
+  kmDecimals: number = 2
+) => {
   if (metres <= 0) return null;
   if (metres < 1000) return metres.toFixed(0) + 'm';
-  return (metres / 1000).toFixed(2) + 'km';
+  return (metres / 1000).toFixed(kmDecimals) + 'km';
 };
 
 export const secondsToTimeString = (totalSeconds: number) => {

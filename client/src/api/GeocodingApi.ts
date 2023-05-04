@@ -1,6 +1,9 @@
 import L from 'leaflet';
 import { GeocodeSearchResult } from 'types';
-import { IGeocodeSearchResult } from './interfaces/Geocoding';
+import {
+  IGeocodeSearchResult,
+  IReverseGeocodeResult,
+} from './interfaces/Geocoding';
 import { makeRequest } from './reqHelpers';
 
 export class GeocodingApi {
@@ -52,12 +55,12 @@ export class GeocodingApi {
     return new L.LatLng(position.latitude, position.longitude);
   }
 
-  static async reverse(latlng: L.LatLng) {
+  static async reverse(latlng: L.LatLng, zoom?: number) {
     try {
       const response = await makeRequest(
-        `${this.baseUrl}/reverse/${latlng.lat}/${latlng.lng}`
+        `${this.baseUrl}/reverse/${latlng.lat}/${latlng.lng}/${zoom ?? 18}`
       );
-      return response.label as string;
+      return response.result as IReverseGeocodeResult;
     } catch (error: any) {
       if (error.message === 'Reverse geo search timed out') return null;
       throw error;

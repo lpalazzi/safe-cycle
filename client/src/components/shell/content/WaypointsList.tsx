@@ -35,21 +35,33 @@ import {
   Button,
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { IconX, IconGripHorizontal } from '@tabler/icons-react';
+import {
+  IconX,
+  IconGripHorizontal,
+  IconList,
+  IconDownload,
+} from '@tabler/icons-react';
 
 import { GeocodingApi } from 'api';
 import { Waypoint, GeocodeSearchResult } from 'types';
 import { useMapContext } from 'contexts/mapContext';
+import { TurnInstructions } from './TurnInstructions';
+import { FeatureFlags } from 'featureFlags';
+import { useGlobalContext } from 'contexts/globalContext';
 
 export const WaypointsList: React.FC = () => {
+  const { loggedInUser } = useGlobalContext();
   const {
     map,
     waypoints,
     currentLocation,
+    routes,
+    selectedRouteIndex,
     addWaypoint,
     reorderWaypoint,
     removeWaypoint,
     clearWaypoints,
+    downloadGPX,
   } = useMapContext();
 
   const [draggableWaypoints, setDraggableWaypoints] = useState(waypoints);
@@ -57,8 +69,10 @@ export const WaypointsList: React.FC = () => {
   const [geoSearchResults, setGeoSearchResults] = useState<
     GeocodeSearchResult[]
   >([]);
+  const [showTurnInstructions, setShowTurnInstructions] = useState(false);
 
   useEffect(() => setDraggableWaypoints(waypoints), [waypoints]);
+  useEffect(() => setShowTurnInstructions(false), [waypoints]);
 
   const reorderDraggableWaypoint = useCallback(
     (srcIndex: number, destIndex: number) => {
@@ -223,20 +237,57 @@ export const WaypointsList: React.FC = () => {
               />
             </Timeline.Item>
           </Timeline>
-          {waypoints.length > 0 ? (
-            <Group position='right'>
-              <Button
-                compact
-                size='xs'
-                variant='subtle'
-                color='gray'
-                rightIcon={<IconX size={14} />}
-                onClick={clearWaypoints}
-              >
-                Clear all
-              </Button>
-            </Group>
-          ) : null}
+          <Stack spacing='md'>
+            {waypoints.length > 0 ? (
+              <Group position='apart'>
+                <Group position='left' spacing={0}>
+                  {FeatureFlags.TurnInstructions.isEnabledForUser(
+                    loggedInUser?._id
+                  ) &&
+                  !!routes &&
+                  (selectedRouteIndex || selectedRouteIndex === 0) &&
+                  waypoints.length > 1 ? (
+                    <>
+                      <Button
+                        size='xs'
+                        variant='subtle'
+                        color='gray'
+                        leftIcon={<IconList size={16} />}
+                        styles={{ leftIcon: { marginRight: 5 } }}
+                        onClick={() => setShowTurnInstructions((prev) => !prev)}
+                      >
+                        Details
+                      </Button>
+                      <Button
+                        size='xs'
+                        variant='subtle'
+                        color='gray'
+                        leftIcon={<IconDownload size={16} />}
+                        styles={{ leftIcon: { marginRight: 5 } }}
+                        onClick={downloadGPX}
+                      >
+                        GPX
+                      </Button>
+                    </>
+                  ) : null}
+                </Group>
+                <Button
+                  size='xs'
+                  variant='subtle'
+                  color='gray'
+                  leftIcon={<IconX size={16} />}
+                  styles={{ leftIcon: { marginRight: 5 } }}
+                  onClick={() => {
+                    setShowTurnInstructions(false);
+                    clearWaypoints();
+                  }}
+                >
+                  Clear
+                </Button>
+              </Group>
+            ) : null}
+            <TurnInstructions show={showTurnInstructions} />
+          </Stack>
         </Stack>
       </Stack>
       <CustomPreviewLayer />

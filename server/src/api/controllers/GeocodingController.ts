@@ -4,7 +4,7 @@ import { container } from 'tsyringe';
 import { BingMapsService, NominatimService } from 'services';
 import { Position, Viewbox } from 'types';
 import { BadRequestError, GatewayTimeoutError } from 'api/errors';
-import { IGeocodeSearchResult } from 'interfaces';
+import { IGeocodeSearchResult, IReverseGeocodeResult } from 'interfaces';
 import { asyncCallWithTimeout } from 'utils/async';
 
 export const geocoding = (app: express.Router) => {
@@ -88,7 +88,7 @@ export const geocoding = (app: express.Router) => {
     }
   });
 
-  route.get('/reverse/:lat/:lng', async (req, res, next) => {
+  route.get('/reverse/:lat/:lng/:zoom', async (req, res, next) => {
     try {
       const lat = req.params.lat;
       const lng = req.params.lng;
@@ -96,6 +96,9 @@ export const geocoding = (app: express.Router) => {
         latitude: Number(lat),
         longitude: Number(lng),
       };
+      const zoom = +req.params.zoom;
+      if (zoom < 0 || zoom > 18)
+        throw new BadRequestError('zoom must be an integer from 0-18');
       const { error } = joi
         .geocoding()
         .position()
@@ -103,11 +106,11 @@ export const geocoding = (app: express.Router) => {
         .validate(position);
       if (error) throw new BadRequestError(error.message);
       try {
-        const label = await asyncCallWithTimeout<string>(
-          nominatimService.reverse(position),
-          3000
+        const result = await asyncCallWithTimeout<IReverseGeocodeResult>(
+          nominatimService.reverse(position, zoom),
+          5000
         );
-        return res.json({ label });
+        return res.json({ result });
       } catch (error: any) {
         if (error.message === 'Async call timeout limit reached')
           throw new GatewayTimeoutError('Reverse geo search timed out');
