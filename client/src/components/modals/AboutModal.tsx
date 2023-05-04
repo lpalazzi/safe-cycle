@@ -40,6 +40,7 @@ import { Nogo, Region } from 'models';
 import { EmailApi, NogoApi } from 'api';
 import { IContactFormDTO as ContactFormValues } from 'api/interfaces/Email';
 import { validateEmail } from 'utils/validation';
+import { metresToDistanceString } from 'utils/formatting';
 
 type ViewType =
   | 'about'
@@ -589,10 +590,10 @@ const SupportedRegions: React.FC<{ open: boolean }> = ({ open }) => {
                     <Text>Total nogos:</Text>
                     <div>
                       <Text>
-                        {regionNogoLengths[region._id] >= 1000
-                          ? (regionNogoLengths[region._id] / 1000).toFixed(1) +
-                            'km'
-                          : regionNogoLengths[region._id].toFixed(0) + 'm'}
+                        {metresToDistanceString(
+                          regionNogoLengths[region._id],
+                          1
+                        )}
                       </Text>
                     </div>
                   </Group>

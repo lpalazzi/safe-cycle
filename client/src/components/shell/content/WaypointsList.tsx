@@ -52,10 +52,13 @@ export const WaypointsList: React.FC = () => {
     map,
     waypoints,
     currentLocation,
+    routes,
+    selectedRouteIndex,
     addWaypoint,
     reorderWaypoint,
     removeWaypoint,
     clearWaypoints,
+    downloadGPX,
   } = useMapContext();
 
   const [draggableWaypoints, setDraggableWaypoints] = useState(waypoints);
@@ -148,8 +151,6 @@ export const WaypointsList: React.FC = () => {
     }
   };
 
-  const downloadGPX = () => {};
-
   useEffect(() => {
     return handleGeoSearchValueChanged.cancel();
   });
@@ -236,7 +237,9 @@ export const WaypointsList: React.FC = () => {
             {waypoints.length > 0 ? (
               <Group position='apart'>
                 <Group position='left' spacing={0}>
-                  {waypoints.length > 1 ? (
+                  {!!routes &&
+                  (selectedRouteIndex || selectedRouteIndex === 0) &&
+                  waypoints.length > 1 ? (
                     <>
                       <Button
                         size='xs'

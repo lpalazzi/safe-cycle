@@ -19,6 +19,7 @@ import {
 } from '@tabler/icons-react';
 import { useMapContext } from 'contexts/mapContext';
 import { TurnInstruction } from 'types';
+import { metresToDistanceString } from 'utils/formatting';
 
 export const TurnInstructions: React.FC<{ show: boolean }> = ({ show }) => {
   const { turnInstructions } = useMapContext();
@@ -50,7 +51,7 @@ const TurnInstructionComponent: React.FC<{
             {getTurnString({ ...turnInstruction, streetName })}
           </Title>
           <Text size='xs' c='dimmed'>
-            {turnInstruction.distanceAfter + 'm'}
+            {metresToDistanceString(turnInstruction.distanceAfter, 1)}
           </Text>
         </Stack>
       </Group>

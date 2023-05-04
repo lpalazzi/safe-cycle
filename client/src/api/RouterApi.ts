@@ -19,6 +19,7 @@ export class RouterApi {
       waypoint.lng,
       waypoint.lat,
     ]);
+    delete routeOptions.avoidNogos;
     const response = await makeRequest(
       `${this.baseUrl}/generateRoute`,
       'POST',
@@ -38,5 +39,35 @@ export class RouterApi {
       nogoGroupIds
     );
     return routes;
+  }
+
+  static async downloadGPX(
+    waypoints: L.LatLng[],
+    nogoGroupIds: ID[] = [],
+    regionIds: ID[] = [],
+    routeOptions: RouteOptions,
+    user: User | null,
+    alternativeIdx: number
+  ) {
+    const points: GeoJSON.Position[] = waypoints.map((waypoint) => [
+      waypoint.lng,
+      waypoint.lat,
+    ]);
+    delete routeOptions.avoidNogos;
+    const response = await makeRequest(`${this.baseUrl}/downloadGPX`, 'POST', {
+      points,
+      nogoGroupIds,
+      regionIds,
+      routeOptions,
+      alternativeIdx,
+    });
+    const gpx = (response.gpx as string)
+      .replace(/creator="BRouter.*/i, 'creator="SafeCycle" version="1.0">')
+      .replace(/<name>brouter_safecycle.*/i, '<name>safecycle</name>');
+    const link = document.createElement('a');
+    link.href = `data:text/plain;chatset=utf-8,${encodeURIComponent(gpx)}`;
+    link.download = 'route.gpx';
+    link.click();
+    link.remove();
   }
 }

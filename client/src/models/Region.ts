@@ -57,5 +57,6 @@ export class Region {
       this.name.replace(/[^a-zA-Z0-9 ]/g, '').replace(' ', '') + '.json';
 
     link.click();
+    link.remove();
   }
 }

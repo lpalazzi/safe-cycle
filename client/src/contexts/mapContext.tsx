@@ -37,6 +37,7 @@ type MapContextType =
       deleteNogo: (nogoId: ID) => void;
       clearNogoWaypoints: () => void;
       refreshWaypointLineToCursor: (mousePosition: L.LatLng | null) => void;
+      downloadGPX: () => void;
     }
   | undefined;
 
@@ -175,10 +176,32 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     }
   };
 
+  const downloadGPX = () => {
+    const regionIds: ID[] = routeOptions.avoidNogos
+      ? regions.map((region) => region._id)
+      : [];
+    RouterApi.downloadGPX(
+      waypoints.map((waypoint) => waypoint.latlng),
+      selectedNogoGroups,
+      regionIds,
+      { ...routeOptions, showAlternateRoutes: false },
+      loggedInUser,
+      selectedRouteIndex ?? 0
+    ).catch((err) => {
+      showNotification({
+        title: 'Error fetching route',
+        message: err.message || 'Undefined error',
+        color: 'red',
+      });
+    });
+  };
+
   const calculateTurnInstructions = async () => {
-    if (!routes || !selectedRouteIndex || editingGroupOrRegion)
-      setTurnInstructions(null);
-    if (routes && (selectedRouteIndex || selectedRouteIndex === 0)) {
+    if (
+      !editingGroupOrRegion &&
+      routes &&
+      (selectedRouteIndex || selectedRouteIndex === 0)
+    ) {
       const route = routes[selectedRouteIndex];
       const voiceHints = route.properties.voicehints;
       const newTurnInstructions = voiceHints.map((voiceHint) => {
@@ -224,7 +247,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         return turnInstruction;
       });
       setTurnInstructions(newTurnInstructions);
-    }
+    } else setTurnInstructions(null);
   };
 
   const refreshNogoRoutes = () => {
@@ -363,6 +386,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         deleteNogo,
         clearNogoWaypoints,
         refreshWaypointLineToCursor,
+        downloadGPX,
       }}
     >
       {props.children}

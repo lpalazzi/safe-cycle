@@ -67,19 +67,6 @@ export class RouterService {
     regionIds: mongoose.Types.ObjectId[],
     routeOptions: RouteOptions
   ) {
-    const getSurfacePrefSuffix = () => {
-      if (routeOptions.surfacePreference === 'preferUnpaved') return '-prup';
-      else if (routeOptions.surfacePreference === 'strictPaved') return '-stp';
-      else if (routeOptions.surfacePreference === 'preferPaved') return '-prp';
-      else return '';
-    };
-
-    const profile = routeOptions.shortest
-      ? 'shortest'
-      : `safecycle${routeOptions.preferBikeFriendly ? '-pbf' : ''}${
-          routeOptions.preferCycleRoutes ? '-pcr' : ''
-        }${getSurfacePrefSuffix()}`;
-
     const groupNogos = (
       await Promise.all(
         nogoGroupIds.map((nogoGroupId) =>
@@ -87,7 +74,6 @@ export class RouterService {
         )
       )
     ).flat();
-
     const regionNogos = (
       await Promise.all(
         regionIds.map((regionId) =>
@@ -105,12 +91,71 @@ export class RouterService {
         this.fetchRoute(
           lonlats,
           [...groupNogos, ...regionNogos],
-          profile,
+          this.getProfileName(routeOptions),
           alternativeidx
         )
       )
     );
 
     return routes;
+  }
+
+  async getGPX(
+    lonlats: GeoJSON.Position[],
+    nogoGroupIds: mongoose.Types.ObjectId[],
+    regionIds: mongoose.Types.ObjectId[],
+    routeOptions: RouteOptions,
+    alternativeidx: 0 | 1 | 2 | 3
+  ) {
+    const groupNogos = (
+      await Promise.all(
+        nogoGroupIds.map((nogoGroupId) =>
+          this.nogoService.getAllByGroup(nogoGroupId, false)
+        )
+      )
+    ).flat();
+    const regionNogos = (
+      await Promise.all(
+        regionIds.map((regionId) =>
+          this.nogoService.getAllByGroup(regionId, true)
+        )
+      )
+    ).flat();
+    const nogos = [...groupNogos, ...regionNogos];
+
+    const url = `${this.brouterUrl}?lonlats=${this.positionsToParamString(
+      lonlats
+    )}&polylines=${this.nogosToParamString(
+      nogos
+    )}&profile=${this.getProfileName(
+      routeOptions
+    )}&alternativeidx=${alternativeidx}&format=gpx&timode=1`;
+    return axios
+      .get(url, {
+        insecureHTTPParser: true,
+      })
+      .then((res) => {
+        return res.data as string;
+      })
+      .catch((error) => {
+        throw new Error(
+          error.response?.data ?? error.message ?? 'BRouter error'
+        );
+      });
+  }
+
+  private getSurfacePrefSuffix = (routeOptions: RouteOptions) => {
+    if (routeOptions.surfacePreference === 'preferUnpaved') return '-prup';
+    else if (routeOptions.surfacePreference === 'strictPaved') return '-stp';
+    else if (routeOptions.surfacePreference === 'preferPaved') return '-prp';
+    else return '';
+  };
+
+  private getProfileName(routeOptions: RouteOptions) {
+    return routeOptions.shortest
+      ? 'shortest'
+      : `safecycle${routeOptions.preferBikeFriendly ? '-pbf' : ''}${
+          routeOptions.preferCycleRoutes ? '-pcr' : ''
+        }${this.getSurfacePrefSuffix(routeOptions)}`;
   }
 }
