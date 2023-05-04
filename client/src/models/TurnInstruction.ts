@@ -1,7 +1,7 @@
 import L from 'leaflet';
-import midpoint from '@turf/midpoint';
-import { IReverseGeocodeResult } from 'api/interfaces/Geocoding';
+import along from '@turf/along';
 import { GeocodingApi } from 'api';
+import { IReverseGeocodeResult } from 'api/interfaces/Geocoding';
 import { distanceBetweenCoords } from 'utils/geojson';
 
 export class TurnInstruction {
@@ -24,9 +24,13 @@ export class TurnInstruction {
     this.streetName = null;
     this.streetFetched = false;
     const position = lineString.coordinates[voiceHint[0]];
+    this.latLng = new L.LatLng(position[1], position[0]);
     const nextPosition = lineString.coordinates[voiceHint[0] + 1];
-    const mid = midpoint(position, nextPosition).geometry.coordinates;
-    this.latLng = new L.LatLng(mid[1], mid[0]);
+    const streetPosition = along(
+      { type: 'LineString', coordinates: [position, nextPosition] },
+      0.01 // gets point 10m along
+    ).geometry.coordinates;
+    const streetLatLng = new L.LatLng(streetPosition[1], streetPosition[0]);
     this.streetNameExecutor = async (
       resolve: (value: string | PromiseLike<string | null> | null) => void
     ) => {
@@ -35,7 +39,7 @@ export class TurnInstruction {
       while (tries < 3 && !result) {
         tries++;
         try {
-          result = await GeocodingApi.reverse(this.latLng, 16);
+          result = await GeocodingApi.reverse(streetLatLng, 16);
         } catch (error) {
           result = null;
         }
@@ -44,8 +48,8 @@ export class TurnInstruction {
       if (
         result &&
         distanceBetweenCoords(
-          this.latLng.lng,
-          this.latLng.lat,
+          streetLatLng.lng,
+          streetLatLng.lat,
           result.position.longitude,
           result.position.latitude
         ) < 5
