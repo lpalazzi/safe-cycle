@@ -1,14 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import L from 'leaflet';
-import midpoint from '@turf/midpoint';
 import { showNotification } from '@mantine/notifications';
 import { useGlobalContext } from './globalContext';
-import { ID, Location, TurnInstruction, Waypoint } from 'types';
-import { Nogo } from 'models';
+import { ID, Location, Waypoint } from 'types';
+import { Nogo, TurnInstruction } from 'models';
 import { GeocodingApi, NogoApi, RouterApi } from 'api';
 import { RouteData } from 'api/interfaces/Router';
-import { IReverseGeocodeResult } from 'api/interfaces/Geocoding';
-import { distanceBetweenCoords } from 'utils/geojson';
+import { FeatureFlags } from 'featureFlags';
 
 type MapContextType =
   | {
@@ -198,6 +196,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
 
   const calculateTurnInstructions = async () => {
     if (
+      FeatureFlags.TurnInstructions.isEnabledForUser(loggedInUser?._id) &&
       !editingGroupOrRegion &&
       routes &&
       (selectedRouteIndex || selectedRouteIndex === 0)
@@ -205,46 +204,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
       const route = routes[selectedRouteIndex];
       const voiceHints = route.properties.voicehints;
       const newTurnInstructions = voiceHints.map((voiceHint) => {
-        const command = voiceHint[1];
-        const position = route.lineString.coordinates[voiceHint[0]];
-        const nextPosition = route.lineString.coordinates[voiceHint[0] + 1];
-        const mid = midpoint(position, nextPosition).geometry.coordinates;
-        const latLng = new L.LatLng(mid[1], mid[0]);
-        const streetName = new Promise<string | null>(async (resolve) => {
-          let tries = 0;
-          let result: IReverseGeocodeResult | null = null;
-          while (tries < 3 && !result) {
-            tries++;
-            try {
-              result = await GeocodingApi.reverse(latLng, 16);
-            } catch (error) {
-              result = null;
-            }
-          }
-          if (
-            result &&
-            distanceBetweenCoords(
-              latLng.lng,
-              latLng.lat,
-              result.position.longitude,
-              result.position.latitude
-            ) < 5
-          ) {
-            resolve(result.address.road ?? null);
-          } else {
-            resolve(null);
-          }
-        });
-        const distanceAfter = voiceHint[3];
-        const roundaboutExit = voiceHint[2];
-        const turnInstruction: TurnInstruction = {
-          command,
-          latLng,
-          distanceAfter,
-          roundaboutExit,
-          streetName,
-        };
-        return turnInstruction;
+        return new TurnInstruction(voiceHint, route.lineString);
       });
       setTurnInstructions(newTurnInstructions);
     } else setTurnInstructions(null);

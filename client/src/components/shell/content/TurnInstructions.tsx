@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Group, Paper, Stack, Text, Title } from '@mantine/core';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Group, Loader, Paper, Stack, Text, Title } from '@mantine/core';
 import {
   IconArrowBack,
   IconArrowBackUp,
@@ -18,28 +18,64 @@ import {
   IconRoadOff,
 } from '@tabler/icons-react';
 import { useMapContext } from 'contexts/mapContext';
-import { TurnInstruction } from 'types';
 import { metresToDistanceString } from 'utils/formatting';
+import { TurnInstruction } from 'models';
 
 export const TurnInstructions: React.FC<{ show: boolean }> = ({ show }) => {
   const { turnInstructions } = useMapContext();
+  const [streetsFetched, setStreetsFetched] = useState(0);
 
-  return turnInstructions ? (
-    <Stack display={show ? 'flex' : 'none'}>
-      {turnInstructions.map((turnInstruction) => (
-        <TurnInstructionComponent turnInstruction={turnInstruction} />
-      ))}
-    </Stack>
+  const allStreetsFetched = useMemo(() => {
+    return turnInstructions?.every(
+      (turnInstruction) => turnInstruction.streetFetched
+    );
+  }, [streetsFetched, turnInstructions]);
+
+  const handleStreetFetched = () => {
+    setStreetsFetched((prev) => prev + 1);
+  };
+
+  return show ? (
+    turnInstructions ? (
+      <>
+        <Stack display={allStreetsFetched ? 'flex' : 'none'}>
+          {turnInstructions.map((turnInstruction) => (
+            <TurnInstructionComponent
+              turnInstruction={turnInstruction}
+              onStreetFetched={handleStreetFetched}
+            />
+          ))}
+        </Stack>
+        {!allStreetsFetched ? (
+          <Group position='center'>
+            <Loader color='gray' />
+            <Title order={6} color='dimmed'>
+              Loading turn instructions
+            </Title>
+          </Group>
+        ) : null}
+      </>
+    ) : (
+      <Group position='center'>
+        <Title order={6} color='dimmed'>
+          No turn instructions available
+        </Title>
+      </Group>
+    )
   ) : null;
 };
 
 const TurnInstructionComponent: React.FC<{
   turnInstruction: TurnInstruction;
-}> = ({ turnInstruction }) => {
+  onStreetFetched: () => void;
+}> = ({ turnInstruction, onStreetFetched }) => {
   const [streetName, setStreetName] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.resolve(turnInstruction.streetName).then(setStreetName);
+    turnInstruction.getStreetName().then((val) => {
+      setStreetName(val);
+      onStreetFetched();
+    });
   }, [turnInstruction]);
 
   return (
@@ -47,9 +83,7 @@ const TurnInstructionComponent: React.FC<{
       <Group noWrap spacing='md'>
         {TurnIcons[turnInstruction.command]}
         <Stack spacing={0}>
-          <Title order={6}>
-            {getTurnString({ ...turnInstruction, streetName })}
-          </Title>
+          <Title order={6}>{getTurnString(turnInstruction, streetName)}</Title>
           <Text size='xs' c='dimmed'>
             {metresToDistanceString(turnInstruction.distanceAfter, 1)}
           </Text>
@@ -59,8 +93,10 @@ const TurnInstructionComponent: React.FC<{
   );
 };
 
-const getTurnString = (turnInstruction: TurnInstruction) => {
-  const streetName = turnInstruction.streetName;
+const getTurnString = (
+  turnInstruction: TurnInstruction,
+  streetName: string | null
+) => {
   return {
     [1]: `Continue ${streetName ? `on ${streetName}` : ''}`,
     [2]: `Turn left  ${streetName ? `onto ${streetName}` : ''}`,
