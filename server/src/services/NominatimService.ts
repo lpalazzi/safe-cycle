@@ -2,6 +2,7 @@ import axios from 'axios';
 import { injectable } from 'tsyringe';
 import { Position, Viewbox } from 'types';
 import { IGeocodeSearchResult, IReverseGeocodeResult } from 'interfaces';
+import { asyncCallWithTimeout } from 'utils/async';
 
 @injectable()
 export class NominatimService {
@@ -21,6 +22,27 @@ export class NominatimService {
       },
       position: { latitude: +data.lat, longitude: +data.lon },
     } as IReverseGeocodeResult;
+  }
+
+  public async bulkReverse(positions: Position[], zoom: number) {
+    return Promise.all(
+      positions.map(async (position) => {
+        let tries = 0;
+        let result: IReverseGeocodeResult | null = null;
+        while (tries < 3 && !result) {
+          tries++;
+          try {
+            result = await asyncCallWithTimeout<IReverseGeocodeResult | null>(
+              this.reverse(position, zoom),
+              5000
+            );
+          } catch (e) {
+            result = null;
+          }
+        }
+        return result;
+      })
+    );
   }
 
   public async search(query: string, viewbox: Viewbox) {

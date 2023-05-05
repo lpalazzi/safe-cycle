@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Group, Loader, Paper, Stack, Text, Title } from '@mantine/core';
 import {
   IconArrowBack,
@@ -20,41 +20,46 @@ import {
 import { useMapContext } from 'contexts/mapContext';
 import { metresToDistanceString } from 'utils/formatting';
 import { TurnInstruction } from 'models';
+import { GeocodingApi } from 'api';
 
 export const TurnInstructions: React.FC<{ show: boolean }> = ({ show }) => {
-  const { turnInstructions } = useMapContext();
-  const [streetsFetched, setStreetsFetched] = useState(0);
+  const { turnInstructions, routes, selectedRouteIndex } = useMapContext();
+  const [streetsFetched, setStreetsFetched] = useState(false);
 
-  const allStreetsFetched = useMemo(() => {
-    return turnInstructions?.every(
-      (turnInstruction) => turnInstruction.streetFetched
-    );
-  }, [streetsFetched, turnInstructions]);
+  useEffect(() => {
+    if (turnInstructions && show && !streetsFetched) {
+      const streetLatLngs = turnInstructions.map(
+        (turnInstruction) => turnInstruction.streetLatLng
+      );
+      GeocodingApi.bulkReverse(streetLatLngs, 16).then((results) => {
+        results.forEach((result, index) =>
+          turnInstructions[index].setStreetName(result)
+        );
+        setStreetsFetched(true);
+      });
+    }
+  }, [turnInstructions, show]);
 
-  const handleStreetFetched = () => {
-    setStreetsFetched((prev) => prev + 1);
-  };
+  useEffect(() => {
+    setStreetsFetched(false);
+  }, [routes, selectedRouteIndex]);
 
   return show ? (
     turnInstructions ? (
-      <>
-        <Stack display={allStreetsFetched ? 'flex' : 'none'}>
+      streetsFetched ? (
+        <Stack>
           {turnInstructions.map((turnInstruction) => (
-            <TurnInstructionComponent
-              turnInstruction={turnInstruction}
-              onStreetFetched={handleStreetFetched}
-            />
+            <TurnInstructionComponent turnInstruction={turnInstruction} />
           ))}
         </Stack>
-        {!allStreetsFetched ? (
-          <Group position='center'>
-            <Loader color='gray' />
-            <Title order={6} color='dimmed'>
-              Loading turn instructions
-            </Title>
-          </Group>
-        ) : null}
-      </>
+      ) : (
+        <Group position='center'>
+          <Loader color='gray' />
+          <Title order={6} color='dimmed'>
+            Loading turn instructions
+          </Title>
+        </Group>
+      )
     ) : (
       <Group position='center'>
         <Title order={6} color='dimmed'>
@@ -67,23 +72,13 @@ export const TurnInstructions: React.FC<{ show: boolean }> = ({ show }) => {
 
 const TurnInstructionComponent: React.FC<{
   turnInstruction: TurnInstruction;
-  onStreetFetched: () => void;
-}> = ({ turnInstruction, onStreetFetched }) => {
-  const [streetName, setStreetName] = useState<string | null>(null);
-
-  useEffect(() => {
-    turnInstruction.getStreetName().then((val) => {
-      setStreetName(val);
-      onStreetFetched();
-    });
-  }, [turnInstruction]);
-
+}> = ({ turnInstruction }) => {
   return (
     <Paper>
       <Group noWrap spacing='md'>
         {TurnIcons[turnInstruction.command]}
         <Stack spacing={0}>
-          <Title order={6}>{getTurnString(turnInstruction, streetName)}</Title>
+          <Title order={6}>{getTurnString(turnInstruction)}</Title>
           <Text size='xs' c='dimmed'>
             {metresToDistanceString(turnInstruction.distanceAfter, 1)}
           </Text>
@@ -93,10 +88,8 @@ const TurnInstructionComponent: React.FC<{
   );
 };
 
-const getTurnString = (
-  turnInstruction: TurnInstruction,
-  streetName: string | null
-) => {
+const getTurnString = (turnInstruction: TurnInstruction) => {
+  const streetName = turnInstruction.streetName;
   return {
     [1]: `Continue ${streetName ? `on ${streetName}` : ''}`,
     [2]: `Turn left  ${streetName ? `onto ${streetName}` : ''}`,

@@ -72,7 +72,10 @@ export const WaypointsList: React.FC = () => {
   const [showTurnInstructions, setShowTurnInstructions] = useState(false);
 
   useEffect(() => setDraggableWaypoints(waypoints), [waypoints]);
-  useEffect(() => setShowTurnInstructions(false), [waypoints]);
+  useEffect(
+    () => setShowTurnInstructions(false),
+    [waypoints, selectedRouteIndex, routes]
+  );
 
   const reorderDraggableWaypoint = useCallback(
     (srcIndex: number, destIndex: number) => {

@@ -120,4 +120,23 @@ export const geocoding = (app: express.Router) => {
       next(err);
     }
   });
+
+  route.post('/bulkReverse', async (req, res, next) => {
+    try {
+      const positions: Position[] = req.body.positions;
+      const zoom: number = req.body.zoom;
+      const { error } = joi
+        .object({
+          positions: joi.array().items(joi.geocoding().position()).required(),
+          zoom: joi.number().integer().min(0).max(18).required(),
+        })
+        .required()
+        .validate({ positions, zoom });
+      if (error) throw new BadRequestError(error.message);
+      const results = await nominatimService.bulkReverse(positions, zoom);
+      return res.json({ results });
+    } catch (err) {
+      next(err);
+    }
+  });
 };

@@ -66,4 +66,16 @@ export class GeocodingApi {
       throw error;
     }
   }
+
+  static async bulkReverse(latlngs: L.LatLng[], zoom?: number) {
+    const positions = latlngs.map((latlng) => ({
+      longitude: latlng.lng,
+      latitude: latlng.lat,
+    }));
+    const response = await makeRequest(`${this.baseUrl}/bulkReverse`, 'POST', {
+      positions,
+      zoom: zoom ?? 18,
+    });
+    return response.results as (IReverseGeocodeResult | null)[];
+  }
 }
