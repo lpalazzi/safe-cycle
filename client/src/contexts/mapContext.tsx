@@ -110,6 +110,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   };
 
   const reorderWaypoint = (srcIndex: number, destIndex: number) => {
+    if (srcIndex === destIndex) return;
     const newWaypoints = [...waypoints];
     const [reorderedWaypoint] = newWaypoints.splice(srcIndex, 1);
     newWaypoints.splice(destIndex, 0, reorderedWaypoint);

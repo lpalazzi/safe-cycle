@@ -25,17 +25,40 @@ export class NominatimService {
   }
 
   public async bulkReverse(positions: Position[], zoom: number) {
+    const results: (IReverseGeocodeResult | null)[] = [];
+    for (const position of positions) {
+      let tries = 0;
+      let result: IReverseGeocodeResult | null = null;
+      let resultFetched = false;
+      while (tries < 3 && !result && !resultFetched) {
+        tries++;
+        try {
+          result = await asyncCallWithTimeout<IReverseGeocodeResult | null>(
+            this.reverse(position, zoom),
+            5000
+          );
+          resultFetched = true;
+        } catch (e) {
+          result = null;
+        }
+      }
+      results.push(result);
+    }
+    return results;
+
     return Promise.all(
       positions.map(async (position) => {
         let tries = 0;
         let result: IReverseGeocodeResult | null = null;
-        while (tries < 3 && !result) {
+        let resultFetched = false;
+        while (tries < 3 && !result && !resultFetched) {
           tries++;
           try {
             result = await asyncCallWithTimeout<IReverseGeocodeResult | null>(
               this.reverse(position, zoom),
-              5000
+              10000
             );
+            resultFetched = true;
           } catch (e) {
             result = null;
           }
