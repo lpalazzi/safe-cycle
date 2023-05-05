@@ -45,27 +45,6 @@ export class NominatimService {
       results.push(result);
     }
     return results;
-
-    return Promise.all(
-      positions.map(async (position) => {
-        let tries = 0;
-        let result: IReverseGeocodeResult | null = null;
-        let resultFetched = false;
-        while (tries < 3 && !result && !resultFetched) {
-          tries++;
-          try {
-            result = await asyncCallWithTimeout<IReverseGeocodeResult | null>(
-              this.reverse(position, zoom),
-              10000
-            );
-            resultFetched = true;
-          } catch (e) {
-            result = null;
-          }
-        }
-        return result;
-      })
-    );
   }
 
   public async search(query: string, viewbox: Viewbox) {
