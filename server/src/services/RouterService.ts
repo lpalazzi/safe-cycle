@@ -129,7 +129,7 @@ export class RouterService {
       nogos
     )}&profile=${this.getProfileName(
       routeOptions
-    )}&alternativeidx=${alternativeidx}&format=gpx&timode=1`;
+    )}&alternativeidx=${alternativeidx}&format=gpx&timode=1&exportWaypoints=1`;
     return axios
       .get(url, {
         insecureHTTPParser: true,

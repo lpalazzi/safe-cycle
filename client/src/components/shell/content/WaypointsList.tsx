@@ -244,23 +244,26 @@ export const WaypointsList: React.FC = () => {
             {waypoints.length > 0 ? (
               <Group position='apart'>
                 <Group position='left' spacing={0}>
-                  {FeatureFlags.TurnInstructions.isEnabledForUser(
-                    loggedInUser?._id
-                  ) &&
-                  !!routes &&
+                  {!!routes &&
                   (selectedRouteIndex || selectedRouteIndex === 0) &&
                   waypoints.length > 1 ? (
                     <>
-                      <Button
-                        size='xs'
-                        variant='subtle'
-                        color='gray'
-                        leftIcon={<IconList size={16} />}
-                        styles={{ leftIcon: { marginRight: 5 } }}
-                        onClick={() => setShowTurnInstructions((prev) => !prev)}
-                      >
-                        Details
-                      </Button>
+                      {FeatureFlags.TurnInstructions.isEnabledForUser(
+                        loggedInUser?._id
+                      ) ? (
+                        <Button
+                          size='xs'
+                          variant='subtle'
+                          color='gray'
+                          leftIcon={<IconList size={16} />}
+                          styles={{ leftIcon: { marginRight: 5 } }}
+                          onClick={() =>
+                            setShowTurnInstructions((prev) => !prev)
+                          }
+                        >
+                          Details
+                        </Button>
+                      ) : null}
                       <Button
                         size='xs'
                         variant='subtle'
