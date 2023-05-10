@@ -34,7 +34,7 @@ export const Map: React.FC = () => {
           bottom: 0,
           left: 0,
           right: 0,
-          zIndex: 1,
+          zIndex: 0,
           cursor: 'crosshair',
         }}
         center={[42.2686, -83.1194]}

@@ -17,9 +17,11 @@ export const SidebarTitle: React.FC<{
       {infoModal ? (
         <Tooltip
           withArrow
-          transition='fade'
-          transitionDuration={200}
           label='Learn more'
+          transitionProps={{
+            duration: 200,
+            transition: 'fade',
+          }}
         >
           <div style={{ height: '18px', cursor: 'pointer' }}>
             <IconInfoCircle size={18} onClick={() => openModal(infoModal)} />

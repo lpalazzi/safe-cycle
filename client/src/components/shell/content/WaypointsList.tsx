@@ -189,7 +189,7 @@ export const WaypointsList: React.FC = () => {
         </Text>
         <Stack spacing={0}>
           <Timeline
-            style={{ zIndex: 100 }}
+            style={{ position: 'relative', zIndex: 1 }}
             active={draggableWaypoints.length - 1}
             bulletSize={20}
             styles={{
@@ -426,7 +426,7 @@ const CustomPreviewLayer: React.FC = () => {
       style={{
         position: 'fixed',
         pointerEvents: 'none',
-        zIndex: 100,
+        zIndex: 1,
         left: 0,
         top: 0,
         width: '100%',

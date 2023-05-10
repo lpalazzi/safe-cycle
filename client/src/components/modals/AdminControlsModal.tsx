@@ -299,12 +299,10 @@ const Roles: React.FC<{ user: User; onRoleUpdate: () => void }> = ({
   user,
   onRoleUpdate,
 }) => {
-  const [selectedRole, setSelectedRole] = useState<UserRole>(user.role ?? null);
-
   const form = useForm({
     initialValues: {
-      role: selectedRole,
-    } as { role: UserRole },
+      role: user.role ?? null,
+    },
   });
 
   const handleFormSubmit = async (values: { role: UserRole }) => {
@@ -325,16 +323,13 @@ const Roles: React.FC<{ user: User; onRoleUpdate: () => void }> = ({
   return (
     <Stack spacing='xs'>
       <Title order={5}>User role</Title>
-      <Text size='sm'>Current role: {user.role ?? 'null'}</Text>
+      <Text size='sm'>Current role: {user.role ?? 'none'}</Text>
       <form onSubmit={form.onSubmit(handleFormSubmit)}>
         <Group position='apart' align='end' noWrap>
           <Select
-            placeholder='Select a role'
+            placeholder='No role'
+            clearable
             data={[
-              {
-                value: null,
-                label: 'No role',
-              },
               {
                 value: 'admin',
                 label: 'Admin',
@@ -344,8 +339,6 @@ const Roles: React.FC<{ user: User; onRoleUpdate: () => void }> = ({
                 label: 'Verified Contributor',
               },
             ]}
-            value={selectedRole}
-            onChange={setSelectedRole}
             style={{ flexGrow: 1 }}
             {...form.getInputProps('role')}
           />

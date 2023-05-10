@@ -27,7 +27,7 @@ export const Sidebar: React.FC = () => {
           grow
           component={ScrollArea}
           type='scroll'
-          styles={{ scrollbar: { zIndex: 10000 } }}
+          styles={{ scrollbar: { zIndex: 1 } }}
         >
           <SidebarContent />
         </Navbar.Section>
@@ -56,7 +56,7 @@ export const Sidebar: React.FC = () => {
             position: 'absolute',
             top: 20,
             left: 20,
-            zIndex: 10,
+            zIndex: 1,
           }}
         >
           <IconMenu2 color='black' size={32} />

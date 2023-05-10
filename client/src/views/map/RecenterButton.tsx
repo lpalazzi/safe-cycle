@@ -13,7 +13,7 @@ export const RecenterButton: React.FC = () => {
         top: 25,
         right: isMobileSize ? '50%' : 10,
         transform: isMobileSize ? 'translate(50%, 0)' : 'none',
-        zIndex: 10,
+        zIndex: 1,
       }}
       onClick={(e) => {
         e.stopPropagation();

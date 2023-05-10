@@ -27,7 +27,7 @@ export const RouteProperties: React.FC = () => {
           isNavbarOpen && !isMobileSize
             ? 'translate(192px, 0) translate(50%, 0)'
             : 'translate(50%, 0)',
-        zIndex: 10,
+        zIndex: 1,
       }}
       onClick={(e) => {
         e.stopPropagation();

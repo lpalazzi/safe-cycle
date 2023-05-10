@@ -19,7 +19,6 @@ export const LoadingIndicator: React.FC = () => {
         radius='lg'
         transitionDuration={500}
         loaderProps={{ size: 'xl' }}
-        zIndex={10000}
       />
     </div>
   );

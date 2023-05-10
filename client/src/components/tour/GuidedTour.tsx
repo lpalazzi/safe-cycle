@@ -69,9 +69,7 @@ export const GuidedTour: React.FC = () => {
       showProgress
       showSkipButton
       scrollOffset={85}
-      styles={{
-        options: { zIndex: 1000, primaryColor: theme.colors.blue[6] },
-      }}
+      styles={{ options: { primaryColor: theme.colors.blue[6] } }}
       callback={handleJoyrideCallback}
       tooltipComponent={Tooltip}
     />

@@ -1,25 +1,20 @@
 import React from 'react';
 import { ActionIcon, Stack } from '@mantine/core';
 import { useGlobalContext } from 'contexts/globalContext';
-import {
-  IconMenu2,
-  IconNavigation,
-  IconNavigationFilled,
-} from '@tabler/icons-react';
+import { IconMenu2 } from '@tabler/icons-react';
 
 export const TopRightButtons: React.FC = () => {
-  const {
-    isMobileSize,
-    isNavbarOpen,
-    isNavModeOn,
-    toggleNavbar,
-    toggleNavMode,
-  } = useGlobalContext();
+  const { isMobileSize, isNavbarOpen, toggleNavbar } = useGlobalContext();
   return (
     <Stack
       justify='flex-start'
       spacing='sm'
-      style={{ position: 'absolute', top: 10, right: 10, zIndex: 10 }}
+      style={{
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        zIndex: 1,
+      }}
     >
       {isMobileSize ? (
         <>

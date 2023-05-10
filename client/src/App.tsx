@@ -1,6 +1,6 @@
 import { MantineProvider } from '@mantine/core';
 import { ModalsProvider } from '@mantine/modals';
-import { NotificationsProvider } from '@mantine/notifications';
+import { Notifications } from '@mantine/notifications';
 import { Shell } from 'components/shell/Shell';
 import { GuidedTour } from 'components/tour/GuidedTour';
 import { MapContextProvider } from 'contexts/mapContext';
@@ -22,17 +22,16 @@ function App() {
           },
         }}
       >
+        <Notifications position='top-right' />
         <GuidedTour />
-        <NotificationsProvider position='top-right' zIndex={100000}>
-          <ModalsProvider modalProps={{ zIndex: 10000 }}>
-            <MapContextProvider>
-              <LoadingIndicator />
-              <Shell>
-                <Map />
-              </Shell>
-            </MapContextProvider>
-          </ModalsProvider>
-        </NotificationsProvider>
+        <ModalsProvider>
+          <MapContextProvider>
+            <LoadingIndicator />
+            <Shell>
+              <Map />
+            </Shell>
+          </MapContextProvider>
+        </ModalsProvider>
       </MantineProvider>
     </GlobalContextProvider>
   );

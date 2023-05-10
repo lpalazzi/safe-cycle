@@ -3,7 +3,7 @@ import { showNotification } from '@mantine/notifications';
 import { NogoGroupApi, RegionApi, UserApi } from 'api';
 import { NogoGroup, Region, User } from 'models';
 import { ID, RouteOptions } from 'types';
-import { useMantineTheme } from '@mantine/core';
+import { rem, useMantineTheme } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { openModal } from '@mantine/modals';
 import { AboutModal } from 'components/modals/AboutModal';
@@ -43,13 +43,12 @@ GlobalContext.displayName = 'GlobalContext';
 type GlobalContextProviderType = {
   children?: React.ReactNode;
 };
-
 export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   props
 ) => {
   const theme = useMantineTheme();
   const isMobileSize = useMediaQuery(
-    `(max-width: ${theme.breakpoints.sm - 1}px)`
+    `(max-width: calc(${theme.breakpoints.sm} - ${rem(1)})`
   );
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [showTour, setShowTour] = useState(false);
@@ -80,7 +79,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     const visited = window.localStorage.getItem('visited');
     if (!visited) {
       const isMobileSize = window.matchMedia(
-        `(max-width: ${theme.breakpoints.sm - 1}px)`
+        `(max-width: calc(${theme.breakpoints.sm} - ${rem(1)})`
       ).matches; // useMediaQuery state is still undefined on initial load
       window.localStorage.setItem('visited', '1');
       openModal(AboutModal('about', isMobileSize));

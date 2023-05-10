@@ -76,9 +76,11 @@ export const RoutePreferences: React.FC = () => {
             <Space w='xs' />
             <Tooltip
               withArrow
-              transition='fade'
-              transitionDuration={200}
               label='What are nogos?'
+              transitionProps={{
+                transition: 'fade',
+                duration: 200,
+              }}
             >
               <IconInfoCircle
                 size={16}
@@ -100,7 +102,11 @@ export const RoutePreferences: React.FC = () => {
           updateRouteOptions({ avoidNogos: e.currentTarget.checked })
         }
       />
-      <Stack spacing='xs' className='comfort-level'>
+      <Stack
+        spacing='xs'
+        className='comfort-level'
+        style={{ position: 'relative', zIndex: 0 }}
+      >
         <Input.Wrapper label='Select a comfort level'>
           <SegmentedControl
             fullWidth
