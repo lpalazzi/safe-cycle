@@ -4,7 +4,11 @@ import { container } from 'tsyringe';
 import joi from 'joi';
 import { RouterService } from 'services';
 import { RouteOptions } from 'types';
-import { BadRequestError, ServiceUnavailableError } from 'api/errors';
+import {
+  BadGatewayError,
+  BadRequestError,
+  ServiceUnavailableError,
+} from 'api/errors';
 
 export const router = (app: express.Router) => {
   const route = express.Router();
@@ -115,6 +119,9 @@ export const router = (app: express.Router) => {
       throw new ServiceUnavailableError(
         'Our servers are currently busy, please try again.'
       );
+
+    if (String(error).includes('timeout after'))
+      throw new BadGatewayError('Server timed out, please try again.');
 
     console.log(error); // Log unhandled BRouter errors to console
     throw new Error(error ?? 'BRouter error');

@@ -10,11 +10,17 @@ export class NominatimService {
   private nominatimBaseUrl = 'https://nominatim.openstreetmap.org';
 
   public async reverse(position: Position, zoom: number) {
-    const { data } = await axios.get<NominatimSearchResult>(
-      `${this.nominatimBaseUrl}/reverse?lat=${position.latitude}&lon=${
-        position.longitude
-      }&format=json&zoom=${zoom.toString()}`
-    );
+    const { data } = await axios
+      .get<NominatimSearchResult>(
+        `${this.nominatimBaseUrl}/reverse?lat=${position.latitude}&lon=${
+          position.longitude
+        }&format=json&zoom=${zoom.toString()}`
+      )
+      .catch((error) => {
+        throw new Error(
+          error.response?.data ?? error.message ?? 'Nominatim error'
+        );
+      });
     return {
       label: data.display_name,
       address: {

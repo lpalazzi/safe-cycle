@@ -114,6 +114,7 @@ export const geocoding = (app: express.Router) => {
       } catch (error: any) {
         if (error.message === 'Async call timeout limit reached')
           throw new GatewayTimeoutError('Reverse geo search timed out');
+        console.log(error.message); // log unhandled error message
         throw error;
       }
     } catch (err) {
