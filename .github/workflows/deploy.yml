@@ -28,10 +28,10 @@ jobs:
           SSH_HOST: ${{ secrets.SSH_HOST }}
 
       - name: Check out latest source code
-        run: ssh digitalocean 'cd /home/safecycle/safe-cycle/ && git fetch && git reset --hard origin/master'
+        run: ssh digitalocean 'cd ~/safe-cycle/ && git fetch && git reset --hard origin/master'
         
       - name: Build application
-        run: ssh digitalocean 'cd /home/safecycle/safe-cycle/ && source ~/.bashrc && nvm use && yarn install && yarn build'
+        run: ssh digitalocean 'cd ~/safe-cycle/ && yarn install && yarn build'
         
       - name: Restart the server
         run: ssh digitalocean 'pm2 restart api'
