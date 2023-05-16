@@ -1,5 +1,7 @@
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 23 * * 2"
 
 jobs:
   update_segments:
@@ -25,6 +27,5 @@ jobs:
           SSH_HOST: ${{ secrets.SSH_HOST }}
 
       - name: Run update_segments.sh
-        run: ssh staging 'touch ~/SSH_WORKED.txt'
-#         run: ssh staging 'cd /home/safecycle/ && bash ./brouter/scripts/update_segments.sh'
-          
+        run: ssh staging 'cd /home/safecycle/ && bash ./brouter/scripts/update_segments.sh'
+        
