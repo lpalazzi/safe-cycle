@@ -31,7 +31,7 @@ jobs:
         run: ssh digitalocean 'cd ~/safe-cycle/ && git fetch && git reset --hard origin/master'
         
       - name: Build application
-        run: ssh digitalocean 'cd ~/safe-cycle/ && yarn install && yarn build'
+        run: ssh digitalocean 'cd ~/safe-cycle/ && export NVM_DIR=$HOME/.nvm && source $NVM_DIR/nvm.sh && echo $NODE_ENV && nvm use && yarn install && yarn build'
         
       - name: Restart the server
         run: ssh digitalocean 'pm2 restart api'
