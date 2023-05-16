@@ -1,0 +1,30 @@
+on:
+  workflow_call:
+
+jobs:
+  update_segments:
+    name: "Update segment files"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure ssh
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/staging.key
+          chmod 600 ~/.ssh/staging.key
+          cat >>~/.ssh/config <<END
+          Host staging
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/staging.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+
+      - name: Run update_segments.sh
+        run: ssh staging 'touch ~/SSH_WORKED.txt'
+#         run: ssh staging 'cd /home/safecycle/ && bash ./brouter/scripts/update_segments.sh'
+          
