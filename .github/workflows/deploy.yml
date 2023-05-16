@@ -6,7 +6,7 @@ on:
 
 jobs:
   deploy:
-    name: "Update segment files"
+    name: "Build and deploy API"
     runs-on: ubuntu-latest
 
     steps:
@@ -27,6 +27,6 @@ jobs:
           SSH_KEY: ${{ secrets.SSH_KEY }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
 
-      - name: Run update_segments.sh
+      - name: Pull master and deploy
         run: ssh staging 'cd /home/safecycle/safe-cycle/ && git restore yarn.lock && git pull && yarn install && yarn build && pm2 restart api'
         
