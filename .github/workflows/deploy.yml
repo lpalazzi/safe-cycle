@@ -16,7 +16,7 @@ jobs:
           echo "$SSH_KEY" > ~/.ssh/staging.key
           chmod 600 ~/.ssh/staging.key
           cat >>~/.ssh/config <<END
-          Host staging
+          Host digitalocean
             HostName $SSH_HOST
             User $SSH_USER
             IdentityFile ~/.ssh/staging.key
@@ -27,6 +27,11 @@ jobs:
           SSH_KEY: ${{ secrets.SSH_KEY }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
 
-      - name: Pull master and deploy
-        run: ssh staging 'cd /home/safecycle/safe-cycle/ && git restore yarn.lock && git pull && yarn install && yarn build && pm2 restart api'
+      - name: Check out latest source code
+        run: ssh digitalocean 'cd /home/safecycle/safe-cycle/ && git fetch && git reset --hard origin/master'
         
+      - name: Build application
+        run: ssh digitalocean 'cd /home/safecycle/safe-cycle/ && yarn install && yarn build'
+        
+      - name: Restart the server
+        run: ssh digitalocean 'pm2 restart api'
