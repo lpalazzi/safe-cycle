@@ -2,12 +2,10 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - master
-
+    - master
 concurrency:
   group: deploy
   cancel-in-progress: true
-
 jobs:
   test:
     uses: ./.github/workflows/test.yml
