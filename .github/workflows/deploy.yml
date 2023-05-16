@@ -4,7 +4,7 @@ on:
     branches:
       - master
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: deploy
   cancel-in-progress: true
 jobs:
   test:
