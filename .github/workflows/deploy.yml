@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - master
+
 concurrency:
   group: deploy
   cancel-in-progress: true
+
 jobs:
   test:
     uses: ./.github/workflows/test.yml
