@@ -1,8 +1,7 @@
 on:
-  workflow_dispatch:
   push:
-    branches:
-    - master
+    branches: [ master ]
+  workflow_dispatch:
 concurrency:
   group: deploy
   cancel-in-progress: true
