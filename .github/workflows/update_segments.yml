@@ -27,5 +27,5 @@ jobs:
           SSH_HOST: ${{ secrets.SSH_HOST }}
 
       - name: Run update_segments.sh
-        run: ssh staging 'cd /home/safecycle/ && bash ./brouter/scripts/update_segments.sh'
+        run: ssh staging 'cd /home/safecycle/safe-cycle/ && bash ./brouter/scripts/update_segments.sh'
         
