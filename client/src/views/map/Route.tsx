@@ -32,7 +32,7 @@ export const Route: React.FC = () => {
           key={
             999 +
             routes.length +
-            routes[selectedRouteIndex].properties.times.reduce(
+            routes[selectedRouteIndex]?.properties?.times?.reduce(
               (acc, a) => acc + a,
               0
             )
