@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import express from 'express';
+import http from 'http';
 import https from 'https';
 import fs from 'fs';
 import 'reflect-metadata';
@@ -35,6 +36,17 @@ async function start() {
           `[server]\t Server is running at https://localhost:${config.port}`
         );
       });
+
+    // HTTP => HTTPS redirect server
+    http
+      .createServer(
+        express().use((req, res, next) => {
+          res.redirect('https://' + req.headers.host + req.url);
+        })
+      )
+      .listen(80, () =>
+        console.log('[server]\t HTTP redirect server running on port 80')
+      );
   }
 }
 
