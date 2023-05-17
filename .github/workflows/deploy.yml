@@ -6,11 +6,11 @@ concurrency:
   group: deploy
   cancel-in-progress: true
 jobs:
-#   test:
-#     uses: ./.github/workflows/test.yml
+  test:
+    uses: ./.github/workflows/test.yml
   deploy:
     name: "Build and deploy API"
-#     needs: test
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Configure ssh
@@ -32,8 +32,6 @@ jobs:
       - name: Check out latest source code
         run: ssh digitalocean 'cd ~/safe-cycle/ && git fetch && git reset --hard origin/master'
       - name: Build application
-        run: ssh digitalocean 'cd ~/safe-cycle/ && yarn install && yarn build && echo $NODE_ENV'
-#         run: ssh digitalocean 'export NVM_DIR=$HOME/.nvm && source $NVM_DIR/nvm.sh && export NODE_ENV=production && cd ~/safe-cycle/ && yarn install && yarn build'
+        run: ssh digitalocean 'cd ~/safe-cycle/ && yarn install && yarn build'
       - name: Restart the server
         run: ssh digitalocean 'pm2 restart api'
-#         run: ssh digitalocean 'export NVM_DIR=$HOME/.nvm && source $NVM_DIR/nvm.sh && pm2 restart api'
