@@ -10,7 +10,7 @@ import {
   IconUser,
 } from '@tabler/icons-react';
 import { createMarker } from 'utils/map';
-import { Button, Flex, Group, MantineColor } from '@mantine/core';
+import { Button, Flex, Group, MantineColor, Title } from '@mantine/core';
 
 export const Markers: React.FC = () => {
   const {
@@ -125,6 +125,9 @@ export const Markers: React.FC = () => {
           )}
         >
           <Popup>
+            <Title order={5} align='center' pb='xs'>
+              Current location
+            </Title>
             {PopupButton('Add as waypoint', <IconPlus />, 'blue', () => {
               addWaypoint(currentLocation.latlng, 'Current location');
             })}

@@ -20,7 +20,6 @@ type MapContextType =
       turnInstructions: TurnInstruction[] | null;
       nogoRoutes: Nogo[];
       lineToCursor: [L.LatLng, L.LatLng] | null;
-      loadingRoute: boolean;
       // functions
       setMap: (map: L.Map) => void;
       setCurrentLocation: (location: Location | null) => void;
@@ -58,6 +57,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     clearSelectedNogoGroups,
     setEditingGroupOrRegion,
     setShowAlternateRoutes,
+    setIsLoading,
   } = useGlobalContext();
 
   const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
@@ -76,7 +76,10 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   );
   const [nogoRoutes, setNogoRoutes] = useState<Nogo[]>([]);
   const [fetchingCount, setFetchingCount] = useState(0);
-  const loadingRoute = fetchingCount > 0;
+
+  useEffect(() => {
+    setIsLoading(fetchingCount > 0);
+  }, [fetchingCount]);
 
   const addWaypoint = (latlng: L.LatLng, label?: string) => {
     const newWaypoint: Waypoint = {
@@ -333,7 +336,6 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         turnInstructions,
         nogoRoutes,
         lineToCursor,
-        loadingRoute,
         setMap,
         setCurrentLocation,
         setFollowUser,

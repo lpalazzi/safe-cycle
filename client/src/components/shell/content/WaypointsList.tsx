@@ -50,7 +50,7 @@ import { FeatureFlags } from 'featureFlags';
 import { useGlobalContext } from 'contexts/globalContext';
 
 export const WaypointsList: React.FC = () => {
-  const { loggedInUser } = useGlobalContext();
+  const { loggedInUser, setIsLoading } = useGlobalContext();
   const {
     map,
     waypoints,
@@ -150,9 +150,14 @@ export const WaypointsList: React.FC = () => {
     if (currentLocation) {
       addWaypoint(currentLocation.latlng, 'Current location');
     } else {
+      setIsLoading(true);
       map?.once('locationfound', (e) => {
         const { latlng, heading } = e;
         addWaypoint(latlng, 'Current location');
+        setIsLoading(false);
+      });
+      map?.once('locationerror', (e) => {
+        setIsLoading(false);
       });
       map?.locate();
     }

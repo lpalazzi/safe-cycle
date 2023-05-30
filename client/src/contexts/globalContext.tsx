@@ -21,6 +21,7 @@ type GlobalContextType =
       showAlternateRoutes: boolean;
       regions: Region[];
       showTour: boolean;
+      isLoading: boolean;
       // functions
       updateLoggedInUser: () => void;
       logoutUser: () => void;
@@ -34,6 +35,7 @@ type GlobalContextType =
       setShowAlternateRoutes: (val: boolean) => void;
       refreshRegions: () => void;
       setShowTour: (val: boolean) => void;
+      setIsLoading: (val: boolean) => void;
     }
   | undefined;
 
@@ -67,6 +69,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   });
   const [showAlternateRoutes, setShowAlternateRoutes] = useState(false);
   const [regions, setRegions] = useState<Region[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     updateLoggedInUser();
@@ -195,6 +198,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         showAlternateRoutes,
         regions,
         showTour,
+        isLoading,
         updateLoggedInUser,
         logoutUser,
         toggleNavbar,
@@ -207,6 +211,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         setShowAlternateRoutes,
         refreshRegions,
         setShowTour,
+        setIsLoading,
       }}
     >
       {props.children}

@@ -10,7 +10,6 @@ export const MapHandlers: React.FC = () => {
   const {
     currentLocation,
     followUser,
-    loadingRoute,
     refreshWaypointLineToCursor,
     setCurrentLocation,
     setFollowUser,
@@ -18,12 +17,13 @@ export const MapHandlers: React.FC = () => {
     clearWaypoints,
     clearNogoWaypoints,
   } = useMapContext();
-  const { editingGroupOrRegion, isNavModeOn } = useGlobalContext();
+  const { editingGroupOrRegion, isNavModeOn, isLoading, setIsLoading } =
+    useGlobalContext();
   const [navMarker, setNavMarker] = useState<L.RotatedMarker | null>(null);
 
   const map = useMapEvents({
     click: (e) => {
-      if (!loadingRoute)
+      if (!isLoading)
         addWaypoint(e.latlng, editingGroupOrRegion ? 'nogo' : undefined);
     },
     mousemove: (e) => {
@@ -98,6 +98,10 @@ export const MapHandlers: React.FC = () => {
     L.easyButton(
       'fa-location-crosshairs',
       () => {
+        map.once('locationfound', (e) => {
+          const { latlng } = e;
+          map.flyTo(latlng, isNavModeOn ? 19 : 14);
+        });
         map.locate({ watch: true, enableHighAccuracy: true });
       },
       'Current location'

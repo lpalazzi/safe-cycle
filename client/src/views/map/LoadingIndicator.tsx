@@ -1,20 +1,20 @@
 import React from 'react';
-import { useMapContext } from 'contexts/mapContext';
 import { LoadingOverlay } from '@mantine/core';
+import { useGlobalContext } from 'contexts/globalContext';
 
 export const LoadingIndicator: React.FC = () => {
-  const { loadingRoute } = useMapContext();
+  const { isLoading } = useGlobalContext();
   return (
     <div
       style={{
         width: '100%',
         height: '100%',
         position: 'absolute',
-        cursor: loadingRoute ? 'wait' : 'unset',
+        cursor: isLoading ? 'wait' : 'unset',
       }}
     >
       <LoadingOverlay
-        visible={loadingRoute}
+        visible={isLoading}
         overlayOpacity={0}
         radius='lg'
         transitionDuration={500}
