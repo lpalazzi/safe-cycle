@@ -83,7 +83,6 @@ export class NogoService {
           10e-6,
         (lineString.coordinates[0][1] + lineString.coordinates[1][1]) / 2 +
           10e-6,
-        (lineString.coordinates[0][2] + lineString.coordinates[1][2]) / 2,
       ];
       lineString.coordinates = [
         lineString.coordinates[0],
