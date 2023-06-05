@@ -115,7 +115,10 @@ export const router = (app: express.Router) => {
         'Nogos are blocking a route to one of your waypoints. Please select another point or disable "Avoid nogos".'
       );
 
-    if (String(error).includes('operation killed by thread-priority-watchdog'))
+    if (
+      String(error).includes('operation killed by thread-priority-watchdog') ||
+      String(error).includes('java.lang.OutOfMemoryError: Java heap space')
+    )
       throw new ServiceUnavailableError(
         'Our servers are currently busy, please try again.'
       );
