@@ -35,7 +35,7 @@ export class BaseDao<Interface, ReturnInterface = Interface> {
 
   async create(newDocument: NoID<Interface>) {
     const createdDocument = await this.model.create(newDocument);
-    return this.getById(createdDocument._id);
+    return this.getById(createdDocument._id as mongoose.Types.ObjectId);
   }
 
   async updateById(
