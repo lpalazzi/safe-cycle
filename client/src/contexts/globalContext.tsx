@@ -79,12 +79,13 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   }, []);
 
   const openInfoModalOnFirstVisit = () => {
-    const visited = window.localStorage.getItem('visited');
+    var visited = Number(window.localStorage.getItem('visited'));
+    if (isNaN(visited)) visited = 0;
+    window.localStorage.setItem('visited', (visited + 1).toFixed(0));
     if (!visited) {
       const isMobileSize = window.matchMedia(
         `(max-width: calc(${theme.breakpoints.sm} - ${rem(1)})`
       ).matches; // useMediaQuery state is still undefined on initial load
-      window.localStorage.setItem('visited', '1');
       openModal(AboutModal('about', isMobileSize));
     }
   };
