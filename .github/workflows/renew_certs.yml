@@ -12,7 +12,7 @@ jobs:
       - name: Configure ssh
         run: |
           mkdir -p ~/.ssh/
-          echo "$SSH_KEY_ROOT" > ~/.ssh/staging.key
+          echo "$SSH_KEY" > ~/.ssh/staging.key
           chmod 600 ~/.ssh/staging.key
           cat >>~/.ssh/config <<END
           Host staging
