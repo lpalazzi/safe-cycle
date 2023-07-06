@@ -32,6 +32,6 @@ jobs:
         run: ssh staging 'cerbot renew && cp -rfL /etc/letsencrypt/live/safecycle.xyz/. /home/safecycle/certificates && chown -R safecycle:safecycle /home/safecycle/certificates/'
         
       - name: Restart server
-        if: always
+        if: always()
         run: ssh staging 'runuser -l safecycle -c "pm2 restart api"'
         
