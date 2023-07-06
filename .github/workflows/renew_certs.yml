@@ -22,7 +22,6 @@ jobs:
             StrictHostKeyChecking no
           END
         env:
-          SSH_USER: ${{ secrets.SSH_USER_ROOT }}
           SSH_KEY: ${{ secrets.SSH_KEY_ROOT }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
 
