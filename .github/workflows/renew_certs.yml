@@ -1,0 +1,31 @@
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 23 01 */2 *"
+
+jobs:
+  update_segments:
+    name: "Renew HTTPS certificate"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure ssh
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY_ROOT" > ~/.ssh/staging.key
+          chmod 600 ~/.ssh/staging.key
+          cat >>~/.ssh/config <<END
+          Host staging
+            HostName $SSH_HOST
+            User $SSH_USER_ROOT
+            IdentityFile ~/.ssh/staging.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_USER: ${{ secrets.SSH_USER_ROOT }}
+          SSH_KEY: ${{ secrets.SSH_KEY_ROOT }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+
+      - name: Renew certs
+        run: ssh staging 'runuser -l safecycle -c "pm2 stop api" && cerbot renew && cp -rfL  /etc/letsencrypt/live/safecycle.xyz/. /home/safecycle/certificates && chown -R safecycle:safecycle /home/safecycle/certificates/ && runuser -l safecycle -c "pm2 restart api"'
+        
