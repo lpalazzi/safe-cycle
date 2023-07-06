@@ -12,7 +12,7 @@ jobs:
       - name: Configure ssh
         run: |
           mkdir -p ~/.ssh/
-          echo "$SSH_KEY" > ~/.ssh/staging.key
+          echo "$SSH_KEY_ROOT" > ~/.ssh/staging.key
           chmod 600 ~/.ssh/staging.key
           cat >>~/.ssh/config <<END
           Host staging
@@ -22,7 +22,7 @@ jobs:
             StrictHostKeyChecking no
           END
         env:
-          SSH_KEY: ${{ secrets.SSH_KEY_ROOT }}
+          SSH_KEY_ROOT: ${{ secrets.SSH_KEY_ROOT }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
 
       - name: Pause server
