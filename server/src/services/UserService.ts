@@ -1,12 +1,18 @@
 import mongoose from 'mongoose';
-import { injectable } from 'tsyringe';
-import { UserDao } from 'daos';
+import { injectable, inject } from 'tsyringe';
+import argon2 from 'argon2';
 import { IUser } from 'interfaces';
+import { UserDao, PasswordResetTokenDao } from 'daos';
+import { EmailService } from 'services';
 import { NoID, UserRole, UserSettings } from 'types';
 
 @injectable()
 export class UserService {
-  constructor(private userDao: UserDao) {}
+  constructor(
+    private userDao: UserDao,
+    private passwordResetTokenDao: PasswordResetTokenDao,
+    @inject('EmailService') private emailService: EmailService
+  ) {}
 
   async getAll() {
     return await this.userDao.get({});
@@ -62,5 +68,47 @@ export class UserService {
       passwordHash: newPasswordHash,
     });
     return updateResult.acknowledged && updateResult.modifiedCount === 1;
+  }
+
+  async createPasswordResetToken(userEmail: string) {
+    const user = await this.getByEmail(userEmail);
+    if (!user) return;
+
+    const token = Math.random().toString(36).substring(2);
+    const hash = await argon2.hash(token);
+    const existingToken = await this.passwordResetTokenDao.getOne({
+      user: user._id,
+    });
+
+    if (existingToken)
+      this.passwordResetTokenDao.updateById(existingToken._id, { hash });
+    else this.passwordResetTokenDao.create({ hash, user: user._id });
+
+    this.emailService.sendEmail({
+      from: 'contact@safecycle.xyz',
+      replyTo: '',
+      to: [user.email],
+      subject: 'SafeCycle password reset',
+      message: `Your password reset token is ${token}. This token can only be used once.`,
+    });
+  }
+
+  async verifyPasswordResetToken(
+    userId: mongoose.Types.ObjectId,
+    token: string
+  ) {
+    const user = await this.userDao.getById(userId);
+    if (!user) return false;
+
+    const existingToken = await this.passwordResetTokenDao.getOne({
+      user: user._id,
+    });
+    if (!existingToken) return false;
+
+    return argon2.verify(existingToken.hash, token);
+  }
+
+  async deletePasswordResetTokenForUser(userId: mongoose.Types.ObjectId) {
+    return this.passwordResetTokenDao.deleteMany({ user: userId });
   }
 }

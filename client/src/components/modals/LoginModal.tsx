@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { Button, Group, Stack, TextInput } from '@mantine/core';
+import { Anchor, Button, Group, Stack, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { closeAllModals } from '@mantine/modals';
+import { closeAllModals, openModal } from '@mantine/modals';
 import { ModalSettings } from '@mantine/modals/lib/context';
 import { showNotification } from '@mantine/notifications';
 
@@ -10,6 +10,7 @@ import { UserApi } from 'api';
 import { IUserLoginDTO as LoginFormValues } from 'api/interfaces/User';
 import { validateEmail } from 'utils/validation';
 import { useGlobalContext } from 'contexts/globalContext';
+import { ResetPasswordModal } from './ResetPasswordModal';
 
 const LoginForm: React.FC = () => {
   const { updateLoggedInUser } = useGlobalContext();
@@ -63,6 +64,16 @@ const LoginForm: React.FC = () => {
           autoComplete='current-password'
           {...form.getInputProps('password')}
         />
+        <Anchor
+          onClick={() => {
+            closeAllModals();
+            openModal(ResetPasswordModal);
+          }}
+          size='xs'
+          align='right'
+        >
+          I forgot my password
+        </Anchor>
       </Stack>
       <Group position='right' mt='md'>
         <Button type='submit'>Submit</Button>

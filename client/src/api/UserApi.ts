@@ -79,4 +79,22 @@ export class UserApi {
     );
     return !!response.success;
   }
+
+  static async createPasswordResetToken(email: string) {
+    const response = await makeRequest(
+      `${this.baseUrl}/createPasswordResetToken`,
+      'POST',
+      { email }
+    );
+    return !!response.success;
+  }
+
+  static async verifyPasswordResetToken(email: string, token: string) {
+    const response = await makeRequest(
+      `${this.baseUrl}/verifyPasswordResetToken`,
+      'POST',
+      { email, token }
+    );
+    return !!response.verified;
+  }
 }

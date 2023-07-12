@@ -77,15 +77,20 @@ const UpdateSettingsForm: React.FC = () => {
   );
 };
 
-const ChangePasswordForm: React.FC = () => {
+export const ChangePasswordForm: React.FC<{
+  bypassCurrentPassword?: boolean;
+  onSuccess?: () => void;
+}> = ({ bypassCurrentPassword, onSuccess }) => {
   const form = useForm({
     initialValues: {
       currentPassword: '',
       newPassword: '',
+      bypassCurrentPassword,
     } as IUserChangePasswordDTO,
     validate: {
       currentPassword: (value) => {
-        if (!value || value === '') return 'Current password is required';
+        if (!bypassCurrentPassword && (!value || value === ''))
+          return 'Current password is required';
       },
       newPassword: (value) => {
         if (!value) return 'New password is required';
@@ -105,6 +110,7 @@ const ChangePasswordForm: React.FC = () => {
           message: 'Your password was changed',
           color: 'green',
         });
+        onSuccess?.();
       } else {
         throw new Error();
       }
@@ -121,12 +127,14 @@ const ChangePasswordForm: React.FC = () => {
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack spacing='xs'>
-        <PasswordInput
-          withAsterisk
-          label='Current password'
-          placeholder='Password'
-          {...form.getInputProps('currentPassword')}
-        />
+        {bypassCurrentPassword ? null : (
+          <PasswordInput
+            withAsterisk
+            label='Current password'
+            placeholder='Password'
+            {...form.getInputProps('currentPassword')}
+          />
+        )}
         <PasswordPopover value={form.values.newPassword}>
           <PasswordInput
             withAsterisk
