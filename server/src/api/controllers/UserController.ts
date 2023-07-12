@@ -161,8 +161,9 @@ export const user = (app: express.Router) => {
         req.body.changePasswordDTO;
       const { error } = joi
         .object({
-          currentPassword: joi.string().required(),
+          currentPassword: joi.string().allow('').required(),
           newPassword: joi.string().min(8).max(64).required(),
+          bypassCurrentPassword: joi.bool(),
         })
         .required()
         .validate(changePasswordDTO);
@@ -172,14 +173,18 @@ export const user = (app: express.Router) => {
         throw new ModelNotFoundError(
           `No user found with id=${userId.toString()}`
         );
-      const { currentPassword, newPassword } = changePasswordDTO;
-      const currentPasswordHash = await userService.getHashById(user._id);
-      const correctCurrentPassword = await argon2.verify(
-        currentPasswordHash ?? '',
-        currentPassword
-      );
-      if (!correctCurrentPassword)
-        throw new BadRequestError('Incorrect current password');
+      const { currentPassword, newPassword, bypassCurrentPassword } =
+        changePasswordDTO;
+
+      if (!bypassCurrentPassword) {
+        const currentPasswordHash = await userService.getHashById(user._id);
+        const correctCurrentPassword = await argon2.verify(
+          currentPasswordHash ?? '',
+          currentPassword
+        );
+        if (!correctCurrentPassword)
+          throw new BadRequestError('Incorrect current password');
+      }
 
       const newPasswordHash = await argon2.hash(newPassword);
       const success = await userService.changeUserPassword(
@@ -187,6 +192,41 @@ export const user = (app: express.Router) => {
         newPasswordHash
       );
       return res.json({ success });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  route.post('/createPasswordResetToken', async (req, res, next) => {
+    try {
+      if (!req.body.email || req.body.email === '')
+        throw new BadRequestError('Email not provided');
+      const email = req.body.email as string;
+      userService.createPasswordResetToken(email);
+      return res.json({ success: true });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  route.post('/verifyPasswordResetToken', async (req, res, next) => {
+    try {
+      if (!req.body.email || req.body.email === '')
+        throw new BadRequestError('Email not provided');
+      if (!req.body.token || req.body.token === '')
+        throw new BadRequestError('Token not provided');
+      const email = req.body.email as string;
+      const token = req.body.token as string;
+      const user = await userService.getByEmail(email);
+      if (!user) throw new BadRequestError('Incorrect token');
+      const verified = await userService.verifyPasswordResetToken(
+        user._id,
+        token
+      );
+      if (!verified) throw new BadRequestError('Incorrect token');
+      userService.deletePasswordResetTokenForUser(user._id);
+      req.session.userId = user._id.toString();
+      return res.json({ verified });
     } catch (err) {
       next(err);
     }

@@ -22,4 +22,5 @@ export interface IUserLoginDTO {
 export interface IUserChangePasswordDTO {
   currentPassword: string;
   newPassword: string;
+  bypassCurrentPassword?: boolean;
 }

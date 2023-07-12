@@ -24,6 +24,7 @@ export interface IUserLoginDTO {
 export interface IUserChangePasswordDTO {
   currentPassword: string;
   newPassword: string;
+  bypassCurrentPassword?: boolean;
 }
 
 export interface IUserReturnDTO extends Omit<IUser, 'passwordHash'> {}
