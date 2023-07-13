@@ -34,7 +34,7 @@ const EmailForm: React.FC<{ onSubmit: (email: string) => void }> = ({
       }
     } catch (error: any) {
       showNotification({
-        title: 'Error requesting a reset token',
+        title: 'Error requesting a reset code',
         message: error.message || 'Undefined error',
         color: 'red',
       });
@@ -69,7 +69,7 @@ const TokenForm: React.FC<{ email: string; onSubmit: () => void }> = ({
     initialValues: { token: '' } as TokenFormValues,
     validate: {
       token: (value) => {
-        if (!value) return 'Token is required';
+        if (!value) return 'Code is required';
       },
     },
   });
@@ -80,11 +80,11 @@ const TokenForm: React.FC<{ email: string; onSubmit: () => void }> = ({
         email,
         values.token
       );
-      if (!verified) throw new Error('Incorrect token');
+      if (!verified) throw new Error('Incorrect code');
       onSubmit();
     } catch (error: any) {
       showNotification({
-        title: 'Error validating your token',
+        title: 'Error validating your code',
         message: error.message || 'Undefined error',
         color: 'red',
       });
@@ -95,11 +95,12 @@ const TokenForm: React.FC<{ email: string; onSubmit: () => void }> = ({
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack spacing='xs'>
         <Text size='sm'>
-          An email has been sent to {email} with a token. Enter the token below.
+          An email has been sent to {email} with a security code. Enter the code
+          below.
         </Text>
         <TextInput
           withAsterisk
-          label='Token'
+          label='Code'
           placeholder=''
           {...form.getInputProps('token')}
         />

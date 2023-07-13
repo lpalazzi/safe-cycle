@@ -89,7 +89,7 @@ export class UserService {
       replyTo: '',
       to: [user.email],
       subject: 'SafeCycle password reset',
-      message: `Your password reset token is ${token}. This token can only be used once.`,
+      message: `Your password reset code is ${token}. This code can only be used once.`,
     });
   }
 
