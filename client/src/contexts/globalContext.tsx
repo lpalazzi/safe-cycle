@@ -54,7 +54,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   );
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [showTour, setShowTour] = useState(false);
-  const [isNavbarOpen, setIsNavbarOpen] = useState(!isMobileSize);
+  const [isNavbarOpen, setIsNavbarOpen] = useState(true);
   const [isNavModeOn, setIsNavModeOn] = useState(false);
   const [selectedNogoGroups, setSelectedNogoGroups] = useState<ID[]>([]);
   const [editingGroupOrRegion, setEditingGroupOrRegion] = useState<
@@ -86,7 +86,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
       const isMobileSize = window.matchMedia(
         `(max-width: calc(${theme.breakpoints.sm} - ${rem(1)})`
       ).matches; // useMediaQuery state is still undefined on initial load
-      openModal(AboutModal('about', isMobileSize));
+      if (!isMobileSize) openModal(AboutModal('about', isMobileSize));
     }
   };
 
