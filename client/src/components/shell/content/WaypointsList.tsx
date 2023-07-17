@@ -232,7 +232,11 @@ export const WaypointsList: React.FC = () => {
               <Select
                 key={draggableWaypoints.length}
                 searchable
-                placeholder='Search for a location'
+                placeholder={
+                  draggableWaypoints.length === 0
+                    ? 'Search for a starting point'
+                    : 'Search for a location'
+                }
                 value={null}
                 data={geoSearchResultOptions}
                 onSearchChange={setGeoSearchValue}

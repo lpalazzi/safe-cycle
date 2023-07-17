@@ -3,6 +3,7 @@ import L from 'leaflet';
 import 'leaflet-marker-rotation';
 import { useMapEvents } from 'react-leaflet';
 import { useMapContext } from 'contexts/mapContext';
+import { Anchor } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { useGlobalContext } from 'contexts/globalContext';
 
@@ -17,8 +18,7 @@ export const MapHandlers: React.FC = () => {
     clearWaypoints,
     clearNogoWaypoints,
   } = useMapContext();
-  const { editingGroupOrRegion, isNavModeOn, isLoading, setIsLoading } =
-    useGlobalContext();
+  const { editingGroupOrRegion, isNavModeOn, isLoading } = useGlobalContext();
   const [navMarker, setNavMarker] = useState<L.RotatedMarker | null>(null);
 
   const map = useMapEvents({
@@ -55,6 +55,36 @@ export const MapHandlers: React.FC = () => {
       });
     },
   });
+
+  useEffect(() => {
+    navigator.permissions.query({ name: 'geolocation' }).then((status) => {
+      switch (status.state) {
+        case 'granted':
+          map.locate({ setView: true, maxZoom: 10 });
+          break;
+        case 'denied':
+          showNotification({
+            title: 'Cannot access location',
+            message: (
+              <>
+                SafeCycle does not have permission to use your location. Please{' '}
+                <Anchor
+                  href='https://www.lifewire.com/denying-access-to-your-location-4027789'
+                  target='_blank'
+                >
+                  enable location permissions
+                </Anchor>{' '}
+                to use all of SafeCycle's features.
+              </>
+            ),
+            autoClose: false,
+          });
+          break;
+        default:
+          break;
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (currentLocation && isNavModeOn && navMarker) {

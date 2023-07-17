@@ -37,8 +37,8 @@ export const Map: React.FC = () => {
           zIndex: 0,
           cursor: 'crosshair',
         }}
-        center={[42.2686, -83.1194]}
-        zoom={10}
+        center={[0, -80]}
+        zoom={2}
         scrollWheelZoom={true}
         zoomControl={false}
       >
