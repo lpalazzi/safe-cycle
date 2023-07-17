@@ -1,16 +1,16 @@
 import React, { ReactElement, useState } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { useMapContext } from '../../contexts/mapContext';
 import { useGlobalContext } from 'contexts/globalContext';
 import {
   IconArrowsMove,
-  IconPlus,
+  IconCurrentLocation,
   IconTrash,
-  IconUser,
 } from '@tabler/icons-react';
 import { createMarker } from 'utils/map';
-import { Button, Flex, Group, MantineColor, Title } from '@mantine/core';
+import { Button, Flex, Group, MantineColor } from '@mantine/core';
 
 export const Markers: React.FC = () => {
   const {
@@ -119,20 +119,27 @@ export const Markers: React.FC = () => {
           key={currentLocation.latlng.lat + currentLocation.latlng.lng}
           position={currentLocation.latlng}
           opacity={0.8}
-          icon={createMarker(
-            <IconUser color='black' style={{ verticalAlign: 'middle' }} />,
-            'orange'
-          )}
-        >
-          <Popup>
-            <Title order={5} align='center' pb='xs'>
-              Current location
-            </Title>
-            {PopupButton('Add as waypoint', <IconPlus />, 'blue', () => {
-              addWaypoint(currentLocation.latlng, 'Current location');
-            })}
-          </Popup>
-        </Marker>
+          eventHandlers={{
+            click: () => {
+              map.flyTo(currentLocation.latlng, isNavModeOn ? 19 : 17);
+            },
+          }}
+          icon={L.divIcon({
+            className: 'marker-location',
+            shadowSize: [0, 0],
+            iconSize: [20, 20],
+            iconAnchor: [10, 10],
+            shadowAnchor: [0, 0],
+            popupAnchor: [0, -10],
+            html: renderToStaticMarkup(
+              <IconCurrentLocation
+                size={16}
+                color='white'
+                style={{ verticalAlign: 'middle' }}
+              />
+            ),
+          })}
+        />
       ) : null}
     </>
   );
