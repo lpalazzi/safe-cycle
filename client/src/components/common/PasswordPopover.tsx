@@ -21,7 +21,7 @@ export const PasswordPopover: React.FC<PasswordPopover> = (props) => {
   return (
     <Popover
       opened={passwordPopoverOpened}
-      position='bottom'
+      position='top'
       width='target'
       transitionProps={{ transition: 'pop' }}
       withinPortal
