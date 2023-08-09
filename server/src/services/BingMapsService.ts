@@ -1,8 +1,9 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { injectable } from 'tsyringe';
 import config from 'config';
 import { Position, Viewbox } from 'types';
 import { IGeocodeSearchResult } from 'interfaces';
+import { fixOutOfBoundsLat, fixOutOfBoundsLon } from 'utils/geo';
 
 @injectable()
 export class BingMapsService {
@@ -38,19 +39,26 @@ export class BingMapsService {
     if (!config.bingMapsApiKey) return null;
 
     const userMapViewStr = [
-      viewbox.southeast.latitude,
-      viewbox.southeast.longitude,
-      viewbox.northwest.latitude,
-      viewbox.northwest.longitude,
+      fixOutOfBoundsLat(viewbox.southeast.latitude),
+      fixOutOfBoundsLon(viewbox.southeast.longitude),
+      fixOutOfBoundsLat(viewbox.northwest.latitude),
+      fixOutOfBoundsLon(viewbox.northwest.longitude),
     ].join();
 
     const userLocationStr = userLocation
       ? [userLocation.latitude, userLocation.longitude].join()
       : '';
 
-    const { data } = await axios.get<BingAutosuggestResult>(
-      `${this.bingMapsBaseUrl}/Autosuggest?query=${query}&userMapView=${userMapViewStr}&userLocation=${userLocationStr}&maxResults=10&key=${config.bingMapsApiKey}`
-    );
+    const { data } = await axios
+      .get<BingAutosuggestResult>(
+        `${this.bingMapsBaseUrl}/Autosuggest?query=${query}&userMapView=${userMapViewStr}&userLocation=${userLocationStr}&maxResults=10&key=${config.bingMapsApiKey}`
+      )
+      .catch((e: AxiosError) => {
+        console.error(e.response?.data);
+        throw Error(
+          `Autosuggest request failed with status code ${e.response?.status}: ${e.response?.statusText}`
+        );
+      });
 
     const places = data?.resourceSets?.[0]?.resources?.[0]?.value;
 
