@@ -24,7 +24,7 @@ export const MapHandlers: React.FC = () => {
   const map = useMapEvents({
     click: (e) => {
       if (!isLoading)
-        addWaypoint(e.latlng, editingGroupOrRegion ? 'nogo' : undefined);
+        addWaypoint(e.latlng.wrap(), editingGroupOrRegion ? 'nogo' : undefined);
     },
     mousemove: (e) => {
       refreshWaypointLineToCursor(e.latlng);

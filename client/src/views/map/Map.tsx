@@ -41,6 +41,7 @@ export const Map: React.FC = () => {
         zoom={2}
         scrollWheelZoom={true}
         zoomControl={false}
+        worldCopyJump={true}
       >
         <TileLayer
           attribution='Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'

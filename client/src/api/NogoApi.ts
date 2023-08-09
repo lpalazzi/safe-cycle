@@ -23,10 +23,11 @@ export class NogoApi {
     nogoGroupId: ID | undefined,
     regionId: ID | undefined
   ) {
+    const wrappedWaypoints = waypoints.map((waypoint) => waypoint.wrap());
     const nogoCreate: INogoCreateDTO = {
       points: [
-        [waypoints[0].lng, waypoints[0].lat],
-        [waypoints[1].lng, waypoints[1].lat],
+        [wrappedWaypoints[0].lng, wrappedWaypoints[0].lat],
+        [wrappedWaypoints[1].lng, wrappedWaypoints[1].lat],
       ],
       nogoGroup: nogoGroupId,
       region: regionId,

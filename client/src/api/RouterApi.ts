@@ -15,7 +15,8 @@ export class RouterApi {
     routeOptions: RouteOptions,
     user: User | null
   ) {
-    const points: GeoJSON.Position[] = waypoints.map((waypoint) => [
+    const wrappedWaypoints = waypoints.map((waypoint) => waypoint.wrap());
+    const points: GeoJSON.Position[] = wrappedWaypoints.map((waypoint) => [
       waypoint.lng,
       waypoint.lat,
     ]);
@@ -32,7 +33,7 @@ export class RouterApi {
     );
     const routes: RouteData[] = response.routes;
     TrackerApi.logRoute(
-      waypoints,
+      wrappedWaypoints,
       routeOptions,
       routes[0].properties,
       user,
@@ -50,8 +51,8 @@ export class RouterApi {
     alternativeIdx: number
   ) {
     const points: GeoJSON.Position[] = waypoints.map((waypoint) => [
-      waypoint.lng,
-      waypoint.lat,
+      waypoint.wrap().lng,
+      waypoint.wrap().lat,
     ]);
     delete routeOptions.avoidNogos;
     const response = await makeRequest(`${this.baseUrl}/downloadGPX`, 'POST', {
