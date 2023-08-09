@@ -70,6 +70,29 @@ export const WaypointsList: React.FC = () => {
     GeocodeSearchResult[]
   >([]);
   const [showTurnInstructions, setShowTurnInstructions] = useState(false);
+  const [savedSearches, setSavedSearches] = useState<GeocodeSearchResult[]>([]);
+
+  useEffect(() => {
+    const storedSearchesStr = window.localStorage.getItem('savedSearches');
+    if (storedSearchesStr) {
+      try {
+        const storedSearches = (JSON.parse(storedSearchesStr) as any[]).map(
+          (storedSearch) => {
+            return {
+              label: storedSearch.label,
+              latlng:
+                storedSearch.latlng?.lat && storedSearch.latlng?.lng
+                  ? new LatLng(storedSearch.latlng.lat, storedSearch.latlng.lng)
+                  : undefined,
+            } as GeocodeSearchResult;
+          }
+        );
+        setSavedSearches(storedSearches);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }, []);
 
   useEffect(() => setDraggableWaypoints(waypoints), [waypoints]);
   useEffect(
@@ -121,9 +144,10 @@ export const WaypointsList: React.FC = () => {
       handleCurrentLocationSelect();
       return;
     }
-    const selectedGeoSearchResult = geoSearchResults.find(
-      (geoSearchResult) => geoSearchResult.label === value
-    );
+    const selectedGeoSearchResult = [
+      ...geoSearchResults,
+      ...savedSearches,
+    ].find((geoSearchResult) => geoSearchResult.label === value);
     if (selectedGeoSearchResult) {
       try {
         const latlng =
@@ -135,6 +159,23 @@ export const WaypointsList: React.FC = () => {
         addWaypoint(
           new LatLng(Number(latlng.lat), Number(latlng.lng)),
           selectedGeoSearchResult.label
+        );
+
+        const newSavedSearch: GeocodeSearchResult = {
+          ...selectedGeoSearchResult,
+          latlng,
+        };
+        const newSavedSearches = [
+          newSavedSearch,
+          ...savedSearches.filter(
+            (savedSearch) => savedSearch.label !== newSavedSearch.label
+          ),
+        ];
+        if (newSavedSearches.length > 10) newSavedSearches.length = 10;
+        setSavedSearches(newSavedSearches);
+        window.localStorage.setItem(
+          'savedSearches',
+          JSON.stringify(newSavedSearches)
         );
       } catch (error: any) {
         showNotification({
@@ -178,6 +219,19 @@ export const WaypointsList: React.FC = () => {
             value: 'location',
             label: 'Your current location',
           },
+          ...savedSearches
+            .filter(
+              (savedSearch) =>
+                !waypoints.find((waypoint) =>
+                  savedSearch.latlng?.equals(waypoint.latlng)
+                )
+            )
+            .map((geoSearchResult) => {
+              return {
+                value: geoSearchResult.label,
+                label: geoSearchResult.label,
+              };
+            }),
         ]
       : geoSearchResults.map((geoSearchResult) => {
           return {
