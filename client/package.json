@@ -7,7 +7,7 @@
     "build:watch": "concurrently \"tsc -noEmit -w\" \"node build.js -w\""
   },
   "dependencies": {
-    "@babel/core": "^7.20.12",
+    "@babel/core": "^7.22.10",
     "@emotion/react": "^11.10.5",
     "@mantine/core": "^6.0.10",
     "@mantine/form": "^6.0.10",

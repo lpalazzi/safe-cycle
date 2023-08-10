@@ -22,7 +22,7 @@
     "test": "yarn workspace server test"
   },
   "devDependencies": {
-    "nodemon": "^2.0.20",
+    "nodemon": "^3.0.1",
     "concurrently": "^7.6.0"
   },
   "nodemonConfig": {
