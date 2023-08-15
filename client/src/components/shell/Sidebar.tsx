@@ -8,7 +8,8 @@ import { IconMap2, IconMenu2 } from '@tabler/icons-react';
 import { TopRightButtons } from './TopRightButtons';
 
 export const Sidebar: React.FC = () => {
-  const { isMobileSize, isNavbarOpen, toggleNavbar } = useGlobalContext();
+  const { loggedInUser, isMobileSize, isNavbarOpen, toggleNavbar } =
+    useGlobalContext();
   return (
     <>
       <Navbar
@@ -42,10 +43,14 @@ export const Sidebar: React.FC = () => {
             View map
           </Button>
         ) : null}
-        <Divider my='sm' />
-        <Navbar.Section>
-          <SidebarFooter />
-        </Navbar.Section>
+        {!!loggedInUser ? (
+          <>
+            <Divider my='sm' />{' '}
+            <Navbar.Section>
+              <SidebarFooter />
+            </Navbar.Section>
+          </>
+        ) : null}
       </Navbar>
       {isNavbarOpen || isMobileSize ? null : (
         <ActionIcon

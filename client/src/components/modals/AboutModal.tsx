@@ -7,7 +7,7 @@ import { BBox, feature, featureCollection } from '@turf/helpers';
 import { Checkbox, Tooltip as MantineTooltip } from '@mantine/core';
 import { ModalSettings } from '@mantine/modals/lib/context';
 import { useForm } from '@mantine/form';
-import { closeAllModals } from '@mantine/modals';
+import { openModal, closeAllModals } from '@mantine/modals';
 import { showNotification } from '@mantine/notifications';
 import {
   Container,
@@ -41,6 +41,8 @@ import { EmailApi, NogoApi } from 'api';
 import { IContactFormDTO as ContactFormValues } from 'api/interfaces/Email';
 import { validateEmail } from 'utils/validation';
 import { metresToDistanceString } from 'utils/formatting';
+import { LoginModal } from 'components/modals/LoginModal';
+import { SignupModal } from 'components/modals/SignupModal';
 
 type ViewType =
   | 'about'
@@ -64,7 +66,7 @@ type AboutModalProps = {
 };
 
 const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
-  const { isMobileSize, setShowTour } = useGlobalContext();
+  const { loggedInUser, isMobileSize, setShowTour } = useGlobalContext();
   const [view, setView] = useState<string | null>(initialView);
   return (
     <Container>
@@ -90,6 +92,17 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
           </Button>
         )}
       </Group>
+      {!loggedInUser ? (
+        <>
+          <Space h='md' />
+          <Group position='center' maw={356} m='auto' grow>
+            <Button onClick={() => openModal(LoginModal)}>Sign in</Button>
+            <Button onClick={() => openModal(SignupModal)}>
+              Create account
+            </Button>
+          </Group>
+        </>
+      ) : null}
       <Space h='md' />
       <Accordion value={view} onChange={setView} variant='contained'>
         <Accordion.Item value='about'>

@@ -2,7 +2,6 @@ import React from 'react';
 import {
   Avatar,
   Box,
-  Button,
   Group,
   Menu,
   Text,
@@ -19,8 +18,6 @@ import {
 } from '@tabler/icons-react';
 
 import { useGlobalContext } from 'contexts/globalContext';
-import { LoginModal } from 'components/modals/LoginModal';
-import { SignupModal } from 'components/modals/SignupModal';
 import { AdminControlsModal } from 'components/modals/AdminControlsModal';
 import { ManageAccountModal } from 'components/modals/ManageAccountModal';
 
@@ -89,10 +86,5 @@ export const SidebarFooter: React.FC = () => {
         </Menu.Item>
       </Menu.Dropdown>
     </Menu>
-  ) : (
-    <Group position='center' grow>
-      <Button onClick={() => openModal(LoginModal)}>Sign in</Button>
-      <Button onClick={() => openModal(SignupModal)}>Create account</Button>
-    </Group>
-  );
+  ) : null;
 };
