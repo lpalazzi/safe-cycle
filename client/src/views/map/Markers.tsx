@@ -17,7 +17,7 @@ export const Markers: React.FC = () => {
     map,
     waypoints,
     currentLocation,
-    addWaypoint,
+    askForStartingLocation,
     updateWaypoint,
     removeWaypoint,
   } = useMapContext();
@@ -79,7 +79,11 @@ export const Markers: React.FC = () => {
                   style={{ verticalAlign: 'middle' }}
                 />
               ) : (
-                <>{(index + 1).toString()}</>
+                <>
+                  {askForStartingLocation && waypoints.length === 1
+                    ? ''
+                    : (index + (askForStartingLocation ? 2 : 1)).toString()}
+                </>
               ),
               'blue'
             )}

@@ -15,6 +15,7 @@ type MapContextType =
       currentLocation: Location | null;
       followUser: boolean;
       waypoints: Waypoint[];
+      askForStartingLocation: boolean;
       routes: RouteData[] | null;
       selectedRouteIndex: number | null;
       turnInstructions: TurnInstruction[] | null;
@@ -64,6 +65,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   const [followUser, setFollowUser] = useState(false);
   const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
   const [nogoWaypoints, setNogoWaypoints] = useState<L.LatLng[]>([]);
+  const [askForStartingLocation, setAskForStartingLocation] = useState(false);
   const [routes, setRoutes] = useState<RouteData[] | null>(null);
   const [selectedRouteIndex, setSelectedRouteIndex] = useState<number | null>(
     null
@@ -88,13 +90,32 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         label ?? GeocodingApi.reverse(latlng).then((res) => res?.label ?? null),
     };
     if (!editingGroupOrRegion) {
-      setWaypoints([...waypoints, newWaypoint]);
+      const newWaypoints: Waypoint[] = [];
+      if (waypoints.length === 0 && !askForStartingLocation) {
+        if (currentLocation) {
+          const startingWaypoint: Waypoint = {
+            latlng: currentLocation.latlng,
+            label: 'Current location',
+          };
+          newWaypoints.push(startingWaypoint);
+          setAskForStartingLocation(false);
+        } else if (label) {
+          setAskForStartingLocation(true);
+        }
+      } else setAskForStartingLocation(false);
+      newWaypoints.push(newWaypoint);
+
+      setWaypoints(
+        askForStartingLocation && label
+          ? [newWaypoint, ...waypoints]
+          : [...waypoints, ...newWaypoints]
+      );
       if (label) {
         const bounds = new L.LatLngBounds(latlng, latlng);
-        waypoints.forEach((waypoint) => {
+        [...waypoints, ...newWaypoints].forEach((waypoint) => {
           bounds.extend(waypoint.latlng);
         });
-        map?.fitBounds(bounds, { maxZoom: 17 });
+        map?.fitBounds(bounds.pad(0.5), { maxZoom: 17 });
       }
     } else {
       setNogoWaypoints([...nogoWaypoints, latlng]);
@@ -124,6 +145,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     const newWaypoints = [...waypoints];
     newWaypoints.splice(index, 1);
     setWaypoints(newWaypoints);
+    if (index === 0) setAskForStartingLocation(true);
   };
 
   const clearWaypoints = () => {
@@ -332,6 +354,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         followUser,
         waypoints,
         routes,
+        askForStartingLocation,
         selectedRouteIndex,
         turnInstructions,
         nogoRoutes,

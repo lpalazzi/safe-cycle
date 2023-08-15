@@ -56,6 +56,7 @@ export const WaypointsList: React.FC = () => {
     waypoints,
     currentLocation,
     routes,
+    askForStartingLocation,
     selectedRouteIndex,
     addWaypoint,
     reorderWaypoint,
@@ -212,13 +213,20 @@ export const WaypointsList: React.FC = () => {
     handleGeoSearchValueChanged(geoSearchValue);
   }, [geoSearchValue]);
 
-  const geoSearchResultOptions: SelectItem[] =
-    geoSearchValue === ''
-      ? [
+  const currentLocationItems: SelectItem[] =
+    waypoints.length === 0
+      ? []
+      : [
           {
             value: 'location',
             label: 'Your current location',
           },
+        ];
+
+  const geoSearchResultOptions: SelectItem[] =
+    geoSearchValue === ''
+      ? [
+          ...currentLocationItems,
           ...savedSearches
             .filter(
               (savedSearch) =>
@@ -250,6 +258,7 @@ export const WaypointsList: React.FC = () => {
           <Timeline
             style={{ position: 'relative', zIndex: 1 }}
             active={draggableWaypoints.length - 1}
+            reverseActive={askForStartingLocation}
             bulletSize={20}
             styles={{
               item: {
@@ -257,16 +266,44 @@ export const WaypointsList: React.FC = () => {
                 '::before': {
                   inset: '0px auto -16px -4px',
                 },
+                ':nth-child(2)': askForStartingLocation
+                  ? {
+                      marginTop: '8px !important',
+                    }
+                  : {},
               },
               itemContent: {
                 transform: 'translateY(-15px)',
               },
+              itemBullet: { zIndex: 2 },
             }}
           >
+            {askForStartingLocation ? (
+              <Timeline.Item lineVariant='dotted' style={{ zIndex: 2 }}>
+                <Select
+                  key={draggableWaypoints.length}
+                  searchable
+                  placeholder='Search for a starting point'
+                  value={null}
+                  data={geoSearchResultOptions}
+                  onSearchChange={setGeoSearchValue}
+                  onChange={handleLocationSelect}
+                  searchValue={geoSearchValue}
+                  nothingFound='No results found'
+                  filter={() => true}
+                  rightSection={<div></div>}
+                  pt={8}
+                />
+              </Timeline.Item>
+            ) : null}
             {draggableWaypoints.map((waypoint, index) => {
               return (
                 <Timeline.Item
-                  bullet={<Text size={12}>{index + 1}</Text>}
+                  bullet={
+                    <Text size={12}>
+                      {index + (askForStartingLocation ? 2 : 1)}
+                    </Text>
+                  }
                   lineVariant='dotted'
                 >
                   <DraggableWaypointItem
@@ -282,26 +319,24 @@ export const WaypointsList: React.FC = () => {
                 </Timeline.Item>
               );
             })}
-            <Timeline.Item lineVariant='dotted'>
-              <Select
-                key={draggableWaypoints.length}
-                searchable
-                placeholder={
-                  draggableWaypoints.length === 0
-                    ? 'Search for a starting point'
-                    : 'Search for a location'
-                }
-                value={null}
-                data={geoSearchResultOptions}
-                onSearchChange={setGeoSearchValue}
-                onChange={handleLocationSelect}
-                searchValue={geoSearchValue}
-                nothingFound='No results found'
-                filter={() => true}
-                rightSection={<div></div>}
-                pt={8}
-              />
-            </Timeline.Item>
+            {!askForStartingLocation ? (
+              <Timeline.Item lineVariant='dotted'>
+                <Select
+                  key={draggableWaypoints.length}
+                  searchable
+                  placeholder='Search for a location'
+                  value={null}
+                  data={geoSearchResultOptions}
+                  onSearchChange={setGeoSearchValue}
+                  onChange={handleLocationSelect}
+                  searchValue={geoSearchValue}
+                  nothingFound='No results found'
+                  filter={() => true}
+                  rightSection={<div></div>}
+                  pt={8}
+                />
+              </Timeline.Item>
+            ) : null}
           </Timeline>
           <Stack spacing='md'>
             {waypoints.length > 0 ? (
