@@ -1,17 +1,13 @@
 import React from 'react';
 import { ActionIcon, Group, Tooltip, Image } from '@mantine/core';
-import {
-  IconChevronsLeft,
-  IconChevronsUp,
-  IconInfoCircle,
-} from '@tabler/icons-react';
+import { IconChevronsLeft, IconInfoCircle, IconX } from '@tabler/icons-react';
 import { useGlobalContext } from 'contexts/globalContext';
 import LogoSvg from 'assets/brand/logo-name.svg';
 import { openModal } from '@mantine/modals';
 import { AboutModal } from 'components/modals/AboutModal';
 
 export const SidebarHeader: React.FC = () => {
-  const { isMobileSize, isNavbarCondensed, toggleNavbar } = useGlobalContext();
+  const { isMobileSize, toggleNavbar } = useGlobalContext();
   return (
     <>
       <Group position='apart' noWrap>
@@ -38,7 +34,7 @@ export const SidebarHeader: React.FC = () => {
           >
             <ActionIcon onClick={() => toggleNavbar()} size='lg'>
               {isMobileSize ? (
-                <IconChevronsUp color='black' size={26} />
+                <IconX color='black' size={26} />
               ) : (
                 <IconChevronsLeft color='black' size={26} />
               )}

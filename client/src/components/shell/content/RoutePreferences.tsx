@@ -93,6 +93,7 @@ export const RoutePreferences: React.FC = () => {
           size='xs'
           styles={{
             label: { padding: '0.375rem', fontSize: 0 },
+            indicator: { translate: '0.5px 0' },
           }}
           data={[
             {
