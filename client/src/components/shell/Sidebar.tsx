@@ -1,49 +1,52 @@
 import React from 'react';
-import { ActionIcon, Button, Divider, Navbar, ScrollArea } from '@mantine/core';
+import { ActionIcon, Divider, Navbar, ScrollArea } from '@mantine/core';
 import { useGlobalContext } from 'contexts/globalContext';
 import { SidebarContent } from './SidebarContent';
 import { SidebarHeader } from './SidebarHeader';
 import { SidebarFooter } from './SidebarFooter';
-import { IconMap2, IconMenu2 } from '@tabler/icons-react';
+import { IconMenu2 } from '@tabler/icons-react';
 import { TopRightButtons } from './TopRightButtons';
 
 export const Sidebar: React.FC = () => {
-  const { loggedInUser, isMobileSize, isNavbarOpen, toggleNavbar } =
-    useGlobalContext();
+  const {
+    loggedInUser,
+    isMobileSize,
+    isNavbarOpen,
+    isNavbarCondensed,
+    toggleNavbar,
+  } = useGlobalContext();
+
   return (
     <>
       <Navbar
         p='md'
         hiddenBreakpoint='sm'
-        hidden={!isNavbarOpen}
+        hidden={!isMobileSize && !isNavbarOpen}
         width={{ sm: 400 }}
-        height={'100%'}
+        height={isNavbarCondensed ? 'fit-content' : '100%'}
         style={isNavbarOpen ? {} : { display: 'none' }}
+        bottom='unset'
+        top={0}
       >
         <Navbar.Section>
           <SidebarHeader />
         </Navbar.Section>
-        <Divider my='sm' />
-        <Navbar.Section
-          grow
-          component={ScrollArea}
-          type='scroll'
-          styles={{ scrollbar: { zIndex: 1 } }}
-        >
-          <SidebarContent />
-        </Navbar.Section>
-        {isMobileSize ? (
-          <Button
-            fullWidth
-            size='lg'
-            leftIcon={<IconMap2 size={18} />}
-            onClick={toggleNavbar}
-            mt='sm'
+        {!isMobileSize ? <Divider my='sm' /> : null}
+        {isNavbarCondensed ? (
+          <Navbar.Section>
+            <SidebarContent />
+          </Navbar.Section>
+        ) : (
+          <Navbar.Section
+            grow
+            component={ScrollArea}
+            type='scroll'
+            styles={{ scrollbar: { zIndex: 1 } }}
           >
-            View map
-          </Button>
-        ) : null}
-        {!!loggedInUser ? (
+            <SidebarContent />
+          </Navbar.Section>
+        )}
+        {loggedInUser && !isNavbarCondensed ? (
           <>
             <Divider my='sm' />{' '}
             <Navbar.Section>

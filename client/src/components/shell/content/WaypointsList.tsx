@@ -50,7 +50,7 @@ import { FeatureFlags } from 'featureFlags';
 import { useGlobalContext } from 'contexts/globalContext';
 
 export const WaypointsList: React.FC = () => {
-  const { loggedInUser, setIsLoading } = useGlobalContext();
+  const { loggedInUser, isMobileSize, setIsLoading } = useGlobalContext();
   const {
     map,
     waypoints,
@@ -251,9 +251,13 @@ export const WaypointsList: React.FC = () => {
   return (
     <DndProvider backend={MultiBackend} options={HTML5toTouch}>
       <Stack spacing='xl' className='waypoints'>
-        <Text size='sm'>
-          Search for your destination, or select points on the map.
-        </Text>
+        {!isMobileSize ? (
+          <Text size='sm'>
+            Search for your destination, or select points on the map.
+          </Text>
+        ) : (
+          <div></div>
+        )}
         <Stack spacing={0}>
           <Timeline
             style={{ position: 'relative', zIndex: 1 }}

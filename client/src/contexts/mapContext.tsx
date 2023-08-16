@@ -55,6 +55,8 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     routeOptions,
     showAlternateRoutes,
     regions,
+    isNavbarCondensed,
+    isNavbarOpen,
     clearSelectedNogoGroups,
     setEditingGroupOrRegion,
     setShowAlternateRoutes,
@@ -91,7 +93,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     };
     if (!editingGroupOrRegion) {
       const newWaypoints: Waypoint[] = [];
-      if (waypoints.length === 0 && !askForStartingLocation) {
+      if (label && waypoints.length === 0 && !askForStartingLocation) {
         if (currentLocation) {
           const startingWaypoint: Waypoint = {
             latlng: currentLocation.latlng,
@@ -99,7 +101,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
           };
           newWaypoints.push(startingWaypoint);
           setAskForStartingLocation(false);
-        } else if (label) {
+        } else {
           setAskForStartingLocation(true);
         }
       } else setAskForStartingLocation(false);
@@ -115,7 +117,6 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         [...waypoints, ...newWaypoints].forEach((waypoint) => {
           bounds.extend(waypoint.latlng);
         });
-        map?.fitBounds(bounds.pad(0.5), { maxZoom: 17 });
       }
     } else {
       setNogoWaypoints([...nogoWaypoints, latlng]);
@@ -145,13 +146,15 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     const newWaypoints = [...waypoints];
     newWaypoints.splice(index, 1);
     setWaypoints(newWaypoints);
-    if (index === 0) setAskForStartingLocation(true);
+    if (waypoints.length > 1 && index === 0) setAskForStartingLocation(true);
+    if (waypoints.length === 1) setAskForStartingLocation(false);
   };
 
   const clearWaypoints = () => {
     setWaypoints([]);
     setRoutes(null);
     setSelectedRouteIndex(null);
+    setAskForStartingLocation(false);
   };
 
   const clearNogoWaypoints = () => {
@@ -183,6 +186,19 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
           setRoutes(fetchedRoutes);
           setSelectedRouteIndex(fetchedRoutes.length > 1 ? null : 0);
           setFetchingCount((prev) => prev - 1);
+          const bounds = fetchedRoutes.map((fetchedRoute) =>
+            fetchedRoute.lineString.coordinates.map((coord) =>
+              L.latLng(coord[1], coord[0])
+            )
+          );
+          map?.fitBounds(L.latLngBounds(bounds.flat()), {
+            paddingTopLeft: isNavbarOpen
+              ? isNavbarCondensed
+                ? [0, 320]
+                : [400, 0]
+              : [0, 0],
+            paddingBottomRight: isNavbarCondensed ? [50, 100] : [0, 0],
+          });
         })
         .catch((err) => {
           setFetchingCount((prev) => prev - 1);

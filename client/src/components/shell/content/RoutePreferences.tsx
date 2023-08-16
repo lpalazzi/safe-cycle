@@ -14,9 +14,17 @@ import {
   Title,
   Select,
   Switch,
+  Group,
+  ActionIcon,
 } from '@mantine/core';
 import { useModals } from '@mantine/modals';
-import { IconInfoCircle, IconRoute2, IconUserCog } from '@tabler/icons-react';
+import {
+  IconChevronsDown,
+  IconChevronsUp,
+  IconInfoCircle,
+  IconRoute2,
+  IconUserCog,
+} from '@tabler/icons-react';
 import { RouteOptions, SurfacePreference } from 'types';
 import { useGlobalContext } from 'contexts/globalContext';
 import { SidebarTitle } from '../common/SidebarTitle';
@@ -54,6 +62,8 @@ export const RoutePreferences: React.FC = () => {
     routeOptions,
     showAlternateRoutes,
     isMobileSize,
+    isNavbarCondensed,
+    toggleNavbarExpanded,
     updateRouteOptions,
     setShowAlternateRoutes,
   } = useGlobalContext();
@@ -65,9 +75,67 @@ export const RoutePreferences: React.FC = () => {
     if (value !== 'Custom') updateRouteOptions(comfortPresets[value]);
   };
 
-  return (
+  const condensed = (
+    <Group position='apart'>
+      <Group position='left' style={{ position: 'relative', zIndex: 0 }}>
+        <Switch
+          className='avoid-nogos'
+          label='Avoid nogos'
+          checked={routeOptions.avoidNogos}
+          onChange={(e) =>
+            updateRouteOptions({ avoidNogos: e.currentTarget.checked })
+          }
+        />
+        <SegmentedControl
+          value={comfortValue}
+          onChange={handleComfortLevelSelected}
+          radius='xl'
+          size='xs'
+          styles={{
+            label: { padding: '0.375rem', fontSize: 0 },
+          }}
+          data={[
+            {
+              value: 'Low',
+              label: <Image src={LowComfortIcon} width='1.5rem' mih='1.5rem' />,
+            },
+            {
+              value: 'Medium',
+              label: (
+                <Image src={MediumComfortIcon} width='1.5rem' mih='1.5rem' />
+              ),
+            },
+            {
+              value: 'High',
+              label: (
+                <Image src={HighComfortIcon} width='1.5rem' mih='1.5rem' />
+              ),
+            },
+            {
+              value: 'Shortest',
+              label: <IconRoute2 size={20} />,
+            },
+          ]}
+        />
+      </Group>
+      <ActionIcon onClick={toggleNavbarExpanded} size='lg'>
+        <IconChevronsDown color='black' size={26} />
+      </ActionIcon>
+    </Group>
+  );
+
+  const expanded = (
     <Stack spacing='xs'>
-      <SidebarTitle title='Route Preferences' />
+      <Group position='apart'>
+        <SidebarTitle title='Route Preferences' />
+        {isMobileSize ? (
+          <ActionIcon onClick={toggleNavbarExpanded} size='lg'>
+            <IconChevronsUp color='black' size={26} />
+          </ActionIcon>
+        ) : (
+          <div></div>
+        )}
+      </Group>
       <Switch
         className='avoid-nogos'
         label={
@@ -232,6 +300,8 @@ export const RoutePreferences: React.FC = () => {
       </Stack>
     </Stack>
   );
+
+  return isNavbarCondensed ? condensed : expanded;
 };
 
 const ComfortLevel: React.FC<{ comfortLevel: string }> = React.memo(

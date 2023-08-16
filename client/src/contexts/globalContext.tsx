@@ -14,6 +14,7 @@ type GlobalContextType =
       loggedInUser: User | null;
       isMobileSize: boolean;
       isNavbarOpen: boolean;
+      isNavbarCondensed: boolean;
       isNavModeOn: boolean;
       selectedNogoGroups: ID[];
       editingGroupOrRegion: NogoGroup | Region | null;
@@ -26,6 +27,7 @@ type GlobalContextType =
       updateLoggedInUser: () => void;
       logoutUser: () => void;
       toggleNavbar: () => void;
+      toggleNavbarExpanded: () => void;
       toggleNavMode: () => void;
       selectNogoGroup: (id: ID) => void;
       deselectNogoGroup: (id: ID) => void;
@@ -55,6 +57,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [showTour, setShowTour] = useState(false);
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
+  const [isNavbarExpanded, setIsNavbarExpanded] = useState(false);
   const [isNavModeOn, setIsNavModeOn] = useState(false);
   const [selectedNogoGroups, setSelectedNogoGroups] = useState<ID[]>([]);
   const [editingGroupOrRegion, setEditingGroupOrRegion] = useState<
@@ -111,6 +114,11 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
 
   const toggleNavbar = () => {
     setIsNavbarOpen(!isNavbarOpen);
+    if (!isNavbarOpen) setIsNavbarExpanded(false);
+  };
+
+  const toggleNavbarExpanded = () => {
+    setIsNavbarExpanded(!isNavbarExpanded);
   };
 
   const toggleNavMode = () => {
@@ -192,6 +200,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         loggedInUser,
         isMobileSize,
         isNavbarOpen,
+        isNavbarCondensed: isMobileSize && !isNavbarExpanded,
         isNavModeOn,
         selectedNogoGroups,
         editingGroupOrRegion,
@@ -203,6 +212,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         updateLoggedInUser,
         logoutUser,
         toggleNavbar,
+        toggleNavbarExpanded,
         toggleNavMode,
         selectNogoGroup,
         deselectNogoGroup,

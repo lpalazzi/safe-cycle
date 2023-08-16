@@ -8,20 +8,20 @@ import { useGlobalContext } from 'contexts/globalContext';
 import { UserRegions } from './content/UserRegions';
 
 export const SidebarContent: React.FC = () => {
-  const { loggedInUser } = useGlobalContext();
+  const { loggedInUser, isNavbarCondensed, isMobileSize } = useGlobalContext();
 
   return (
     <>
       <WaypointsList />
-      <Divider my='sm' />
+      {!isMobileSize ? <Divider my='sm' /> : null}
       <RoutePreferences />
-      {loggedInUser?.settings?.privateNogosEnabled ? (
+      {!isNavbarCondensed && loggedInUser?.settings?.privateNogosEnabled ? (
         <>
           <Divider my='sm' />
           <UserNogoGroups />
         </>
       ) : null}
-      {loggedInUser?.role === 'verified contributor' ? (
+      {!isNavbarCondensed && loggedInUser?.role === 'verified contributor' ? (
         <>
           <Divider my='sm' />
           <UserRegions />
