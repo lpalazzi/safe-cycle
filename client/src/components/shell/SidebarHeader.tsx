@@ -1,6 +1,10 @@
 import React from 'react';
 import { ActionIcon, Group, Tooltip, Image } from '@mantine/core';
-import { IconChevronsLeft, IconInfoCircle, IconX } from '@tabler/icons-react';
+import {
+  IconChevronsLeft,
+  IconChevronsUp,
+  IconInfoCircle,
+} from '@tabler/icons-react';
 import { useGlobalContext } from 'contexts/globalContext';
 import LogoSvg from 'assets/brand/logo-name.svg';
 import { openModal } from '@mantine/modals';
@@ -34,7 +38,7 @@ export const SidebarHeader: React.FC = () => {
           >
             <ActionIcon onClick={() => toggleNavbar()} size='lg'>
               {isMobileSize ? (
-                <IconX color='black' size={26} />
+                <IconChevronsUp color='black' size={26} />
               ) : (
                 <IconChevronsLeft color='black' size={26} />
               )}
