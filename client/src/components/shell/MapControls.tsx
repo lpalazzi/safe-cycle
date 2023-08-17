@@ -4,8 +4,7 @@ import { useGlobalContext } from 'contexts/globalContext';
 import {
   IconArrowsMaximize,
   IconCurrentLocation,
-  IconLayoutNavbarExpand,
-  IconLayoutSidebarLeftExpand,
+  IconMenu2,
   IconMinus,
   IconPlus,
   IconTrash,
@@ -67,14 +66,15 @@ export const MapControls: React.FC = () => {
   );
 
   const toggleNavbarButton = (
-    <Tooltip label='Fullscreen map' position='left'>
+    <Tooltip
+      label={isNavbarOpen ? 'Fullscreen map' : 'Show menu'}
+      position='left'
+    >
       <ActionIcon onClick={toggleNavbar} variant='default' size='lg'>
         {isNavbarOpen ? (
           <IconArrowsMaximize size='1.25rem' />
-        ) : isMobileSize ? (
-          <IconLayoutNavbarExpand size='1.25rem' />
         ) : (
-          <IconLayoutSidebarLeftExpand size='1.25rem' />
+          <IconMenu2 size='1.25rem' />
         )}
       </ActionIcon>
     </Tooltip>

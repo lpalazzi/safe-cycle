@@ -50,7 +50,6 @@ type GlobalContextProviderType = {
 export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   props
 ) => {
-  const theme = useMantineTheme();
   const isMobileSize = useMediaQuery('(max-width: calc(48em - 1px)');
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [showTour, setShowTour] = useState(false);
