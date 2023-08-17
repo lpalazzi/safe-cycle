@@ -340,11 +340,6 @@ const ComfortLevel: React.FC<{ comfortLevel: string }> = React.memo(
 
     return (
       <Paper shadow='sm' radius='md' p='sm' bg={theme.colors.gray[1]}>
-        <Title order={6} align='center'>
-          {comfortLevel === 'Shortest'
-            ? 'Shortest Available'
-            : comfortLevel + ' Comfort'}
-        </Title>
         <Grid align='center' gutter={0} mih={100}>
           <Grid.Col span={5}>
             <div
@@ -358,6 +353,11 @@ const ComfortLevel: React.FC<{ comfortLevel: string }> = React.memo(
             </div>
           </Grid.Col>
           <Grid.Col span={7}>
+            <Title order={6} align='left'>
+              {comfortLevel === 'Shortest'
+                ? 'Shortest Available'
+                : comfortLevel + ' Comfort'}
+            </Title>
             <Text size='sm'>{description}</Text>
           </Grid.Col>
         </Grid>
