@@ -50,7 +50,7 @@ type GlobalContextProviderType = {
 export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   props
 ) => {
-  const isMobileSize = useMediaQuery('(max-width: calc(48em - 1px)');
+  const isMobileSize = useMediaQuery('(max-width: calc(48em - 1px))');
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [showTour, setShowTour] = useState(false);
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
@@ -84,7 +84,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     window.localStorage.setItem('visited', (visited + 1).toFixed(0));
     if (!visited) {
       const isMobileSize = window.matchMedia(
-        '(max-width: calc(48em - 1px)'
+        '(max-width: calc(48em - 1px))'
       ).matches; // useMediaQuery state is still undefined on initial load
       if (!isMobileSize) openModal(AboutModal('about', isMobileSize));
     }
