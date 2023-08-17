@@ -3,7 +3,7 @@ import { showNotification } from '@mantine/notifications';
 import { NogoGroupApi, RegionApi, UserApi } from 'api';
 import { NogoGroup, Region, User } from 'models';
 import { ID, RouteOptions } from 'types';
-import { rem, useMantineTheme } from '@mantine/core';
+import { useMantineTheme } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { openModal } from '@mantine/modals';
 import { AboutModal } from 'components/modals/AboutModal';
@@ -51,9 +51,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   props
 ) => {
   const theme = useMantineTheme();
-  const isMobileSize = useMediaQuery(
-    `(max-width: calc(${theme.breakpoints.sm} - ${rem(1)})`
-  );
+  const isMobileSize = useMediaQuery('(max-width: calc(48em - 1px)');
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [showTour, setShowTour] = useState(false);
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
@@ -87,7 +85,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     window.localStorage.setItem('visited', (visited + 1).toFixed(0));
     if (!visited) {
       const isMobileSize = window.matchMedia(
-        `(max-width: calc(${theme.breakpoints.sm} - ${rem(1)})`
+        '(max-width: calc(48em - 1px)'
       ).matches; // useMediaQuery state is still undefined on initial load
       if (!isMobileSize) openModal(AboutModal('about', isMobileSize));
     }
