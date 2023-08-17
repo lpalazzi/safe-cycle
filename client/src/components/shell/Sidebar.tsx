@@ -1,20 +1,14 @@
 import React from 'react';
-import { ActionIcon, Divider, Navbar, ScrollArea } from '@mantine/core';
+import { Divider, Navbar, ScrollArea } from '@mantine/core';
 import { useGlobalContext } from 'contexts/globalContext';
 import { SidebarContent } from './SidebarContent';
 import { SidebarHeader } from './SidebarHeader';
 import { SidebarFooter } from './SidebarFooter';
-import { IconMenu2 } from '@tabler/icons-react';
-import { TopRightButtons } from './TopRightButtons';
+import { MapControls } from './MapControls';
 
 export const Sidebar: React.FC = () => {
-  const {
-    loggedInUser,
-    isMobileSize,
-    isNavbarOpen,
-    isNavbarCondensed,
-    toggleNavbar,
-  } = useGlobalContext();
+  const { loggedInUser, isMobileSize, isNavbarOpen, isNavbarCondensed } =
+    useGlobalContext();
 
   return (
     <>
@@ -55,22 +49,7 @@ export const Sidebar: React.FC = () => {
           </>
         ) : null}
       </Navbar>
-      {isNavbarOpen || isMobileSize ? null : (
-        <ActionIcon
-          onClick={() => toggleNavbar()}
-          size='xl'
-          variant='default'
-          style={{
-            position: 'absolute',
-            top: 20,
-            left: 20,
-            zIndex: 1,
-          }}
-        >
-          <IconMenu2 color='black' size={32} />
-        </ActionIcon>
-      )}
-      <TopRightButtons />
+      <MapControls />
     </>
   );
 };

@@ -194,7 +194,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
           map?.fitBounds(L.latLngBounds(bounds.flat()), {
             paddingTopLeft: isNavbarOpen
               ? isNavbarCondensed
-                ? [0, 320]
+                ? [0, 340]
                 : [400, 0]
               : [0, 0],
             paddingBottomRight: isNavbarCondensed ? [50, 100] : [0, 0],

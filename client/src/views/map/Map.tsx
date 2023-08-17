@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  MapContainer,
-  ScaleControl,
-  TileLayer,
-  ZoomControl,
-} from 'react-leaflet';
+import { MapContainer, ScaleControl, TileLayer } from 'react-leaflet';
 import 'leaflet-easybutton';
 import 'leaflet-easybutton/src/easy-button.css';
 import 'leaflet.awesome-markers';
@@ -50,7 +45,6 @@ export const Map: React.FC = () => {
           maxZoom={19}
         />
         <ScaleControl />
-        <ZoomControl position='bottomright' />
         <MapHandlers />
         {!editingGroupOrRegion ? (
           <>

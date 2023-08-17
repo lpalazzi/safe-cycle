@@ -1,13 +1,13 @@
 import React from 'react';
 import { ActionIcon, Group, Tooltip, Image } from '@mantine/core';
-import { IconChevronsLeft, IconInfoCircle, IconX } from '@tabler/icons-react';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { useGlobalContext } from 'contexts/globalContext';
 import LogoSvg from 'assets/brand/logo-name.svg';
 import { openModal } from '@mantine/modals';
 import { AboutModal } from 'components/modals/AboutModal';
 
 export const SidebarHeader: React.FC = () => {
-  const { isMobileSize, toggleNavbar } = useGlobalContext();
+  const { isMobileSize } = useGlobalContext();
   return (
     <>
       <Group position='apart' noWrap>
@@ -19,28 +19,14 @@ export const SidebarHeader: React.FC = () => {
           alt='SafeCycle Logo'
           withPlaceholder
         />
-        <Group position='right' noWrap spacing={0}>
-          <Tooltip label='About' position='bottom'>
-            <ActionIcon
-              onClick={() => openModal(AboutModal('about', isMobileSize))}
-              size='lg'
-            >
-              <IconInfoCircle color='black' size={26} />
-            </ActionIcon>
-          </Tooltip>
-          <Tooltip
-            label={isMobileSize ? 'Close menu' : 'Collapse sidebar'}
-            position='bottom'
+        <Tooltip label='About' position='bottom'>
+          <ActionIcon
+            onClick={() => openModal(AboutModal('about', isMobileSize))}
+            size='lg'
           >
-            <ActionIcon onClick={() => toggleNavbar()} size='lg'>
-              {isMobileSize ? (
-                <IconX color='black' size={26} />
-              ) : (
-                <IconChevronsLeft color='black' size={26} />
-              )}
-            </ActionIcon>
-          </Tooltip>
-        </Group>
+            <IconInfoCircle color='black' size={26} />
+          </ActionIcon>
+        </Tooltip>
       </Group>
     </>
   );

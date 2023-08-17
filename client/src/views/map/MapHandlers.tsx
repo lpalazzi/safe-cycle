@@ -15,7 +15,6 @@ export const MapHandlers: React.FC = () => {
     setCurrentLocation,
     setFollowUser,
     addWaypoint,
-    clearWaypoints,
     clearNogoWaypoints,
   } = useMapContext();
   const { editingGroupOrRegion, isNavModeOn, isLoading } = useGlobalContext();
@@ -123,35 +122,6 @@ export const MapHandlers: React.FC = () => {
       setFollowUser(false);
     }
   }, [isNavModeOn]);
-
-  const buildEasyButtons = () => {
-    L.easyButton(
-      'fa-location-crosshairs',
-      () => {
-        map.once('locationfound', (e) => {
-          const { latlng } = e;
-          map.flyTo(latlng, isNavModeOn ? 19 : 14);
-        });
-        map.locate({ watch: true, enableHighAccuracy: true });
-      },
-      'Current location'
-    )
-      .addTo(map)
-      .setPosition('bottomright');
-    L.easyButton(
-      'fa-eraser',
-      () => {
-        clearWaypoints();
-      },
-      'Clear all waypoints'
-    )
-      .addTo(map)
-      .setPosition('bottomright');
-  };
-
-  useEffect(() => {
-    buildEasyButtons();
-  }, []);
 
   return <></>;
 };
