@@ -25,7 +25,7 @@ import {
   IconRoute2,
   IconUserCog,
 } from '@tabler/icons-react';
-import { RouteOptions, SurfacePreference } from 'types';
+import { ComfortLevel, RouteOptions, SurfacePreference } from 'types';
 import { useGlobalContext } from 'contexts/globalContext';
 import { SidebarTitle } from '../common/SidebarTitle';
 import { AboutModal } from 'components/modals/AboutModal';
@@ -60,18 +60,19 @@ const comfortPresets: { [key: string]: Partial<RouteOptions> } = {
 export const RoutePreferences: React.FC = () => {
   const {
     routeOptions,
+    selectedComfortLevel,
     showAlternateRoutes,
     isMobileSize,
     isNavbarCondensed,
+    setSelectedComfortLevel,
     toggleNavbarExpanded,
     updateRouteOptions,
     setShowAlternateRoutes,
   } = useGlobalContext();
   const { openModal } = useModals();
-  const [comfortValue, setComfortValue] = useState('High');
 
-  const handleComfortLevelSelected = (value: string) => {
-    setComfortValue(value);
+  const handleComfortLevelSelected = (value: ComfortLevel) => {
+    setSelectedComfortLevel(value);
     if (value !== 'Custom') updateRouteOptions(comfortPresets[value]);
   };
 
@@ -87,10 +88,11 @@ export const RoutePreferences: React.FC = () => {
           }
         />
         <SegmentedControl
-          value={comfortValue}
+          value={selectedComfortLevel}
           onChange={handleComfortLevelSelected}
           radius='xl'
           size='xs'
+          transitionDuration={0}
           styles={{
             label: { padding: '0.375rem', fontSize: 0 },
             indicator: { translate: '0.5px 0' },
@@ -179,8 +181,9 @@ export const RoutePreferences: React.FC = () => {
         <Input.Wrapper label='Select a comfort level'>
           <SegmentedControl
             fullWidth
-            value={comfortValue}
+            value={selectedComfortLevel}
             onChange={handleComfortLevelSelected}
+            transitionDuration={0}
             data={[
               {
                 value: 'Low',
@@ -230,7 +233,7 @@ export const RoutePreferences: React.FC = () => {
             ]}
           />
         </Input.Wrapper>
-        {comfortValue === 'Custom' ? (
+        {selectedComfortLevel === 'Custom' ? (
           <>
             <Checkbox
               label='Prefer bike-friendly roads'
@@ -272,7 +275,7 @@ export const RoutePreferences: React.FC = () => {
             />
           </>
         ) : (
-          <ComfortLevel comfortLevel={comfortValue} />
+          <ComfortLevel comfortLevel={selectedComfortLevel} />
         )}
       </Stack>
       <Stack spacing='xs' className='additional-preferences'>

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { showNotification } from '@mantine/notifications';
 import { NogoGroupApi, RegionApi, UserApi } from 'api';
 import { NogoGroup, Region, User } from 'models';
-import { ID, RouteOptions } from 'types';
+import { ComfortLevel, ID, RouteOptions } from 'types';
 import { useMediaQuery } from '@mantine/hooks';
 import { openModal } from '@mantine/modals';
 import { AboutModal } from 'components/modals/AboutModal';
@@ -18,6 +18,7 @@ type GlobalContextType =
       selectedNogoGroups: ID[];
       editingGroupOrRegion: NogoGroup | Region | null;
       routeOptions: RouteOptions;
+      selectedComfortLevel: ComfortLevel;
       showAlternateRoutes: boolean;
       regions: Region[];
       showTour: boolean;
@@ -33,6 +34,7 @@ type GlobalContextType =
       clearSelectedNogoGroups: () => void;
       setEditingGroupOrRegion: (nogoGroup: NogoGroup | Region | null) => void;
       updateRouteOptions: (update: Partial<RouteOptions>) => void;
+      setSelectedComfortLevel: (value: ComfortLevel) => void;
       setShowAlternateRoutes: (val: boolean) => void;
       refreshRegions: () => void;
       setShowTour: (val: boolean) => void;
@@ -66,6 +68,8 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     preferCycleRoutes: true,
     surfacePreference: 'none',
   });
+  const [selectedComfortLevel, setSelectedComfortLevel] =
+    useState<ComfortLevel>('High');
   const [showAlternateRoutes, setShowAlternateRoutes] = useState(false);
   const [regions, setRegions] = useState<Region[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -199,6 +203,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         selectedNogoGroups,
         editingGroupOrRegion,
         routeOptions,
+        selectedComfortLevel,
         showAlternateRoutes,
         regions,
         showTour,
@@ -213,6 +218,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         clearSelectedNogoGroups,
         setEditingGroupOrRegion: handleSetEditingGroupOrRegion,
         updateRouteOptions,
+        setSelectedComfortLevel,
         setShowAlternateRoutes,
         refreshRegions,
         setShowTour,

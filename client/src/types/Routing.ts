@@ -12,3 +12,5 @@ export type SurfacePreference =
   | 'preferPaved'
   | 'none'
   | 'preferUnpaved';
+
+export type ComfortLevel = 'Low' | 'Medium' | 'High' | 'Shortest' | 'Custom';
