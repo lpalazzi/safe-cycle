@@ -57,7 +57,6 @@ export const AboutModal = (initialView: ViewType, isMobileSize: boolean) => {
     children: <AboutModalContent initialView={initialView} />,
     size: '1000px',
     fullScreen: isMobileSize,
-    styles: { inner: { overflowY: 'scroll' } },
   } as ModalSettings;
 };
 
