@@ -94,16 +94,16 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     if (!editingGroupOrRegion) {
       const newWaypoints: Waypoint[] = [];
       if (label && waypoints.length === 0 && !askForStartingLocation) {
-        if (currentLocation) {
-          const startingWaypoint: Waypoint = {
-            latlng: currentLocation.latlng,
-            label: 'Current location',
-          };
-          newWaypoints.push(startingWaypoint);
-          setAskForStartingLocation(false);
-        } else {
-          setAskForStartingLocation(true);
-        }
+        // if (currentLocation) {
+        //   const startingWaypoint: Waypoint = {
+        //     latlng: currentLocation.latlng,
+        //     label: 'Current location',
+        //   };
+        //   newWaypoints.push(startingWaypoint);
+        //   setAskForStartingLocation(false);
+        // } else {
+        setAskForStartingLocation(true);
+        // }
       } else setAskForStartingLocation(false);
       newWaypoints.push(newWaypoint);
 
