@@ -19,14 +19,17 @@ export const RouteProperties: React.FC = () => {
     <Paper
       shadow='xs'
       p='md'
+      maw={isMobileSize ? 210 : undefined}
       style={{
         position: 'fixed',
-        bottom: 28,
-        right: '50%',
+        bottom: 25.8,
+        left: isMobileSize ? '8px' : '50%',
         transform:
           isNavbarOpen && !isMobileSize
-            ? 'translate(192px, 0) translate(50%, 0)'
-            : 'translate(50%, 0)',
+            ? 'translate(192px, 0) translate(-50%, 0)'
+            : isMobileSize
+            ? 'unset'
+            : 'translate(-50%, 0)',
         zIndex: 1,
       }}
       onClick={(e) => {
@@ -53,8 +56,10 @@ const Property: React.FC<{ label: string; value: string }> = ({
   label,
   value,
 }) => {
+  const { isMobileSize } = useGlobalContext();
+
   return (
-    <Text fw={700} size='sm'>
+    <Text fw={700} size={isMobileSize ? 'xs' : 'sm'}>
       {label}:{' '}
       <Text span c='blue' inherit>
         {value}
