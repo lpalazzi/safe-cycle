@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   useMantineTheme,
   Stack,
@@ -18,6 +18,7 @@ import {
   ActionIcon,
 } from '@mantine/core';
 import { useModals } from '@mantine/modals';
+import { useMediaQuery } from '@mantine/hooks';
 import {
   IconChevronsDown,
   IconChevronsUp,
@@ -70,6 +71,8 @@ export const RoutePreferences: React.FC = () => {
     setShowAlternateRoutes,
   } = useGlobalContext();
   const { openModal } = useModals();
+  const isSmallWidth = useMediaQuery('(max-width: 382px)');
+  const isExtraSmallWidth = useMediaQuery('(max-width: 363px)');
 
   const handleComfortLevelSelected = (value: ComfortLevel) => {
     setSelectedComfortLevel(value);
@@ -77,12 +80,17 @@ export const RoutePreferences: React.FC = () => {
   };
 
   const condensed = (
-    <Group position='apart'>
-      <Group position='left' style={{ position: 'relative', zIndex: 0 }}>
+    <Group position='apart' spacing={0}>
+      <Group
+        position='left'
+        spacing='xs'
+        style={{ position: 'relative', zIndex: 0 }}
+      >
         <Switch
           className='avoid-nogos'
           label='Avoid nogos'
           checked={routeOptions.avoidNogos}
+          size={isSmallWidth ? (isExtraSmallWidth ? 'xs' : 'sm') : 'md'}
           onChange={(e) =>
             updateRouteOptions({ avoidNogos: e.currentTarget.checked })
           }
