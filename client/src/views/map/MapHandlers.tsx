@@ -55,35 +55,35 @@ export const MapHandlers: React.FC = () => {
     },
   });
 
-  useEffect(() => {
-    navigator.permissions.query({ name: 'geolocation' }).then((status) => {
-      switch (status.state) {
-        case 'granted':
-          map.locate({ setView: true, maxZoom: 10 });
-          break;
-        case 'denied':
-          showNotification({
-            title: 'Cannot access location',
-            message: (
-              <>
-                SafeCycle does not have permission to use your location. Please{' '}
-                <Anchor
-                  href='https://www.lifewire.com/denying-access-to-your-location-4027789'
-                  target='_blank'
-                >
-                  enable location permissions
-                </Anchor>{' '}
-                to use all of SafeCycle's features.
-              </>
-            ),
-            autoClose: false,
-          });
-          break;
-        default:
-          break;
-      }
-    });
-  }, []);
+  // useEffect(() => {
+  //   navigator.permissions.query({ name: 'geolocation' }).then((status) => {
+  //     switch (status.state) {
+  //       case 'granted':
+  //         map.locate({ setView: true, maxZoom: 10 });
+  //         break;
+  //       case 'denied':
+  //         showNotification({
+  //           title: 'Cannot access location',
+  //           message: (
+  //             <>
+  //               SafeCycle does not have permission to use your location. Please{' '}
+  //               <Anchor
+  //                 href='https://www.lifewire.com/denying-access-to-your-location-4027789'
+  //                 target='_blank'
+  //               >
+  //                 enable location permissions
+  //               </Anchor>{' '}
+  //               to use all of SafeCycle's features.
+  //             </>
+  //           ),
+  //           autoClose: false,
+  //         });
+  //         break;
+  //       default:
+  //         break;
+  //     }
+  //   });
+  // }, []);
 
   useEffect(() => {
     if (currentLocation && isNavModeOn && navMarker) {
