@@ -5,8 +5,13 @@ const config: CapacitorConfig = {
   appName: 'SafeCycle',
   webDir: 'public',
   server: {
-    androidScheme: 'https'
-  }
+    androidScheme: 'https',
+  },
+  plugins: {
+    CapacitorHttp: {
+      enabled: true,
+    },
+  },
 };
 
 export default config;
