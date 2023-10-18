@@ -345,6 +345,24 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
         your route choices safer, users bear full responsibility for their own
         safety. Ride at your own risk.
       </Text>
+      <Group mt='lg' position='center'>
+        <Anchor
+          href='/policies/privacy.html'
+          color='dimmed'
+          size='xs'
+          target='_blank'
+        >
+          Privacy Policy
+        </Anchor>
+        <Anchor
+          href='/policies/cookies.html'
+          color='dimmed'
+          size='xs'
+          target='_blank'
+        >
+          Cookie Policy
+        </Anchor>
+      </Group>
     </Container>
   );
 };
