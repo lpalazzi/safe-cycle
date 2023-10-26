@@ -1,11 +1,13 @@
 import React from 'react';
 import {
   Accordion,
+  Anchor,
   Button,
   Group,
   PasswordInput,
   Stack,
   Switch,
+  Text,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { ModalSettings } from '@mantine/modals/lib/context';
@@ -163,10 +165,26 @@ const ManageAccountContent: React.FC = () => {
           <UpdateSettingsForm />
         </Accordion.Panel>
       </Accordion.Item>
-      <Accordion.Item value='add-region'>
+      <Accordion.Item value='change-password'>
         <Accordion.Control>Change password</Accordion.Control>
         <Accordion.Panel>
           <ChangePasswordForm />
+        </Accordion.Panel>
+      </Accordion.Item>
+      <Accordion.Item value='delete-account'>
+        <Accordion.Control>Delete account</Accordion.Control>
+        <Accordion.Panel>
+          <Text>
+            <Anchor
+              span
+              target='_blank'
+              href='https://surveys.xyzdigital.com/index.php?r=survey/index&sid=693415&lang=en'
+            >
+              You can send a request here
+            </Anchor>{' '}
+            to delete your account and personally identifiable information that
+            is stored on our system.
+          </Text>
         </Accordion.Panel>
       </Accordion.Item>
     </Accordion>
