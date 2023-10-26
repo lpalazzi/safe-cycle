@@ -6,6 +6,7 @@ import { ComfortLevel, ID, RouteOptions } from 'types';
 import { useMediaQuery } from '@mantine/hooks';
 import { openModal } from '@mantine/modals';
 import { AboutModal } from 'components/modals/AboutModal';
+import { SurveyModal } from 'components/modals/SurveyModal';
 
 type GlobalContextType =
   | {
@@ -77,6 +78,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   useEffect(() => {
     updateLoggedInUser();
     openInfoModalOnFirstVisit();
+    openSurveyModalOnManyVisits();
     getStoredSelectedNogoGroups();
     refreshRegions();
   }, []);
@@ -88,6 +90,25 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     if (!visited) {
       const isMobileSize = window.matchMedia('(max-width: 767px)').matches; // useMediaQuery state is still undefined on initial load
       if (!isMobileSize) openModal(AboutModal('about', isMobileSize));
+    }
+  };
+
+  const openSurveyModalOnManyVisits = () => {
+    const surveyClicked =
+      window.localStorage.getItem('surveyClicked') === 'true';
+    if (surveyClicked) return;
+    var timesSurveyModalShown = Number(
+      window.localStorage.getItem('timesSurveyModalShown')
+    );
+    if (isNaN(timesSurveyModalShown)) timesSurveyModalShown = 0;
+    const visited = Number(window.localStorage.getItem('visited'));
+    if (isNaN(visited)) return;
+    if (visited >= 10 && timesSurveyModalShown < 3) {
+      openModal(SurveyModal);
+      window.localStorage.setItem(
+        'timesSurveyModalShown',
+        (timesSurveyModalShown + 1).toFixed(0)
+      );
     }
   };
 
