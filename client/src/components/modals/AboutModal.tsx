@@ -57,6 +57,7 @@ export const AboutModal = (initialView: ViewType, isMobileSize: boolean) => {
     children: <AboutModalContent initialView={initialView} />,
     size: '1000px',
     fullScreen: isMobileSize,
+    scrollAreaComponent: ScrollArea.Autosize,
   } as ModalSettings;
 };
 
