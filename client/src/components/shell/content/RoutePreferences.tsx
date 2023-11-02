@@ -34,6 +34,7 @@ import { AboutModal } from 'components/modals/AboutModal';
 import LowComfortIcon from 'assets/comfortlevels/2-low.png';
 import MediumComfortIcon from 'assets/comfortlevels/3-medium.png';
 import HighComfortIcon from 'assets/comfortlevels/4-high.png';
+import { NogoManagerModal } from 'components/modals/NogoManagerModal';
 
 const comfortPresets: { [key: string]: Partial<RouteOptions> } = {
   Shortest: {
@@ -91,9 +92,13 @@ export const RoutePreferences: React.FC = () => {
           label='Avoid nogos'
           checked={routeOptions.avoidNogos}
           size={isSmallWidth ? (isExtraSmallWidth ? 'xs' : 'sm') : 'md'}
-          onChange={(e) =>
-            updateRouteOptions({ avoidNogos: e.currentTarget.checked })
-          }
+          onChange={(e) => {
+            if (e.currentTarget.checked) {
+              openModal(NogoManagerModal(isMobileSize));
+            } else {
+              updateRouteOptions({ avoidNogos: e.currentTarget.checked });
+            }
+          }}
         />
         <SegmentedControl
           value={selectedComfortLevel}
@@ -177,9 +182,13 @@ export const RoutePreferences: React.FC = () => {
           </div>
         }
         checked={routeOptions.avoidNogos}
-        onChange={(e) =>
-          updateRouteOptions({ avoidNogos: e.currentTarget.checked })
-        }
+        onChange={(e) => {
+          if (e.currentTarget.checked) {
+            openModal(NogoManagerModal(isMobileSize));
+          } else {
+            updateRouteOptions({ avoidNogos: e.currentTarget.checked });
+          }
+        }}
       />
       <Stack
         spacing='xs'

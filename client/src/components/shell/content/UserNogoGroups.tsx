@@ -37,8 +37,7 @@ export const UserNogoGroups: React.FC = () => {
     selectedNogoGroups,
     editingGroupOrRegion,
     isMobileSize,
-    selectNogoGroup,
-    deselectNogoGroup,
+    toggleNogoGroup,
     setEditingGroupOrRegion,
   } = useGlobalContext();
 
@@ -136,11 +135,7 @@ export const UserNogoGroups: React.FC = () => {
                         withArrow
                       >
                         <ActionIcon
-                          onClick={() =>
-                            alreadySelected
-                              ? deselectNogoGroup(nogoGroup._id)
-                              : selectNogoGroup(nogoGroup._id)
-                          }
+                          onClick={() => toggleNogoGroup(nogoGroup._id)}
                         >
                           {alreadySelected ? (
                             <IconX size={18} />

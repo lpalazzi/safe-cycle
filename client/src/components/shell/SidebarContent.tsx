@@ -15,12 +15,6 @@ export const SidebarContent: React.FC = () => {
       <WaypointsList />
       {!isMobileSize ? <Divider my='sm' /> : null}
       <RoutePreferences />
-      {!isNavbarCondensed && loggedInUser?.settings?.privateNogosEnabled ? (
-        <>
-          <Divider my='sm' />
-          <UserNogoGroups />
-        </>
-      ) : null}
       {!isNavbarCondensed && loggedInUser?.role === 'verified contributor' ? (
         <>
           <Divider my='sm' />

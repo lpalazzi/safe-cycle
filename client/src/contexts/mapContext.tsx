@@ -52,9 +52,9 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     loggedInUser,
     editingGroupOrRegion,
     selectedNogoGroups,
+    selectedRegions,
     routeOptions,
     showAlternateRoutes,
-    regions,
     isNavbarCondensed,
     isNavbarOpen,
     clearSelectedNogoGroups,
@@ -171,14 +171,11 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
 
   const fetchRoute = () => {
     if (!editingGroupOrRegion && waypoints.length >= 2) {
-      const regionIds: ID[] = routeOptions.avoidNogos
-        ? regions.map((region) => region._id)
-        : [];
       setFetchingCount((prev) => prev + 1);
       RouterApi.generateRoute(
         waypoints.map((waypoint) => waypoint.latlng),
-        selectedNogoGroups,
-        regionIds,
+        routeOptions.avoidNogos ? selectedNogoGroups : [],
+        routeOptions.avoidNogos ? selectedRegions : [],
         { ...routeOptions, showAlternateRoutes },
         loggedInUser
       )
@@ -217,13 +214,10 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   };
 
   const downloadGPX = () => {
-    const regionIds: ID[] = routeOptions.avoidNogos
-      ? regions.map((region) => region._id)
-      : [];
     RouterApi.downloadGPX(
       waypoints.map((waypoint) => waypoint.latlng),
-      selectedNogoGroups,
-      regionIds,
+      routeOptions.avoidNogos ? selectedNogoGroups : [],
+      routeOptions.avoidNogos ? selectedRegions : [],
       { ...routeOptions, showAlternateRoutes: false },
       loggedInUser,
       selectedRouteIndex ?? 0
@@ -324,7 +318,13 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
 
   useEffect(() => {
     fetchRoute();
-  }, [waypoints, editingGroupOrRegion, selectedNogoGroups, routeOptions]);
+  }, [
+    waypoints,
+    editingGroupOrRegion,
+    selectedNogoGroups,
+    selectedRegions,
+    routeOptions,
+  ]);
 
   useEffect(() => {
     calculateTurnInstructions();

@@ -17,6 +17,7 @@ type GlobalContextType =
       isNavbarCondensed: boolean;
       isNavModeOn: boolean;
       selectedNogoGroups: ID[];
+      selectedRegions: ID[];
       editingGroupOrRegion: NogoGroup | Region | null;
       routeOptions: RouteOptions;
       selectedComfortLevel: ComfortLevel;
@@ -30,9 +31,10 @@ type GlobalContextType =
       toggleNavbar: () => void;
       toggleNavbarExpanded: () => void;
       toggleNavMode: () => void;
-      selectNogoGroup: (id: ID) => void;
-      deselectNogoGroup: (id: ID) => void;
+      toggleNogoGroup: (id: ID) => void;
+      toggleRegion: (id: ID) => void;
       clearSelectedNogoGroups: () => void;
+      clearSelectedRegions: () => void;
       setEditingGroupOrRegion: (nogoGroup: NogoGroup | Region | null) => void;
       updateRouteOptions: (update: Partial<RouteOptions>) => void;
       setSelectedComfortLevel: (value: ComfortLevel) => void;
@@ -59,6 +61,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   const [isNavbarExpanded, setIsNavbarExpanded] = useState(false);
   const [isNavModeOn, setIsNavModeOn] = useState(false);
   const [selectedNogoGroups, setSelectedNogoGroups] = useState<ID[]>([]);
+  const [selectedRegions, setSelectedRegions] = useState<ID[]>([]);
   const [editingGroupOrRegion, setEditingGroupOrRegion] = useState<
     NogoGroup | Region | null
   >(null);
@@ -171,24 +174,34 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     );
   }, [selectedNogoGroups]);
 
-  const selectNogoGroup = (id: ID) => {
+  const toggleNogoGroup = (id: ID) => {
     if (selectedNogoGroups.includes(id)) {
-      return;
+      setSelectedNogoGroups(
+        [...selectedNogoGroups].filter(
+          (selectedNogoGroup) => selectedNogoGroup !== id
+        )
+      );
+    } else {
+      setSelectedNogoGroups([...selectedNogoGroups, id]);
     }
-    const newSelectedNogoGroups = [...selectedNogoGroups];
-    newSelectedNogoGroups.push(id);
-    setSelectedNogoGroups(newSelectedNogoGroups);
   };
 
-  const deselectNogoGroup = (id: ID) => {
-    const newSelectedNogoGroups = [...selectedNogoGroups].filter(
-      (selectedNogoGroup) => selectedNogoGroup !== id
-    );
-    setSelectedNogoGroups(newSelectedNogoGroups);
+  const toggleRegion = (id: ID) => {
+    if (selectedRegions.includes(id)) {
+      setSelectedRegions(
+        [...selectedRegions].filter((selectedRegion) => selectedRegion !== id)
+      );
+    } else {
+      setSelectedRegions([...selectedRegions, id]);
+    }
   };
 
   const clearSelectedNogoGroups = () => {
     setSelectedNogoGroups([]);
+  };
+
+  const clearSelectedRegions = () => {
+    setSelectedRegions([]);
   };
 
   const handleSetEditingGroupOrRegion = (
@@ -222,6 +235,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         isNavbarCondensed: isMobileSize && !isNavbarExpanded,
         isNavModeOn,
         selectedNogoGroups,
+        selectedRegions,
         editingGroupOrRegion,
         routeOptions,
         selectedComfortLevel,
@@ -234,9 +248,10 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         toggleNavbar,
         toggleNavbarExpanded,
         toggleNavMode,
-        selectNogoGroup,
-        deselectNogoGroup,
+        toggleNogoGroup,
+        toggleRegion,
         clearSelectedNogoGroups,
+        clearSelectedRegions,
         setEditingGroupOrRegion: handleSetEditingGroupOrRegion,
         updateRouteOptions,
         setSelectedComfortLevel,
