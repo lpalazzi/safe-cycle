@@ -399,7 +399,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
 export const useMapContext = () => {
   const context = useContext(MapContext);
   if (!context) {
-    throw new Error('useMap must be inside a MapContextProvider');
+    throw new Error('useMapContext must be inside a MapContextProvider');
   }
   return context;
 };

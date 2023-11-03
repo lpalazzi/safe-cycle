@@ -31,8 +31,8 @@ type GlobalContextType =
       toggleNavbar: () => void;
       toggleNavbarExpanded: () => void;
       toggleNavMode: () => void;
-      toggleNogoGroup: (id: ID) => void;
-      toggleRegion: (id: ID) => void;
+      setSelectedNogoGroups: (nogoGroupIds: ID[]) => void;
+      setSelectedRegions: (regionIds: ID[]) => void;
       clearSelectedNogoGroups: () => void;
       clearSelectedRegions: () => void;
       setEditingGroupOrRegion: (nogoGroup: NogoGroup | Region | null) => void;
@@ -174,28 +174,6 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     );
   }, [selectedNogoGroups]);
 
-  const toggleNogoGroup = (id: ID) => {
-    if (selectedNogoGroups.includes(id)) {
-      setSelectedNogoGroups(
-        [...selectedNogoGroups].filter(
-          (selectedNogoGroup) => selectedNogoGroup !== id
-        )
-      );
-    } else {
-      setSelectedNogoGroups([...selectedNogoGroups, id]);
-    }
-  };
-
-  const toggleRegion = (id: ID) => {
-    if (selectedRegions.includes(id)) {
-      setSelectedRegions(
-        [...selectedRegions].filter((selectedRegion) => selectedRegion !== id)
-      );
-    } else {
-      setSelectedRegions([...selectedRegions, id]);
-    }
-  };
-
   const clearSelectedNogoGroups = () => {
     setSelectedNogoGroups([]);
   };
@@ -248,8 +226,8 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         toggleNavbar,
         toggleNavbarExpanded,
         toggleNavMode,
-        toggleNogoGroup,
-        toggleRegion,
+        setSelectedNogoGroups,
+        setSelectedRegions,
         clearSelectedNogoGroups,
         clearSelectedRegions,
         setEditingGroupOrRegion: handleSetEditingGroupOrRegion,

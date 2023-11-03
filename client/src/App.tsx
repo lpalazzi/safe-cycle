@@ -24,14 +24,14 @@ function App() {
       >
         <Notifications position='top-right' />
         <GuidedTour />
-        <ModalsProvider>
-          <MapContextProvider>
+        <MapContextProvider>
+          <ModalsProvider>
             <LoadingIndicator />
             <Shell>
               <Map />
             </Shell>
-          </MapContextProvider>
-        </ModalsProvider>
+          </ModalsProvider>
+        </MapContextProvider>
       </MantineProvider>
     </GlobalContextProvider>
   );
