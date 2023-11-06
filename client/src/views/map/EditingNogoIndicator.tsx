@@ -2,6 +2,8 @@ import React from 'react';
 import { Paper, Group, Stack, Text, Button } from '@mantine/core';
 import { IconEditOff } from '@tabler/icons-react';
 import { useGlobalContext } from 'contexts/globalContext';
+import { openModal } from '@mantine/modals';
+import { NogoManagerModal } from 'components/modals/NogoManagerModal';
 
 export const EditingNogoIndicator: React.FC = () => {
   const { isMobileSize, editingGroupOrRegion, setEditingGroupOrRegion } =
@@ -34,6 +36,7 @@ export const EditingNogoIndicator: React.FC = () => {
           onClick={(e) => {
             e.stopPropagation();
             setEditingGroupOrRegion(null);
+            openModal(NogoManagerModal(isMobileSize));
           }}
         >
           <Group position='center' spacing='xs' noWrap>

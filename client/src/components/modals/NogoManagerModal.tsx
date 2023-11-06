@@ -4,10 +4,12 @@ import { ModalSettings } from '@mantine/modals/lib/context';
 import {
   ActionIcon,
   Anchor,
+  Avatar,
   Button,
   Collapse,
   Flex,
   Group,
+  Input,
   Loader,
   Paper,
   ScrollArea,
@@ -19,11 +21,21 @@ import { useGlobalContext } from 'contexts/globalContext';
 import { Nogo, NogoGroup, Region } from 'models';
 import { metresToDistanceString } from 'utils/formatting';
 import { useMapContext } from 'contexts/mapContext';
-import { IconEdit, IconX } from '@tabler/icons-react';
+import {
+  IconCheck,
+  IconEdit,
+  IconPlus,
+  IconTrash,
+  IconX,
+} from '@tabler/icons-react';
 import { ID } from 'types';
-import { modals } from '@mantine/modals';
+import { modals, openModal } from '@mantine/modals';
 import { getBoundsForNogos, getTotalLengthOfNogos } from 'utils/nogos';
 import { NogoGroupApi } from 'api';
+import { showNotification } from '@mantine/notifications';
+import { IconInfoCircle } from '@tabler/icons-react';
+import { LoginModal } from './LoginModal';
+import { SignupModal } from './SignupModal';
 
 export const NogoManagerModal = (isMobileSize: boolean) =>
   ({
@@ -79,8 +91,8 @@ const NogoManagerContent: React.FC = () => {
   return (
     <Stack>
       <Group position='apart'>
-        <Text size='lg' fw='bold'>
-          Manage nogos
+        <Text size='xl' fw={600}>
+          Select nogos to avoid
         </Text>
         {/* TODO: what are nogos? */}
         <Group>
@@ -164,7 +176,12 @@ const Regions: React.FC<{
             toggleSelect={() => toggleRegion(region._id)}
           />
         ))}
-        <Anchor align='center' onClick={toggleShowAllRegions}>
+        <Anchor
+          align='center'
+          w='auto'
+          mx='auto'
+          onClick={toggleShowAllRegions}
+        >
           {showAllRegions ? 'Collapse regions' : 'Show all regions'}
         </Anchor>
         {showAllRegions &&
@@ -180,7 +197,7 @@ const Regions: React.FC<{
   );
 };
 
-// TODO: add contributor info; add edit button if user is contributor; indicate if user is located in the region
+// TODO: collapse contributor bio; add edit button if user is contributor; indicate if user is located in the region
 const RegionCard: React.FC<{
   region: Region;
   isSelected: boolean;
@@ -234,82 +251,114 @@ const RegionCard: React.FC<{
           </Anchor>
         </Stack>
         <Group position='right' spacing='xs'>
-          {isSelected && (
-            <ActionIcon
-              size={36}
-              variant='filled'
-              radius='md'
-              color='red'
-              onClick={toggleSelect}
-            >
-              <IconX size='1.125rem' />
-            </ActionIcon>
-          )}
           <Button
             size='sm'
             variant='filled'
-            color='green'
+            color={isSelected ? 'red' : 'green'}
             radius='md'
             onClick={toggleSelect}
-            disabled={isSelected}
           >
-            {isSelected ? 'Selected' : 'Select'}
+            {isSelected ? 'Deselect' : 'Select'}
           </Button>
         </Group>
       </Group>
       <Collapse in={showDetails}>
-        {showMap ? (
-          <MapContainer
-            bounds={region.getBounds()}
-            style={{
-              height: '300px',
-              width: '100%',
-              borderRadius: '12px',
-            }}
-          >
-            <TileLayer
-              attribution='Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
-              url='https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-              minZoom={0}
-              maxZoom={19}
-            />
-            {nogos.map((nogo) => (
-              <GeoJSON
-                key={nogo._id}
-                data={nogo.lineString}
-                style={{
-                  color: theme.colors.red[7],
-                  weight: 3,
-                  opacity: 1,
-                }}
-                interactive={false}
-              />
-            ))}
-            <GeoJSON
-              key={region._id}
-              data={region.polygon}
+        <Group position='apart' spacing='xs' align='flex-start'>
+          {showMap ? (
+            <MapContainer
+              bounds={region.getBounds()}
               style={{
-                color: 'grey',
-                weight: 4,
-                opacity: 1.0,
-                fillOpacity: 0.1,
+                height: '300px',
+                width: '100%',
+                borderRadius: '12px',
+                flexBasis: '40%',
+                flexGrow: 1,
               }}
-            ></GeoJSON>
-          </MapContainer>
-        ) : (
-          <Flex
-            justify='center'
-            align='center'
-            style={{
-              height: '300px',
-              width: '100%',
-              borderRadius: '12px',
-              backgroundColor: theme.colors.gray[3],
-            }}
-          >
-            <Loader />
-          </Flex>
-        )}
+            >
+              <TileLayer
+                attribution='Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+                url='https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+                minZoom={0}
+                maxZoom={19}
+              />
+              {nogos.map((nogo) => (
+                <GeoJSON
+                  key={nogo._id}
+                  data={nogo.lineString}
+                  style={{
+                    color: theme.colors.red[7],
+                    weight: 3,
+                    opacity: 1,
+                  }}
+                  interactive={false}
+                />
+              ))}
+              <GeoJSON
+                key={region._id}
+                data={region.polygon}
+                style={{
+                  color: 'grey',
+                  weight: 4,
+                  opacity: 1.0,
+                  fillOpacity: 0.1,
+                }}
+              ></GeoJSON>
+            </MapContainer>
+          ) : (
+            <Flex
+              justify='center'
+              align='center'
+              style={{
+                height: '300px',
+                width: '100%',
+                borderRadius: '12px',
+                flexBasis: '40%',
+                flexGrow: 1,
+                backgroundColor: theme.colors.gray[3],
+              }}
+            >
+              <Loader />
+            </Flex>
+          )}
+
+          <ScrollArea style={{ flexBasis: '50%', flexGrow: 1 }} miw={300}>
+            <Stack spacing='xs' mah={300}>
+              <Text>
+                Verified contributor
+                {region.contributors.length === 1 ? '' : 's'}:
+              </Text>
+              {region.contributors.map(
+                (contributor) =>
+                  !!contributor.contributorProfile && (
+                    <Paper
+                      shadow='xs'
+                      p='md'
+                      radius='md'
+                      bg={theme.colors.gray[1]}
+                    >
+                      <Stack spacing='xs'>
+                        <Group position='left'>
+                          <Avatar
+                            radius='xl'
+                            src={`/images/contributors/${contributor.contributorProfile.imageFilename}`}
+                          />
+                          <Text>
+                            {contributor.name.first +
+                              ' ' +
+                              contributor.name.last}
+                          </Text>
+                          {/* <Text>{contributor.contributorProfile.title}</Text> */}
+                        </Group>
+                        <Text size='xs' color='dimmed'>
+                          {contributor.contributorProfile.bio}
+                        </Text>
+                      </Stack>
+                    </Paper>
+                  )
+              )}
+            </Stack>
+          </ScrollArea>
+        </Group>
       </Collapse>
     </Paper>
   );
@@ -323,39 +372,99 @@ const NogoGroups: React.FC<{
   const { loggedInUser } = useGlobalContext();
   const [userNogoGroups, setUserNogoGroups] = useState<NogoGroup[]>([]);
 
-  useEffect(() => {
+  const refreshUserNogoGroups = () => {
     NogoGroupApi.getAllForUser().then(setUserNogoGroups);
+  };
+
+  const createNewNogoGroup = (attempt: number = 0) => {
+    const name = 'Nogo Group' + (attempt ? ` ${attempt + 1}` : '');
+    NogoGroupApi.create({ name })
+      .then(refreshUserNogoGroups)
+      .catch((error) => {
+        if (error.message === `Name "${name}" is already taken`) {
+          createNewNogoGroup(attempt + 1);
+        } else {
+          showNotification({
+            title: 'Error creating Nogo Group',
+            message: error.message || 'Undefined error',
+            color: 'red',
+          });
+        }
+      });
+  };
+
+  useEffect(() => {
+    refreshUserNogoGroups();
   }, [loggedInUser]);
 
   return (
     <Paper shadow='sm' radius='md' p='sm' bg={theme.colors.gray[1]}>
-      <Text align='center'>Your nogos</Text>
       <Stack spacing='sm' align='stretch' justify='flext-start'>
-        {userNogoGroups.map((nogoGroup) => (
-          <NogoGroupCard
-            nogoGroup={nogoGroup}
-            isSelected={unsavedSelectedNogoGroups.includes(nogoGroup._id)}
-            toggleSelect={() => toggleNogoGroup(nogoGroup._id)}
-          />
-        ))}
-        {/* TODO: Button to create a new nogo group; if not logged in, show login and signup buttons */}
+        <Text align='center'>Your nogos</Text>
+        {!!loggedInUser && userNogoGroups.length === 0 && (
+          <Text align='center' size='sm'>
+            <IconInfoCircle
+              size={20}
+              style={{ verticalAlign: 'text-bottom' }}
+            />{' '}
+            You have no custom nogos yet. Create a group to get started.
+          </Text>
+        )}
+        {!loggedInUser && (
+          <>
+            <Text align='center' size='sm'>
+              You must have an account to use custom nogos.
+            </Text>
+            <Group position='center' maw={356} w='100%' m='auto' grow>
+              <Button onClick={() => openModal(LoginModal)}>Sign in</Button>
+              <Button onClick={() => openModal(SignupModal)}>
+                Create account
+              </Button>
+            </Group>
+          </>
+        )}
+        <Stack spacing='sm' align='stretch' justify='flext-start'>
+          {userNogoGroups.map((nogoGroup) => (
+            <NogoGroupCard
+              nogoGroup={nogoGroup}
+              isSelected={unsavedSelectedNogoGroups.includes(nogoGroup._id)}
+              toggleSelect={() => toggleNogoGroup(nogoGroup._id)}
+              onNogoGroupUpdated={refreshUserNogoGroups}
+            />
+          ))}
+          {loggedInUser ? (
+            <Button
+              variant='outline'
+              fullWidth
+              h={60}
+              leftIcon={<IconPlus size={18} />}
+              onClick={() => createNewNogoGroup()}
+            >
+              Create a new Nogo Group
+            </Button>
+          ) : (
+            <></>
+          )}
+        </Stack>
       </Stack>
     </Paper>
   );
 };
 
-// TODO: edit group name; delete group
 const NogoGroupCard: React.FC<{
   nogoGroup: NogoGroup;
   isSelected: boolean;
   toggleSelect: () => void;
-}> = ({ nogoGroup, isSelected, toggleSelect }) => {
+  onNogoGroupUpdated: () => void;
+}> = ({ nogoGroup, isSelected, toggleSelect, onNogoGroupUpdated }) => {
   const theme = useMantineTheme();
   const { setEditingGroupOrRegion } = useGlobalContext();
   const [showDetails, setShowDetails] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [nogos, setNogos] = useState<Nogo[]>([]);
   const [totalLength, setTotalLength] = useState<number | null>(null);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState(nogoGroup.name);
 
   useEffect(() => {
     nogoGroup.getAllNogos().then((fetchedNogos) => {
@@ -365,6 +474,10 @@ const NogoGroupCard: React.FC<{
       );
     });
   }, []);
+
+  useEffect(() => {
+    setEditedName(nogoGroup.name);
+  }, [nogoGroup.name]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -383,11 +496,64 @@ const NogoGroupCard: React.FC<{
       shadow='xs'
       p='md'
       radius='md'
-      bg={isSelected ? theme.colors.green[0] : undefined}
+      bg={isSelected ? theme.colors.green[1] : undefined}
     >
       <Group position='apart'>
         <Stack spacing={0}>
-          <Text>{nogoGroup.name}</Text>
+          <Group spacing={isEditingName ? 'xs' : 0}>
+            {isEditingName ? (
+              <>
+                <Input
+                  value={editedName}
+                  onChange={(e) => setEditedName(e.target.value)}
+                  maw={200}
+                />
+                <ActionIcon
+                  size={36}
+                  variant='outline'
+                  radius='md'
+                  color='red'
+                  onClick={() => {
+                    setIsEditingName(false);
+                    setEditedName(nogoGroup.name);
+                  }}
+                >
+                  <IconX size='1.125rem' />
+                </ActionIcon>
+                <ActionIcon
+                  size={36}
+                  variant='filled'
+                  radius='md'
+                  color='blue'
+                  onClick={() => {
+                    NogoGroupApi.update(nogoGroup._id, {
+                      name: editedName,
+                    }).then(() => {
+                      setIsEditingName(false);
+                      onNogoGroupUpdated();
+                    });
+                  }}
+                >
+                  <IconCheck size='1.125rem' />
+                </ActionIcon>
+              </>
+            ) : (
+              <>
+                <Text>{nogoGroup.name}</Text>
+                <ActionIcon
+                  size={36}
+                  variant='transparent'
+                  radius='md'
+                  color='gray'
+                  onClick={() => {
+                    setIsEditingName(true);
+                  }}
+                >
+                  <IconEdit size='1.125rem' />
+                </ActionIcon>
+              </>
+            )}
+          </Group>
           <Text size='sm' color='dimmed'>
             {!!totalLength
               ? `Total nogos: ${metresToDistanceString(totalLength || 0, 1)}`
@@ -406,34 +572,50 @@ const NogoGroupCard: React.FC<{
             size={36}
             variant='outline'
             radius='md'
+            color='red'
+            onClick={() => {
+              modals.openConfirmModal({
+                title: `Delete ${nogoGroup.name}?`,
+                centered: true,
+                children: (
+                  <Text size='sm'>
+                    Are you sure you want to delete these nogos? This action
+                    cannot be undone.
+                  </Text>
+                ),
+                labels: {
+                  confirm: 'Delete nogos',
+                  cancel: "No don't delete anything",
+                },
+                confirmProps: { color: 'red' },
+                onConfirm: () => {
+                  NogoGroupApi.delete(nogoGroup._id).then(onNogoGroupUpdated);
+                },
+              });
+            }}
+          >
+            <IconTrash size='1.125rem' />
+          </ActionIcon>
+          <Button
+            size='sm'
+            variant='outline'
             color='blue'
+            radius='md'
             onClick={() => {
               setEditingGroupOrRegion(nogoGroup);
               modals.closeAll();
             }}
           >
-            <IconEdit size='1.125rem' />
-          </ActionIcon>
-          {isSelected && (
-            <ActionIcon
-              size={36}
-              variant='filled'
-              radius='md'
-              color='red'
-              onClick={toggleSelect}
-            >
-              <IconX size='1.125rem' />
-            </ActionIcon>
-          )}
+            Edit nogos
+          </Button>
           <Button
             size='sm'
             variant='filled'
-            color='green'
+            color={isSelected ? 'red' : 'green'}
             radius='md'
             onClick={toggleSelect}
-            disabled={isSelected}
           >
-            {isSelected ? 'Selected' : 'Select'}
+            {isSelected ? 'Deselect' : 'Select'}
           </Button>
         </Group>
       </Group>

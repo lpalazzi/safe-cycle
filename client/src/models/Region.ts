@@ -3,7 +3,7 @@ import L from 'leaflet';
 import bbox from '@turf/bbox';
 import { feature } from '@turf/helpers';
 import { NogoApi } from 'api';
-import { ID, Name, UserRole } from 'types';
+import { ContributorProfile, ID, Name, UserRole } from 'types';
 import { getSubdivisionNameWithCountry } from 'utils/iso3166';
 
 interface RegionParams {
@@ -15,6 +15,7 @@ interface RegionParams {
     _id: ID;
     name: Name;
     role: UserRole;
+    contributorProfile?: ContributorProfile;
   }[];
 }
 

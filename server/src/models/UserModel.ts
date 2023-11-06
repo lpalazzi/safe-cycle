@@ -19,6 +19,11 @@ const UserSchema = new mongoose.Schema<IUser>({
     type: String,
     enum: [null, 'admin', 'verified contributor'],
   },
+  contributorProfile: {
+    title: String,
+    bio: String,
+    imageFilename: String,
+  },
   settings: {
     privateNogosEnabled: Boolean,
   },
