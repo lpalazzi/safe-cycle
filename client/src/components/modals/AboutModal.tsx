@@ -15,7 +15,6 @@ import {
   Text,
   Group,
   Image,
-  List,
   useMantineTheme,
   Accordion,
   Loader,
@@ -29,10 +28,7 @@ import {
   Textarea,
   LoadingOverlay,
 } from '@mantine/core';
-import { IconEditCircle, IconPlus } from '@tabler/icons-react';
 import LogoSvg from 'assets/brand/logo-name.svg';
-import ImgNogoWithout from 'assets/info/info-nogo-without.png';
-import ImgNogoWith from 'assets/info/info-nogo-with.png';
 import LogoXYZ from 'assets/sponsors/logo-xyz.png';
 import LogoSTR from 'assets/sponsors/logo-sharetheroad.png';
 import { useGlobalContext } from 'contexts/globalContext';
@@ -96,8 +92,8 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
         <>
           <Space h='md' />
           <Group position='center' maw={356} m='auto' grow>
-            <Button onClick={() => openModal(LoginModal)}>Sign in</Button>
-            <Button onClick={() => openModal(SignupModal)}>
+            <Button onClick={() => openModal(LoginModal())}>Sign in</Button>
+            <Button onClick={() => openModal(SignupModal())}>
               Create account
             </Button>
           </Group>
@@ -117,85 +113,14 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
             </Text>
 
             <Text mb='sm'>
-              Using a combination of comfort-focused preferences and a unique{' '}
-              <Anchor onClick={() => setView('nogos')}>"nogo" feature</Anchor>,
-              SafeCycle can guide cyclists of all ages and abilities, even in
-              regions with poor cycling infrastructure and high levels of motor
-              vehicle traffic.
+              Using a combination of comfort-focused preferences and a unique
+              "nogo" feature, SafeCycle can guide cyclists of all ages and
+              abilities, even in regions with poor cycling infrastructure and
+              high levels of motor vehicle traffic.
             </Text>
           </Accordion.Panel>
         </Accordion.Item>
-        <Accordion.Item value='nogos'>
-          <Accordion.Control>
-            <b>What are nogos?</b>
-          </Accordion.Control>
-          <Accordion.Panel>
-            <Text mb='sm'>
-              A <b>nogo</b> is a section of a roadway that SafeCycle completely
-              avoids when creating a route due to unsafe conditions or high
-              levels of motor vehicle traffic.
-            </Text>
-
-            <Group spacing='xl' position='center' mb='sm'>
-              <Image
-                radius='md'
-                style={{ width: '35%', maxWidth: '300px' }}
-                src={ImgNogoWithout}
-                alt='Map example without nogo'
-                caption='Without nogo'
-                withPlaceholder
-              />
-              <Image
-                radius='md'
-                style={{ width: '35%', maxWidth: '300px' }}
-                src={ImgNogoWith}
-                alt='Map example with nogo'
-                caption='With nogo'
-                withPlaceholder
-              />
-            </Group>
-
-            <Text mb='sm'>
-              SafeCycle works with knowledgeable cyclists in various{' '}
-              <Anchor onClick={() => setView('regions')}>regions</Anchor> to add
-              nogos and keep them up-to-date. Using their extensive regional
-              knowledge of local roads and cycling routes, our contributors
-              carefully curate nogos based on roads that most cyclists should
-              avoid.
-            </Text>
-            <Text mb='sm' italic align='center'>
-              To apply our curated nogos, select the "Avoid nogos" checkbox in
-              your route preferences.
-            </Text>
-          </Accordion.Panel>
-        </Accordion.Item>
-        <Accordion.Item value='regions'>
-          <Accordion.Control>
-            <b>Regions supported with nogos</b>
-          </Accordion.Control>
-          <Accordion.Panel>
-            <Text mb='md'>
-              SafeCycle currently only supports nogos in a handful of regions.
-              If you live in an unsupported region, you can still use SafeCycle
-              to explore cycling routes in your area by using the comfort
-              settings and other available route preferences. You can also{' '}
-              <Anchor onClick={() => setView('howto')}>
-                create your own private nogos
-              </Anchor>{' '}
-              for personal use.
-            </Text>
-            <SupportedRegions open={view === 'regions'} />
-            <Text align='center' fs='italic' mt='md'>
-              If you are a knowledgeable cyclist and interested in becoming a
-              contributor for either an existing or unsupported region,{' '}
-              <Anchor onClick={() => setView('contact')}>
-                please contact us
-              </Anchor>
-              .
-            </Text>
-          </Accordion.Panel>
-        </Accordion.Item>
-        <Accordion.Item value='howto'>
+        {/* <Accordion.Item value='howto'>
           <Accordion.Control>
             <b>Create private nogos for personal use</b>
           </Accordion.Control>
@@ -267,8 +192,8 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
               </List.Item>
             </List>
           </Accordion.Panel>
-        </Accordion.Item>
-        <Accordion.Item value='updating'>
+        </Accordion.Item> */}
+        {/* <Accordion.Item value='updating'>
           <Accordion.Control>
             <b>Help keep our nogos up to date</b>
           </Accordion.Control>
@@ -297,7 +222,7 @@ const AboutModalContent: React.FC<AboutModalProps> = ({ initialView }) => {
               </List.Item>
             </List>
           </Accordion.Panel>
-        </Accordion.Item>
+        </Accordion.Item> */}
         <Accordion.Item value='contact'>
           <Accordion.Control>
             <b>Contact us</b>

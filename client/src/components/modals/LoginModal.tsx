@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Anchor, Button, Group, Stack, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { closeAllModals, openModal } from '@mantine/modals';
+import { closeAllModals, modals, openModal } from '@mantine/modals';
 import { ModalSettings } from '@mantine/modals/lib/context';
 import { showNotification } from '@mantine/notifications';
 
@@ -11,6 +11,16 @@ import { IUserLoginDTO as LoginFormValues } from 'api/interfaces/User';
 import { validateEmail } from 'utils/validation';
 import { useGlobalContext } from 'contexts/globalContext';
 import { ResetPasswordModal } from './ResetPasswordModal';
+
+export const LoginModal = (nextModal?: ModalSettings) => {
+  return {
+    title: 'Sign in',
+    children: <LoginForm />,
+    onClose: () => {
+      if (nextModal) modals.open(nextModal);
+    },
+  } as ModalSettings;
+};
 
 const LoginForm: React.FC = () => {
   const { updateLoggedInUser } = useGlobalContext();
@@ -80,9 +90,4 @@ const LoginForm: React.FC = () => {
       </Group>
     </form>
   );
-};
-
-export const LoginModal: ModalSettings = {
-  title: 'Sign in',
-  children: <LoginForm />,
 };

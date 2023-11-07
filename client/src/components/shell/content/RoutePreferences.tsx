@@ -34,7 +34,7 @@ import { AboutModal } from 'components/modals/AboutModal';
 import LowComfortIcon from 'assets/comfortlevels/2-low.png';
 import MediumComfortIcon from 'assets/comfortlevels/3-medium.png';
 import HighComfortIcon from 'assets/comfortlevels/4-high.png';
-import { NogoManagerModal } from 'components/modals/NogoManagerModal';
+import { SelectNogosModal } from 'components/modals/SelectNogosModal/SelectNogosModal';
 
 const comfortPresets: { [key: string]: Partial<RouteOptions> } = {
   Shortest: {
@@ -94,7 +94,7 @@ export const RoutePreferences: React.FC = () => {
           size={isSmallWidth ? (isExtraSmallWidth ? 'xs' : 'sm') : 'md'}
           onChange={(e) => {
             if (e.currentTarget.checked) {
-              openModal(NogoManagerModal(isMobileSize));
+              openModal(SelectNogosModal(isMobileSize));
             } else {
               updateRouteOptions({ avoidNogos: e.currentTarget.checked });
             }
@@ -184,7 +184,7 @@ export const RoutePreferences: React.FC = () => {
         checked={routeOptions.avoidNogos}
         onChange={(e) => {
           if (e.currentTarget.checked) {
-            openModal(NogoManagerModal(isMobileSize));
+            openModal(SelectNogosModal(isMobileSize));
           } else {
             updateRouteOptions({ avoidNogos: e.currentTarget.checked });
           }

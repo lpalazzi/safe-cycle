@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Group, PasswordInput, Stack, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { closeAllModals } from '@mantine/modals';
+import { closeAllModals, modals } from '@mantine/modals';
 import { ModalSettings } from '@mantine/modals/lib/context';
 import { showNotification } from '@mantine/notifications';
 
@@ -10,6 +10,16 @@ import { IUserSignupDTO as SignupFormValues } from 'api/interfaces/User';
 import { validateEmail, validatePassword } from 'utils/validation';
 import { useGlobalContext } from 'contexts/globalContext';
 import { PasswordPopover } from 'components/common/PasswordPopover';
+
+export const SignupModal = (nextModal?: ModalSettings) => {
+  return {
+    title: 'Create account',
+    children: <SignupForm />,
+    onClose: () => {
+      if (nextModal) modals.open(nextModal);
+    },
+  } as ModalSettings;
+};
 
 const SignupForm: React.FC = () => {
   const { updateLoggedInUser } = useGlobalContext();
@@ -103,9 +113,4 @@ const SignupForm: React.FC = () => {
       </Group>
     </form>
   );
-};
-
-export const SignupModal: ModalSettings = {
-  title: 'Create account',
-  children: <SignupForm />,
 };

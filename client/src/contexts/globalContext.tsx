@@ -183,10 +183,10 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   };
 
   const handleSetEditingGroupOrRegion = (
-    nogoGroup: NogoGroup | Region | null
+    groupOrRegion: NogoGroup | Region | null
   ) => {
-    setEditingGroupOrRegion(nogoGroup);
-    if (isMobileSize && nogoGroup) {
+    setEditingGroupOrRegion(groupOrRegion);
+    if (groupOrRegion) {
       setIsNavbarOpen(false);
     }
   };
