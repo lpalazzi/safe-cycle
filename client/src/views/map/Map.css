@@ -32,6 +32,12 @@
   background-image: url('assets/map/marker-orange.png');
 }
 
+.marker-nogoWaypoint {
+  background-color: #f03e3e;
+  border-radius: 50%;
+  text-align: center;
+}
+
 .marker-location {
   background-color: #228be6;
   border-radius: 50%;

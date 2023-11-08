@@ -33,7 +33,11 @@ export const NogoGroups: React.FC<{
   const [userNogoGroups, setUserNogoGroups] = useState<NogoGroup[]>([]);
 
   const refreshUserNogoGroups = () => {
-    NogoGroupApi.getAllForUser().then(setUserNogoGroups);
+    if (!loggedInUser) {
+      setUserNogoGroups([]);
+    } else {
+      NogoGroupApi.getAllForUser().then(setUserNogoGroups);
+    }
   };
 
   const createNewNogoGroup = (attempt: number = 0) => {

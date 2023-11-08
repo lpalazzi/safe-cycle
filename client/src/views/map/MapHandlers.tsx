@@ -13,6 +13,7 @@ export const MapHandlers: React.FC = () => {
     currentLocation,
     followUser,
     refreshWaypointLineToCursor,
+    setZoomLevel,
     setCurrentLocation,
     setFollowUser,
     addWaypoint,
@@ -37,6 +38,9 @@ export const MapHandlers: React.FC = () => {
     },
     dragstart: (e) => {
       setFollowUser(false);
+    },
+    zoomend: (e) => {
+      setZoomLevel(e.target._zoom);
     },
     zoomanim: (e) => {
       setFollowUser(false);

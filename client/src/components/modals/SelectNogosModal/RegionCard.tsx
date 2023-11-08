@@ -18,6 +18,7 @@ import {
   IconCheck,
   IconDownload,
   IconEdit,
+  IconExclamationCircle,
   IconMapPin,
 } from '@tabler/icons-react';
 import booleanWithin from '@turf/boolean-within';
@@ -78,7 +79,9 @@ export const RegionCard: React.FC<{
     setShowDetails((prev) => !prev);
   };
 
-  return !!totalLength || showHidden || userIsContributor ? (
+  const isHidden = (totalLength || 0) < 10000;
+
+  return !isHidden || showHidden || userIsContributor ? (
     <Paper
       shadow='xs'
       p='md'
@@ -97,6 +100,16 @@ export const RegionCard: React.FC<{
             <Text color='gray' size='xs'>
               <IconEdit size={16} style={{ verticalAlign: 'text-bottom' }} />{' '}
               You are a contributor for this region
+            </Text>
+          )}
+          {userIsContributor && isHidden && (
+            <Text color='gray' size='xs'>
+              <IconExclamationCircle
+                size={16}
+                style={{ verticalAlign: 'text-bottom' }}
+              />{' '}
+              This region is hidden from users until it has at least 10km of
+              nogos
             </Text>
           )}
           <Text>{region.name}</Text>

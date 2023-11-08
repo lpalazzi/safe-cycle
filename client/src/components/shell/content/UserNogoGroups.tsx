@@ -48,6 +48,10 @@ export const UserNogoGroups: React.FC = () => {
 
   const refreshData = async () => {
     try {
+      if (!loggedInUser) {
+        setUserNogoGroups([]);
+        return;
+      }
       const fetchedUserNogoGroups = await NogoGroupApi.getAllForUser();
       setUserNogoGroups(fetchedUserNogoGroups);
       const editingNogoGroupWasDeleted = !fetchedUserNogoGroups.some(

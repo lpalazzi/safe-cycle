@@ -82,6 +82,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     updateLoggedInUser();
     openInfoModalOnFirstVisit();
     openSurveyModalOnManyVisits();
+    getStoredSelectedRegions();
     getStoredSelectedNogoGroups();
     refreshRegions();
   }, []);
@@ -129,6 +130,18 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     setSelectedNogoGroups(filteredStoredSelectedNogoGroups);
   };
 
+  const getStoredSelectedRegions = async () => {
+    const stored = window.localStorage.getItem('selectedRegions');
+    if (!stored || stored === '') return;
+    const allRegions = await RegionApi.getAll();
+    const filteredStoredSelectedRegions = stored
+      .split(',')
+      .filter((selectedRegion) => {
+        return !!allRegions.find((region) => region._id === selectedRegion);
+      });
+    setSelectedRegions(filteredStoredSelectedRegions);
+  };
+
   const updateLoggedInUser = async () => {
     const user = await UserApi.getActiveUser();
     setLoggedInUser(user);
@@ -173,6 +186,10 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
       selectedNogoGroups.join()
     );
   }, [selectedNogoGroups]);
+
+  useEffect(() => {
+    window.localStorage.setItem('selectedRegions', selectedRegions.join());
+  }, [selectedRegions]);
 
   const clearSelectedNogoGroups = () => {
     setSelectedNogoGroups([]);
