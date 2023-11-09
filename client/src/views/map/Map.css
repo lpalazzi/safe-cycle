@@ -14,22 +14,19 @@
 }
 
 .number-icon {
-  background-size: 43px 50px;
+  background-size: 35px 48px;
   background-repeat: no-repeat;
   margin: 0 auto;
   text-align: center;
-  color: white;
+  color: #252525;
   font-weight: bold;
-  line-height: 36px;
+  line-height: 34px;
   font-size: 20px;
+  font-family: 'Noto Sans', sans-serif;
 }
 
 .marker-blue {
   background-image: url('assets/map/marker-blue.png');
-}
-
-.marker-orange {
-  background-image: url('assets/map/marker-orange.png');
 }
 
 .marker-nogoWaypoint {

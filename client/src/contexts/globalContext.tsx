@@ -80,17 +80,21 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
 
   useEffect(() => {
     updateLoggedInUser();
-    openInfoModalOnFirstVisit();
+    countSiteVisits();
     openSurveyModalOnManyVisits();
     getStoredSelectedRegions();
     getStoredSelectedNogoGroups();
     refreshRegions();
   }, []);
 
-  const openInfoModalOnFirstVisit = () => {
+  const countSiteVisits = () => {
     var visited = Number(window.localStorage.getItem('visited'));
     if (isNaN(visited)) visited = 0;
     window.localStorage.setItem('visited', (visited + 1).toFixed(0));
+  };
+
+  const openInfoModalOnFirstVisit = () => {
+    var visited = Number(window.localStorage.getItem('visited'));
     if (!visited) {
       const isMobileSize = window.matchMedia('(max-width: 767px)').matches; // useMediaQuery state is still undefined on initial load
       if (!isMobileSize) openModal(AboutModal('about', isMobileSize));

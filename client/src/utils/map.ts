@@ -1,17 +1,12 @@
 import L from 'leaflet';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-export const createMarker = (
-  content: JSX.Element,
-  color: 'blue' | 'orange' = 'blue'
-) => {
+export const createMarker = (content: JSX.Element) => {
   return L.divIcon({
-    className: `number-icon marker-${color}`,
-    shadowSize: [20, 30],
-    iconSize: [43, 50],
-    iconAnchor: [20, 48],
-    shadowAnchor: [4, 30],
-    popupAnchor: [0, -45],
+    className: `number-icon marker-blue`,
+    iconSize: [35, 48],
+    iconAnchor: [17, 48],
+    popupAnchor: [0, -54],
     html: renderToStaticMarkup(content),
   });
 };
