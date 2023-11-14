@@ -42,7 +42,14 @@ export const EditingNogoIndicator: React.FC = () => {
             e.stopPropagation();
             setEditingGroupOrRegion(null);
             if (!isNavbarOpen) toggleNavbar();
-            openModal(SelectNogosModal(isMobileSize));
+            openModal(
+              SelectNogosModal(
+                isMobileSize,
+                !!editingGroupOrRegion && !editingGroupOrRegion.isRegion
+                  ? 'custom'
+                  : 'regions'
+              )
+            );
           }}
         >
           <Group position='center' spacing='xs' noWrap>

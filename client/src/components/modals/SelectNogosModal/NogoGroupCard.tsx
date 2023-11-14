@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import {
   ActionIcon,
   Anchor,
+  Button,
   Collapse,
   Flex,
   Group,
@@ -36,13 +37,14 @@ export const NogoGroupCard: React.FC<{
   onNogoGroupUpdated: () => void;
 }> = ({ nogoGroup, isSelected, toggleSelect, onNogoGroupUpdated }) => {
   const theme = useMantineTheme();
-  const { isMobileSize, setEditingGroupOrRegion } = useGlobalContext();
+  const { setEditingGroupOrRegion } = useGlobalContext();
   const [showDetails, setShowDetails] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [nogos, setNogos] = useState<Nogo[]>([]);
   const [totalLength, setTotalLength] = useState<number | null>(null);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(nogoGroup.name);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
     nogoGroup.getAllNogos().then((fetchedNogos) => {
@@ -188,26 +190,8 @@ export const NogoGroupCard: React.FC<{
                 icon={<IconTrash size={14} />}
                 color='red'
                 onClick={() => {
-                  modals.openConfirmModal({
-                    title: `Delete ${nogoGroup.name}?`,
-                    centered: true,
-                    children: (
-                      <Text size='sm'>
-                        Are you sure you want to delete these nogos? This action
-                        cannot be undone.
-                      </Text>
-                    ),
-                    labels: {
-                      confirm: 'Delete nogos',
-                      cancel: "No don't delete anything",
-                    },
-                    confirmProps: { color: 'red' },
-                    onConfirm: () => {
-                      NogoGroupApi.delete(nogoGroup._id).then(
-                        onNogoGroupUpdated
-                      );
-                    },
-                  });
+                  setShowDetails(false);
+                  setConfirmDelete(true);
                 }}
               >
                 Delete group
@@ -227,6 +211,32 @@ export const NogoGroupCard: React.FC<{
           </Tooltip>
         </Group>
       </Group>
+      <Collapse in={confirmDelete}>
+        <Stack spacing='xs' align='center' py='xs'>
+          <Text fw='bolder'>
+            Are you sure you want to delete these nogos? This action cannot be
+            undone.
+          </Text>
+          <Group>
+            <Button
+              onClick={() => setConfirmDelete(false)}
+              variant='outline'
+              color='dark'
+            >
+              No don't delete anything
+            </Button>
+            <Button
+              onClick={() => {
+                NogoGroupApi.delete(nogoGroup._id).then(onNogoGroupUpdated);
+              }}
+              variant='filled'
+              color='red'
+            >
+              Delete these nogos
+            </Button>
+          </Group>
+        </Stack>
+      </Collapse>
       <Collapse in={showDetails}>
         {showMap && nogos.length > 0 ? (
           <MapContainer

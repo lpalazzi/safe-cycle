@@ -99,14 +99,18 @@ export const NogoGroups: React.FC<{
             <Group position='center' maw={356} w='100%' m='auto' grow>
               <Button
                 onClick={() =>
-                  openModal(LoginModal(SelectNogosModal(isMobileSize)))
+                  openModal(
+                    LoginModal(SelectNogosModal(isMobileSize, 'custom'))
+                  )
                 }
               >
                 Sign in
               </Button>
               <Button
                 onClick={() =>
-                  openModal(SignupModal(SelectNogosModal(isMobileSize)))
+                  openModal(
+                    SignupModal(SelectNogosModal(isMobileSize, 'custom'))
+                  )
                 }
               >
                 Create account
@@ -118,6 +122,7 @@ export const NogoGroups: React.FC<{
           <Stack spacing='sm' align='stretch' justify='flext-start'>
             {userNogoGroups.map((nogoGroup) => (
               <NogoGroupCard
+                key={nogoGroup._id}
                 nogoGroup={nogoGroup}
                 isSelected={unsavedSelectedNogoGroups.includes(nogoGroup._id)}
                 toggleSelect={() => toggleNogoGroup(nogoGroup._id)}
