@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  Accordion,
   Anchor,
   Button,
   Checkbox,
@@ -116,18 +117,28 @@ export const Regions: React.FC<{
         </Stack>
       </Paper>
       <Paper shadow='sm' radius='md' p='sm' bg={theme.colors.gray[1]}>
-        <Stack spacing='sm' align='stretch' justify='flext-start'>
-          <Text>All regions</Text>
-          {alphaSortedRegions.map((region) => (
-            <RegionCard
-              key={region._id + 'alpha'}
-              region={region}
-              isSelected={unsavedSelectedRegions.includes(region._id)}
-              showHidden={showHidden}
-              toggleSelect={() => toggleRegion(region._id)}
-            />
-          ))}
-        </Stack>
+        <Accordion
+          defaultValue={!currentLocation ? 'regions' : null}
+          chevronPosition='left'
+          styles={{ content: { padding: 0 }, item: { borderBottom: 'none' } }}
+        >
+          <Accordion.Item value='regions'>
+            <Accordion.Control>All regions</Accordion.Control>
+            <Accordion.Panel>
+              <Stack spacing='sm' align='stretch' justify='flext-start'>
+                {alphaSortedRegions.map((region) => (
+                  <RegionCard
+                    key={region._id + 'alpha'}
+                    region={region}
+                    isSelected={unsavedSelectedRegions.includes(region._id)}
+                    showHidden={showHidden}
+                    toggleSelect={() => toggleRegion(region._id)}
+                  />
+                ))}
+              </Stack>
+            </Accordion.Panel>
+          </Accordion.Item>
+        </Accordion>
       </Paper>
     </Stack>
   );

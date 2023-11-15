@@ -22,12 +22,7 @@ import { SelectNogosModal } from './SelectNogosModal';
 export const NogoGroups: React.FC<{
   unsavedSelectedNogoGroups: ID[];
   toggleNogoGroup: (id: ID) => void;
-  clearSelectedNogoGroups: () => void;
-}> = ({
-  unsavedSelectedNogoGroups,
-  toggleNogoGroup,
-  clearSelectedNogoGroups,
-}) => {
+}> = ({ unsavedSelectedNogoGroups, toggleNogoGroup }) => {
   const theme = useMantineTheme();
   const { loggedInUser, isMobileSize } = useGlobalContext();
   const [userNogoGroups, setUserNogoGroups] = useState<NogoGroup[]>([]);
@@ -64,20 +59,7 @@ export const NogoGroups: React.FC<{
   return (
     <Paper shadow='sm' radius='md' p='sm' bg={theme.colors.gray[1]}>
       <Stack spacing='sm' align='stretch' justify='flext-start'>
-        {!!loggedInUser && (
-          <Group position='apart' noWrap h={26}>
-            <Text>Your nogos</Text>
-            {unsavedSelectedNogoGroups.length > 0 && (
-              <Button
-                variant='outline'
-                compact
-                onClick={clearSelectedNogoGroups}
-              >
-                Clear
-              </Button>
-            )}
-          </Group>
-        )}
+        {!!loggedInUser && <Text>Your nogos</Text>}
         {!!loggedInUser && userNogoGroups.length === 0 && (
           <Text align='center' size='sm'>
             <IconExclamationCircle
@@ -86,6 +68,28 @@ export const NogoGroups: React.FC<{
             />{' '}
             You have no custom nogos yet. Create a group to get started.
           </Text>
+        )}
+        {!!loggedInUser && (
+          <Stack spacing='sm' align='stretch' justify='flext-start'>
+            {userNogoGroups.map((nogoGroup) => (
+              <NogoGroupCard
+                key={nogoGroup._id}
+                nogoGroup={nogoGroup}
+                isSelected={unsavedSelectedNogoGroups.includes(nogoGroup._id)}
+                toggleSelect={() => toggleNogoGroup(nogoGroup._id)}
+                onNogoGroupUpdated={refreshUserNogoGroups}
+              />
+            ))}
+            <Button
+              variant='outline'
+              fullWidth
+              h={60}
+              leftIcon={<IconPlus size={18} />}
+              onClick={() => createNewNogoGroup()}
+            >
+              Create a new Nogo Group
+            </Button>
+          </Stack>
         )}
         {!loggedInUser && (
           <>
@@ -117,28 +121,6 @@ export const NogoGroups: React.FC<{
               </Button>
             </Group>
           </>
-        )}
-        {!!loggedInUser && (
-          <Stack spacing='sm' align='stretch' justify='flext-start'>
-            {userNogoGroups.map((nogoGroup) => (
-              <NogoGroupCard
-                key={nogoGroup._id}
-                nogoGroup={nogoGroup}
-                isSelected={unsavedSelectedNogoGroups.includes(nogoGroup._id)}
-                toggleSelect={() => toggleNogoGroup(nogoGroup._id)}
-                onNogoGroupUpdated={refreshUserNogoGroups}
-              />
-            ))}
-            <Button
-              variant='outline'
-              fullWidth
-              h={60}
-              leftIcon={<IconPlus size={18} />}
-              onClick={() => createNewNogoGroup()}
-            >
-              Create a new Nogo Group
-            </Button>
-          </Stack>
         )}
       </Stack>
     </Paper>

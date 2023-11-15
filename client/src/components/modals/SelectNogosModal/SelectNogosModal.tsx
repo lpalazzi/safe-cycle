@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ModalSettings } from '@mantine/modals/lib/context';
 import {
   Anchor,
+  Badge,
   Button,
   Center,
   CloseButton,
@@ -72,11 +73,8 @@ const SelectNogosContent: React.FC<{ defaultValue: 'regions' | 'custom' }> = ({
     }
   };
 
-  const clearSelectedRegions = () => {
+  const clearSelected = () => {
     setUnsavedSelectedRegions([]);
-  };
-
-  const clearSelectedNogoGroups = () => {
     setUnsavedSelectedNogoGroups([]);
   };
 
@@ -130,14 +128,76 @@ const SelectNogosContent: React.FC<{ defaultValue: 'regions' | 'custom' }> = ({
           </Text>
         </Collapse>
       </Stack>
-      <Tabs defaultValue={defaultValue} variant='outline'>
+
+      <Tabs
+        defaultValue={defaultValue}
+        variant='outline'
+        styles={{
+          tabLabel: { lineHeight: '1rem' },
+          tabsList: { position: 'relative' },
+        }}
+      >
         <Tabs.List>
-          <Tabs.Tab value='regions' icon={<IconWorld size='0.8rem' />}>
+          <Tabs.Tab
+            value='regions'
+            icon={<IconWorld size='0.8rem' />}
+            rightSection={
+              unsavedSelectedRegions.length ? (
+                <Badge
+                  color='green'
+                  w={16}
+                  h={16}
+                  sx={{ pointerEvents: 'none' }}
+                  variant='filled'
+                  size='xs'
+                  p={0}
+                >
+                  {unsavedSelectedRegions.length}
+                </Badge>
+              ) : undefined
+            }
+          >
             Regions
           </Tabs.Tab>
-          <Tabs.Tab value='custom' icon={<IconUserEdit size='0.8rem' />}>
+          <Tabs.Tab
+            value='custom'
+            icon={<IconUserEdit size='0.8rem' />}
+            rightSection={
+              unsavedSelectedNogoGroups.length ? (
+                <Badge
+                  color='green'
+                  w={16}
+                  h={16}
+                  sx={{ pointerEvents: 'none' }}
+                  variant='filled'
+                  size='xs'
+                  p={0}
+                >
+                  {unsavedSelectedNogoGroups.length}
+                </Badge>
+              ) : undefined
+            }
+          >
             Custom nogos
           </Tabs.Tab>
+          {[...unsavedSelectedNogoGroups, ...unsavedSelectedRegions].length >
+            0 && (
+            <Button
+              variant='outline'
+              compact
+              onClick={clearSelected}
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                bottom: 0,
+                marginTop: 'auto',
+                marginBottom: 'auto',
+              }}
+            >
+              Clear
+            </Button>
+          )}
         </Tabs.List>
 
         <Tabs.Panel value='regions' pt='xs'>
@@ -150,7 +210,6 @@ const SelectNogosContent: React.FC<{ defaultValue: 'regions' | 'custom' }> = ({
           <NogoGroups
             unsavedSelectedNogoGroups={unsavedSelectedNogoGroups}
             toggleNogoGroup={toggleNogoGroup}
-            clearSelectedNogoGroups={clearSelectedNogoGroups}
           />
         </Tabs.Panel>
       </Tabs>
