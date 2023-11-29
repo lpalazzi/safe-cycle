@@ -6,6 +6,7 @@ import LogoSvg from 'assets/brand/logo-name.svg';
 import { openModal } from '@mantine/modals';
 import { AboutModal } from 'components/modals/AboutModal';
 
+// TODO: either hide the sidebar header on mobile or make it smaller
 export const SidebarHeader: React.FC = () => {
   const { isMobileSize } = useGlobalContext();
   return (
@@ -22,7 +23,7 @@ export const SidebarHeader: React.FC = () => {
       />
       <Tooltip label='About' position='bottom'>
         <ActionIcon
-          onClick={() => openModal(AboutModal('about', isMobileSize))}
+          onClick={() => openModal(AboutModal(isMobileSize))}
           size='lg'
           c='dimmed'
         >

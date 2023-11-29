@@ -5,6 +5,7 @@ import { feature } from '@turf/helpers';
 import { NogoApi } from 'api';
 import { ContributorProfile, ID, Name, UserRole } from 'types';
 import { getSubdivisionNameWithCountry } from 'utils/iso3166';
+import { getTotalLengthOfNogos } from 'utils/nogos';
 
 interface RegionParams {
   _id: ID;
@@ -17,6 +18,7 @@ interface RegionParams {
     role: UserRole;
     contributorProfile?: ContributorProfile;
   }[];
+  shortName?: string;
 }
 
 export class Region {
@@ -25,6 +27,7 @@ export class Region {
   public iso31662;
   public polygon;
   public contributors;
+  public shortName;
   public isRegion = true;
 
   constructor(params: RegionParams) {
@@ -32,6 +35,7 @@ export class Region {
     this.name = params.name;
     this.polygon = params.polygon;
     this.contributors = params.contributors;
+    this.shortName = params.shortName ?? params.name;
 
     const subdivisionEntry = iso31662.find(
       (subd) => subd.code === params.iso31662
@@ -79,5 +83,10 @@ export class Region {
 
   public isLatLngInside(latlng: L.LatLng) {
     return this.getBounds().contains(latlng);
+  }
+
+  public async getTotalNogoLength() {
+    const nogos = await this.getAllNogos();
+    return getTotalLengthOfNogos(nogos);
   }
 }

@@ -23,14 +23,30 @@ import { IconUserEdit, IconWorld } from '@tabler/icons-react';
 
 export const SelectNogosModal = (
   isMobileSize: boolean,
-  defaultValue: 'regions' | 'custom' = 'regions'
+  defaultValue: 'regions' | 'custom' = 'custom'
 ) =>
   ({
     children: <SelectNogosContent defaultValue={defaultValue} />,
     size: '800px',
-    fullScreen: isMobileSize,
     scrollAreaComponent: isMobileSize ? undefined : ScrollArea.Autosize,
+    fullScreen: isMobileSize,
     withCloseButton: false,
+    styles: isMobileSize
+      ? {
+          inner: {
+            padding: '5dvh 0 0 !important',
+          },
+          content: {
+            maxHeight: 'calc(100dvh - 5dvh) !important',
+            borderTopLeftRadius: '0.5rem !important',
+            borderTopRightRadius: '0.5rem !important',
+          },
+          body: {
+            height: '100% !important',
+            paddingBottom: '0 !important',
+          },
+        }
+      : {},
   } as ModalSettings);
 
 const SelectNogosContent: React.FC<{ defaultValue: 'regions' | 'custom' }> = ({
@@ -85,7 +101,7 @@ const SelectNogosContent: React.FC<{ defaultValue: 'regions' | 'custom' }> = ({
   };
 
   return (
-    <Stack pos='relative'>
+    <Stack pos='relative' h='100%'>
       <Center
         style={{
           position: 'absolute',
@@ -121,7 +137,7 @@ const SelectNogosContent: React.FC<{ defaultValue: 'regions' | 'custom' }> = ({
             when creating a route. Nogos are useful for avoiding unsafe
             conditions or high levels of motor vehicle traffic.{' '}
             {isMobileSize && (
-              <Anchor onClick={() => setShowWhatAreNogos(false)} inherit span>
+              <Anchor onClick={() => setShowWhatAreNogos(false)} inherit>
                 Hide
               </Anchor>
             )}
@@ -138,6 +154,27 @@ const SelectNogosContent: React.FC<{ defaultValue: 'regions' | 'custom' }> = ({
         }}
       >
         <Tabs.List>
+          <Tabs.Tab
+            value='custom'
+            icon={<IconUserEdit size='0.8rem' />}
+            rightSection={
+              unsavedSelectedNogoGroups.length ? (
+                <Badge
+                  color='green'
+                  w={16}
+                  h={16}
+                  sx={{ pointerEvents: 'none' }}
+                  variant='filled'
+                  size='xs'
+                  p={0}
+                >
+                  {unsavedSelectedNogoGroups.length}
+                </Badge>
+              ) : undefined
+            }
+          >
+            Your nogos
+          </Tabs.Tab>
           <Tabs.Tab
             value='regions'
             icon={<IconWorld size='0.8rem' />}
@@ -159,27 +196,6 @@ const SelectNogosContent: React.FC<{ defaultValue: 'regions' | 'custom' }> = ({
           >
             Regions
           </Tabs.Tab>
-          <Tabs.Tab
-            value='custom'
-            icon={<IconUserEdit size='0.8rem' />}
-            rightSection={
-              unsavedSelectedNogoGroups.length ? (
-                <Badge
-                  color='green'
-                  w={16}
-                  h={16}
-                  sx={{ pointerEvents: 'none' }}
-                  variant='filled'
-                  size='xs'
-                  p={0}
-                >
-                  {unsavedSelectedNogoGroups.length}
-                </Badge>
-              ) : undefined
-            }
-          >
-            Custom nogos
-          </Tabs.Tab>
           {[...unsavedSelectedNogoGroups, ...unsavedSelectedRegions].length >
             0 && (
             <Button
@@ -200,16 +216,16 @@ const SelectNogosContent: React.FC<{ defaultValue: 'regions' | 'custom' }> = ({
           )}
         </Tabs.List>
 
-        <Tabs.Panel value='regions' pt='xs'>
-          <Regions
-            unsavedSelectedRegions={unsavedSelectedRegions}
-            toggleRegion={toggleRegion}
-          />
-        </Tabs.Panel>
         <Tabs.Panel value='custom' pt='xs'>
           <NogoGroups
             unsavedSelectedNogoGroups={unsavedSelectedNogoGroups}
             toggleNogoGroup={toggleNogoGroup}
+          />
+        </Tabs.Panel>
+        <Tabs.Panel value='regions' pt='xs'>
+          <Regions
+            unsavedSelectedRegions={unsavedSelectedRegions}
+            toggleRegion={toggleRegion}
           />
         </Tabs.Panel>
       </Tabs>
@@ -222,7 +238,12 @@ const SelectNogosContent: React.FC<{ defaultValue: 'regions' | 'custom' }> = ({
         right={0}
         bg='white'
         style={{
-          zIndex: 1000,
+          marginTop: 'auto',
+          marginLeft: '-1rem',
+          marginRight: '-1rem',
+          paddingRight: '1rem',
+          paddingLeft: '1rem',
+          zIndex: 400,
         }}
       >
         <Group position='right'>

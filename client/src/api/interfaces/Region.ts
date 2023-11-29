@@ -11,6 +11,7 @@ export interface IRegionReturnDTO {
     role: UserRole;
     contributorProfile?: ContributorProfile;
   }[];
+  shortName?: string;
 }
 
 export interface IRegionCreateDTO

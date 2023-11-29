@@ -20,7 +20,6 @@ export class RouterApi {
       waypoint.lng,
       waypoint.lat,
     ]);
-    delete routeOptions.avoidNogos;
     const response = await makeRequest(
       `${this.baseUrl}/generateRoute`,
       'POST',
@@ -37,7 +36,8 @@ export class RouterApi {
       routeOptions,
       routes[0].properties,
       user,
-      nogoGroupIds
+      nogoGroupIds,
+      regionIds
     );
     return routes;
   }
@@ -54,7 +54,6 @@ export class RouterApi {
       waypoint.wrap().lng,
       waypoint.wrap().lat,
     ]);
-    delete routeOptions.avoidNogos;
     const response = await makeRequest(`${this.baseUrl}/downloadGPX`, 'POST', {
       points,
       nogoGroupIds,

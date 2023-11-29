@@ -1,14 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Button,
-  Group,
-  Paper,
-  Stack,
-  Text,
-  useMantineTheme,
-} from '@mantine/core';
+import React from 'react';
+import { Button, Group, Stack, Text } from '@mantine/core';
 import { useGlobalContext } from 'contexts/globalContext';
-import { NogoGroup } from 'models';
 import { IconExclamationCircle, IconPlus } from '@tabler/icons-react';
 import { ID } from 'types';
 import { openModal } from '@mantine/modals';
@@ -23,17 +15,8 @@ export const NogoGroups: React.FC<{
   unsavedSelectedNogoGroups: ID[];
   toggleNogoGroup: (id: ID) => void;
 }> = ({ unsavedSelectedNogoGroups, toggleNogoGroup }) => {
-  const theme = useMantineTheme();
-  const { loggedInUser, isMobileSize } = useGlobalContext();
-  const [userNogoGroups, setUserNogoGroups] = useState<NogoGroup[]>([]);
-
-  const refreshUserNogoGroups = () => {
-    if (!loggedInUser) {
-      setUserNogoGroups([]);
-    } else {
-      NogoGroupApi.getAllForUser().then(setUserNogoGroups);
-    }
-  };
+  const { userNogoGroups, loggedInUser, isMobileSize, refreshUserNogoGroups } =
+    useGlobalContext();
 
   const createNewNogoGroup = (attempt: number = 0) => {
     const name = 'Nogo Group' + (attempt ? ` ${attempt + 1}` : '');
@@ -52,77 +35,67 @@ export const NogoGroups: React.FC<{
       });
   };
 
-  useEffect(() => {
-    refreshUserNogoGroups();
-  }, [loggedInUser]);
-
   return (
-    <Paper shadow='sm' radius='md' p='sm' bg={theme.colors.gray[1]}>
-      <Stack spacing='sm' align='stretch' justify='flext-start'>
-        {!!loggedInUser && <Text>Your nogos</Text>}
-        {!!loggedInUser && userNogoGroups.length === 0 && (
+    <Stack spacing='sm' align='stretch' justify='flext-start'>
+      {!!loggedInUser && userNogoGroups.length === 0 && (
+        <Text align='center' size='sm'>
+          <IconExclamationCircle
+            size={20}
+            style={{ verticalAlign: 'text-bottom' }}
+          />{' '}
+          You have no custom nogos yet. Create a group to get started.
+        </Text>
+      )}
+      {loggedInUser ? (
+        <>
+          {userNogoGroups.map((nogoGroup) => (
+            <NogoGroupCard
+              key={nogoGroup._id}
+              nogoGroup={nogoGroup}
+              isSelected={unsavedSelectedNogoGroups.includes(nogoGroup._id)}
+              toggleSelect={() => toggleNogoGroup(nogoGroup._id)}
+              onNogoGroupUpdated={refreshUserNogoGroups}
+            />
+          ))}
+          <Button
+            variant='outline'
+            fullWidth
+            h={60}
+            leftIcon={<IconPlus size={18} />}
+            onClick={() => createNewNogoGroup()}
+          >
+            Create a new Nogo Group
+          </Button>
+        </>
+      ) : (
+        <>
           <Text align='center' size='sm'>
             <IconExclamationCircle
               size={20}
               style={{ verticalAlign: 'text-bottom' }}
             />{' '}
-            You have no custom nogos yet. Create a group to get started.
+            You must have an account to add your own nogos.
           </Text>
-        )}
-        {!!loggedInUser && (
-          <Stack spacing='sm' align='stretch' justify='flext-start'>
-            {userNogoGroups.map((nogoGroup) => (
-              <NogoGroupCard
-                key={nogoGroup._id}
-                nogoGroup={nogoGroup}
-                isSelected={unsavedSelectedNogoGroups.includes(nogoGroup._id)}
-                toggleSelect={() => toggleNogoGroup(nogoGroup._id)}
-                onNogoGroupUpdated={refreshUserNogoGroups}
-              />
-            ))}
+          <Group position='center' maw={356} w='100%' m='auto' grow>
             <Button
               variant='outline'
-              fullWidth
-              h={60}
-              leftIcon={<IconPlus size={18} />}
-              onClick={() => createNewNogoGroup()}
+              onClick={() =>
+                openModal(LoginModal(SelectNogosModal(isMobileSize)))
+              }
             >
-              Create a new Nogo Group
+              Sign in
             </Button>
-          </Stack>
-        )}
-        {!loggedInUser && (
-          <>
-            <Text align='center' size='sm'>
-              <IconExclamationCircle
-                size={20}
-                style={{ verticalAlign: 'text-bottom' }}
-              />{' '}
-              You must have an account to add your own nogos.
-            </Text>
-            <Group position='center' maw={356} w='100%' m='auto' grow>
-              <Button
-                onClick={() =>
-                  openModal(
-                    LoginModal(SelectNogosModal(isMobileSize, 'custom'))
-                  )
-                }
-              >
-                Sign in
-              </Button>
-              <Button
-                onClick={() =>
-                  openModal(
-                    SignupModal(SelectNogosModal(isMobileSize, 'custom'))
-                  )
-                }
-              >
-                Create account
-              </Button>
-            </Group>
-          </>
-        )}
-      </Stack>
-    </Paper>
+            <Button
+              variant='outline'
+              onClick={() =>
+                openModal(SignupModal(SelectNogosModal(isMobileSize)))
+              }
+            >
+              Create account
+            </Button>
+          </Group>
+        </>
+      )}
+    </Stack>
   );
 };

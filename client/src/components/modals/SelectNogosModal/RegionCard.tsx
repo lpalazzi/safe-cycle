@@ -79,13 +79,14 @@ export const RegionCard: React.FC<{
     setShowDetails((prev) => !prev);
   };
 
-  const isHidden = (totalLength || 0) < 10000;
+  const isHidden = (totalLength || 0) < 5000;
 
   return !isHidden || showHidden || userIsContributor ? (
     <Paper
       shadow='xs'
       p='md'
       radius='md'
+      withBorder
       bg={isSelected ? theme.colors.green[0] : undefined}
     >
       <Group position='apart' noWrap>
@@ -103,12 +104,12 @@ export const RegionCard: React.FC<{
             </Text>
           )}
           {userIsContributor && isHidden && (
-            <Text color='gray' size='xs'>
+            <Text color='red' size='xs'>
               <IconExclamationCircle
                 size={16}
                 style={{ verticalAlign: 'text-bottom' }}
               />{' '}
-              This region is hidden from users until it has at least 10km of
+              This region is hidden from users until it has at least 5km of
               nogos
             </Text>
           )}

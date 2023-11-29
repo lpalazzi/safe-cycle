@@ -29,6 +29,7 @@ export const region = (app: express.Router) => {
       const { error } = joi
         .object({
           name: joi.string().required(),
+          shortName: joi.string().required(),
           polygon: joi.geojson().polygon().required(),
           iso31662: joi.string().required(),
         })

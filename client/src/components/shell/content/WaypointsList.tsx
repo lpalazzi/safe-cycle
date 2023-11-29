@@ -49,6 +49,9 @@ import { TurnInstructions } from './TurnInstructions';
 import { FeatureFlags } from 'featureFlags';
 import { useGlobalContext } from 'contexts/globalContext';
 
+// ideas:
+//   - collapse multiple waypoints unless editing
+//   - add maximum height on mobile
 export const WaypointsList: React.FC = () => {
   const { loggedInUser, isMobileSize, setIsLoading } = useGlobalContext();
   const {
@@ -250,7 +253,7 @@ export const WaypointsList: React.FC = () => {
 
   return (
     <DndProvider backend={MultiBackend} options={HTML5toTouch}>
-      <Stack spacing='xl' className='waypoints'>
+      <Stack spacing='xl'>
         {!isMobileSize ? (
           <Text size='sm'>
             Search for your destination, or select points on the map.

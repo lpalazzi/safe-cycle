@@ -176,7 +176,6 @@ const ManageAccountContent: React.FC = () => {
         <Accordion.Panel>
           <Text>
             <Anchor
-              span
               target='_blank'
               href='https://surveys.xyzdigital.com/index.php?r=survey/index&sid=693415&lang=en'
             >

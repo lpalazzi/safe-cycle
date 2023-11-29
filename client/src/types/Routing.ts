@@ -1,5 +1,4 @@
 export type RouteOptions = {
-  avoidNogos?: boolean;
   shortest?: boolean;
   preferBikeFriendly?: boolean;
   preferCycleRoutes?: boolean;

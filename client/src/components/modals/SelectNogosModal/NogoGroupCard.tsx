@@ -76,6 +76,7 @@ export const NogoGroupCard: React.FC<{
       shadow='xs'
       p='md'
       radius='md'
+      withBorder
       bg={isSelected ? theme.colors.green[1] : undefined}
     >
       <Group position='apart' noWrap>
@@ -145,7 +146,6 @@ export const NogoGroupCard: React.FC<{
               : 'This group has no nogos. '}
             {!totalLength && (
               <Anchor
-                span
                 inherit
                 onClick={() => {
                   setEditingGroupOrRegion(nogoGroup);

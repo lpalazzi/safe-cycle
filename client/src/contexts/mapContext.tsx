@@ -175,8 +175,8 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
       setFetchingCount((prev) => prev + 1);
       RouterApi.generateRoute(
         waypoints.map((waypoint) => waypoint.latlng),
-        routeOptions.avoidNogos ? selectedNogoGroups : [],
-        routeOptions.avoidNogos ? selectedRegions : [],
+        selectedNogoGroups,
+        selectedRegions,
         { ...routeOptions, showAlternateRoutes },
         loggedInUser
       )
@@ -217,8 +217,8 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   const downloadGPX = () => {
     RouterApi.downloadGPX(
       waypoints.map((waypoint) => waypoint.latlng),
-      routeOptions.avoidNogos ? selectedNogoGroups : [],
-      routeOptions.avoidNogos ? selectedRegions : [],
+      selectedNogoGroups,
+      selectedRegions,
       { ...routeOptions, showAlternateRoutes: false },
       loggedInUser,
       selectedRouteIndex ?? 0

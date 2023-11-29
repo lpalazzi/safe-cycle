@@ -1,40 +1,38 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   useMantineTheme,
   Stack,
   Checkbox,
   Input,
   SegmentedControl,
-  Space,
-  Tooltip,
   Grid,
   Image,
   Text,
   Paper,
   Title,
   Select,
-  Switch,
   Group,
   ActionIcon,
+  Chip,
 } from '@mantine/core';
 import { useModals } from '@mantine/modals';
 import { useMediaQuery } from '@mantine/hooks';
 import {
   IconChevronsDown,
   IconChevronsUp,
-  IconInfoCircle,
   IconRoute2,
   IconUserCog,
 } from '@tabler/icons-react';
-import { ComfortLevel, RouteOptions, SurfacePreference } from 'types';
+import { ComfortLevel, ID, RouteOptions, SurfacePreference } from 'types';
 import { useGlobalContext } from 'contexts/globalContext';
 import { SidebarTitle } from '../common/SidebarTitle';
-import { AboutModal } from 'components/modals/AboutModal';
 
 import LowComfortIcon from 'assets/comfortlevels/2-low.png';
 import MediumComfortIcon from 'assets/comfortlevels/3-medium.png';
 import HighComfortIcon from 'assets/comfortlevels/4-high.png';
 import { SelectNogosModal } from 'components/modals/SelectNogosModal/SelectNogosModal';
+import { useMapContext } from 'contexts/mapContext';
+import { NogoGroup, Region } from 'models';
 
 const comfortPresets: { [key: string]: Partial<RouteOptions> } = {
   Shortest: {
@@ -59,6 +57,9 @@ const comfortPresets: { [key: string]: Partial<RouteOptions> } = {
   },
 };
 
+// TODO:
+//   - see drawings for new design
+//   - hide regions with less than 5km of nogos
 export const RoutePreferences: React.FC = () => {
   const {
     routeOptions,
@@ -66,14 +67,107 @@ export const RoutePreferences: React.FC = () => {
     showAlternateRoutes,
     isMobileSize,
     isNavbarCondensed,
+    selectedNogoGroups,
+    selectedRegions,
+    regions,
+    userNogoGroups,
     setSelectedComfortLevel,
+    setSelectedNogoGroups,
+    setSelectedRegions,
     toggleNavbarExpanded,
     updateRouteOptions,
     setShowAlternateRoutes,
+    getLocationSortedRegions,
+    getLengthSortedRegions,
   } = useGlobalContext();
+  const { currentLocation } = useMapContext();
   const { openModal } = useModals();
+  const theme = useMantineTheme();
   const isSmallWidth = useMediaQuery('(max-width: 382px)');
   const isExtraSmallWidth = useMediaQuery('(max-width: 363px)');
+  const [suggestedRegions, setSuggestedRegions] = useState<Region[]>([]);
+  const [suggestedNogoGroups, setSuggestedNogoGroups] = useState<NogoGroup[]>(
+    []
+  );
+
+  const chips = useMemo(
+    () =>
+      [
+        ...suggestedNogoGroups.map((group) => ({
+          label: group.name,
+          value: group._id,
+          isRegion: false,
+        })),
+        ...suggestedRegions.map((region) => ({
+          label: region.shortName,
+          value: region._id,
+          isRegion: true,
+        })),
+      ].slice(0, 5),
+    [suggestedRegions, suggestedNogoGroups, isMobileSize]
+  );
+
+  useEffect(() => {
+    const allSelectedNogoGroupsInSuggestedNogoGroups = selectedNogoGroups.every(
+      (id) => chips.some((chip) => chip.value === id)
+    );
+    if (allSelectedNogoGroupsInSuggestedNogoGroups) return;
+    setSuggestedNogoGroups(
+      userNogoGroups.filter((group) => selectedNogoGroups.includes(group._id))
+    );
+  }, [userNogoGroups, selectedNogoGroups]);
+
+  useEffect(() => {
+    const allSelectedRegionsInSuggestedRegions =
+      selectedRegions.length > 0 &&
+      selectedRegions.every((id) => chips.some((chip) => chip.value === id));
+    if (allSelectedRegionsInSuggestedRegions) return;
+    const selectedRegionObjs = regions.filter((region) =>
+      selectedRegions.includes(region._id)
+    );
+    if (selectedRegionObjs.length >= 4) {
+      setSuggestedRegions(selectedRegionObjs);
+    } else if (currentLocation) {
+      const locationSortedRegions = getLocationSortedRegions(currentLocation);
+      const regionsToSuggest = [
+        ...selectedRegionObjs,
+        ...locationSortedRegions.filter(
+          (region) => !selectedRegions.includes(region._id)
+        ),
+      ];
+      setSuggestedRegions(regionsToSuggest);
+    } else {
+      getLengthSortedRegions().then((lengthSortedRegions) => {
+        const regionsToSuggest = [
+          ...selectedRegionObjs,
+          ...lengthSortedRegions.filter(
+            (region) => !selectedRegions.includes(region._id)
+          ),
+        ];
+        setSuggestedRegions(regionsToSuggest);
+      });
+    }
+  }, [regions, currentLocation, selectedRegions]);
+
+  const handleRegionChipToggled = (id: ID, isRegion: boolean) => {
+    if (isRegion) {
+      if (selectedRegions.includes(id)) {
+        setSelectedRegions(
+          [...selectedRegions].filter((region) => region !== id)
+        );
+      } else {
+        setSelectedRegions([...selectedRegions, id]);
+      }
+    } else {
+      if (selectedNogoGroups.includes(id)) {
+        setSelectedNogoGroups(
+          [...selectedNogoGroups].filter((group) => group !== id)
+        );
+      } else {
+        setSelectedNogoGroups([...selectedNogoGroups, id]);
+      }
+    }
+  };
 
   const handleComfortLevelSelected = (value: ComfortLevel) => {
     setSelectedComfortLevel(value);
@@ -81,63 +175,92 @@ export const RoutePreferences: React.FC = () => {
   };
 
   const condensed = (
-    <Group position='apart' spacing={0}>
-      <Group
-        position='left'
-        spacing='xs'
-        style={{ position: 'relative', zIndex: 0 }}
-      >
-        <Switch
-          className='avoid-nogos'
-          label='Avoid nogos'
-          checked={routeOptions.avoidNogos}
-          size={isSmallWidth ? (isExtraSmallWidth ? 'xs' : 'sm') : 'md'}
-          onChange={(e) => {
-            if (e.currentTarget.checked) {
-              openModal(SelectNogosModal(isMobileSize));
-            } else {
-              updateRouteOptions({ avoidNogos: e.currentTarget.checked });
+    <Paper shadow='sm' radius='md' p='sm' bg={theme.colors.gray[1]}>
+      <Stack justify='flex-start' spacing='xs'>
+        <Group position='left' spacing='0.25rem'>
+          <Text size='xs'>Avoid nogos: </Text>
+          {chips.map((chip) => {
+            const isSelected = [
+              ...selectedNogoGroups,
+              ...selectedRegions,
+            ].includes(chip.value);
+            return (
+              <Chip
+                size='xs'
+                checked={isSelected}
+                onChange={() =>
+                  handleRegionChipToggled(chip.value, chip.isRegion)
+                }
+                styles={{ root: { height: 26 } }}
+              >
+                {chip.label}
+              </Chip>
+            );
+          })}
+          <Chip
+            size='xs'
+            checked={false}
+            variant='light'
+            onChange={() =>
+              openModal(SelectNogosModal(isMobileSize, 'regions'))
             }
-          }}
-        />
-        <SegmentedControl
-          value={selectedComfortLevel}
-          onChange={handleComfortLevelSelected}
-          radius='xl'
-          size='xs'
-          transitionDuration={0}
-          styles={{
-            label: { padding: '0.375rem', fontSize: 0 },
-            indicator: { translate: '0.5px 0' },
-          }}
-          data={[
-            {
-              value: 'Low',
-              label: <Image src={LowComfortIcon} width='1.5rem' mih='1.5rem' />,
-            },
-            {
-              value: 'Medium',
-              label: (
-                <Image src={MediumComfortIcon} width='1.5rem' mih='1.5rem' />
-              ),
-            },
-            {
-              value: 'High',
-              label: (
-                <Image src={HighComfortIcon} width='1.5rem' mih='1.5rem' />
-              ),
-            },
-            {
-              value: 'Shortest',
-              label: <IconRoute2 size={20} />,
-            },
-          ]}
-        />
-      </Group>
-      <ActionIcon onClick={toggleNavbarExpanded} size='lg'>
-        <IconChevronsDown color='black' size={26} />
-      </ActionIcon>
-    </Group>
+          >
+            More
+          </Chip>
+        </Group>
+        <Group position='apart' spacing={0}>
+          <Group
+            position='left'
+            spacing='xs'
+            style={{ position: 'relative', zIndex: 0 }}
+          >
+            <Text size='sm'>Comfort level: </Text>
+            <SegmentedControl
+              value={selectedComfortLevel}
+              onChange={handleComfortLevelSelected}
+              radius='xl'
+              size='xs'
+              transitionDuration={0}
+              styles={{
+                label: { padding: '0.375rem', fontSize: 0 },
+                indicator: { translate: '0.5px 0' },
+              }}
+              data={[
+                {
+                  value: 'Low',
+                  label: (
+                    <Image src={LowComfortIcon} width='1.5rem' mih='1.5rem' />
+                  ),
+                },
+                {
+                  value: 'Medium',
+                  label: (
+                    <Image
+                      src={MediumComfortIcon}
+                      width='1.5rem'
+                      mih='1.5rem'
+                    />
+                  ),
+                },
+                {
+                  value: 'High',
+                  label: (
+                    <Image src={HighComfortIcon} width='1.5rem' mih='1.5rem' />
+                  ),
+                },
+                {
+                  value: 'Shortest',
+                  label: <IconRoute2 size={20} />,
+                },
+              ]}
+            />
+          </Group>
+          <ActionIcon onClick={toggleNavbarExpanded} size='lg'>
+            <IconChevronsDown color='black' size={26} />
+          </ActionIcon>
+        </Group>
+      </Stack>
+    </Paper>
   );
 
   const expanded = (
@@ -152,49 +275,44 @@ export const RoutePreferences: React.FC = () => {
           <div></div>
         )}
       </Group>
-      <Switch
-        className='avoid-nogos'
-        label={
-          <div style={{ display: 'flex' }}>
-            Avoid nogos
-            <Space w='xs' />
-            <Tooltip
-              withArrow
-              label='What are nogos?'
-              transitionProps={{
-                transition: 'fade',
-                duration: 200,
-              }}
-            >
-              <IconInfoCircle
-                size={16}
-                style={{
-                  lineHeight: 1.55,
-                  margin: 'auto',
-                  cursor: 'pointer',
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  openModal(AboutModal('nogos', isMobileSize));
-                }}
-              />
-            </Tooltip>
-          </div>
-        }
-        checked={routeOptions.avoidNogos}
-        onChange={(e) => {
-          if (e.currentTarget.checked) {
-            openModal(SelectNogosModal(isMobileSize));
-          } else {
-            updateRouteOptions({ avoidNogos: e.currentTarget.checked });
-          }
-        }}
-      />
+
       <Stack
         spacing='xs'
         className='comfort-level'
         style={{ position: 'relative', zIndex: 0 }}
       >
+        <Input.Wrapper label='Avoid nogos'>
+          <Group position='left' spacing='0.25rem'>
+            {chips.map((chip) => {
+              const isSelected = [
+                ...selectedNogoGroups,
+                ...selectedRegions,
+              ].includes(chip.value);
+              return (
+                <Chip
+                  size='xs'
+                  checked={isSelected}
+                  onChange={() =>
+                    handleRegionChipToggled(chip.value, chip.isRegion)
+                  }
+                  styles={{ root: { height: 26 } }}
+                >
+                  {chip.label}
+                </Chip>
+              );
+            })}
+            <Chip
+              size='xs'
+              checked={false}
+              variant='light'
+              onChange={() =>
+                openModal(SelectNogosModal(isMobileSize, 'regions'))
+              }
+            >
+              More
+            </Chip>
+          </Group>
+        </Input.Wrapper>
         <Input.Wrapper label='Select a comfort level'>
           <SegmentedControl
             fullWidth

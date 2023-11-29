@@ -1,11 +1,17 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from 'react';
 import { showNotification } from '@mantine/notifications';
 import { NogoGroupApi, RegionApi, UserApi } from 'api';
 import { NogoGroup, Region, User } from 'models';
-import { ComfortLevel, ID, RouteOptions } from 'types';
+import { ComfortLevel, ID, Location, RouteOptions } from 'types';
 import { useMediaQuery } from '@mantine/hooks';
 import { openModal } from '@mantine/modals';
-import { AboutModal } from 'components/modals/AboutModal';
 import { SurveyModal } from 'components/modals/SurveyModal';
 
 type GlobalContextType =
@@ -23,7 +29,7 @@ type GlobalContextType =
       selectedComfortLevel: ComfortLevel;
       showAlternateRoutes: boolean;
       regions: Region[];
-      showTour: boolean;
+      userNogoGroups: NogoGroup[];
       isLoading: boolean;
       // functions
       updateLoggedInUser: () => void;
@@ -40,7 +46,9 @@ type GlobalContextType =
       setSelectedComfortLevel: (value: ComfortLevel) => void;
       setShowAlternateRoutes: (val: boolean) => void;
       refreshRegions: () => void;
-      setShowTour: (val: boolean) => void;
+      refreshUserNogoGroups: () => void;
+      getLocationSortedRegions: (location: Location | null) => Region[];
+      getLengthSortedRegions: () => Promise<Region[]>;
       setIsLoading: (val: boolean) => void;
     }
   | undefined;
@@ -56,7 +64,6 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
 ) => {
   const isMobileSize = useMediaQuery('(max-width: 767px)');
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
-  const [showTour, setShowTour] = useState(false);
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
   const [isNavbarExpanded, setIsNavbarExpanded] = useState(false);
   const [isNavModeOn, setIsNavModeOn] = useState(false);
@@ -66,7 +73,6 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     NogoGroup | Region | null
   >(null);
   const [routeOptions, setRouteOptions] = useState<RouteOptions>({
-    avoidNogos: false,
     shortest: false,
     preferBikeFriendly: true,
     preferCycleRoutes: true,
@@ -76,6 +82,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     useState<ComfortLevel>('High');
   const [showAlternateRoutes, setShowAlternateRoutes] = useState(false);
   const [regions, setRegions] = useState<Region[]>([]);
+  const [userNogoGroups, setUserNogoGroups] = useState<NogoGroup[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -85,20 +92,13 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     getStoredSelectedRegions();
     getStoredSelectedNogoGroups();
     refreshRegions();
+    refreshUserNogoGroups();
   }, []);
 
   const countSiteVisits = () => {
     var visited = Number(window.localStorage.getItem('visited'));
     if (isNaN(visited)) visited = 0;
     window.localStorage.setItem('visited', (visited + 1).toFixed(0));
-  };
-
-  const openInfoModalOnFirstVisit = () => {
-    var visited = Number(window.localStorage.getItem('visited'));
-    if (!visited) {
-      const isMobileSize = window.matchMedia('(max-width: 767px)').matches; // useMediaQuery state is still undefined on initial load
-      if (!isMobileSize) openModal(AboutModal('about', isMobileSize));
-    }
   };
 
   const openSurveyModalOnManyVisits = () => {
@@ -171,10 +171,21 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     });
   };
 
-  const refreshRegions = async () => {
+  const refreshRegions = useCallback(async () => {
     try {
       const fetchedRegions = await RegionApi.getAll();
-      setRegions(fetchedRegions);
+      const alphaSortFunction = (a: Region, b: Region) => {
+        const compareRegion = (
+          a.iso31662?.nameWithCountry || 'zzz'
+        ).localeCompare(b.iso31662?.nameWithCountry || 'zzz');
+        if (compareRegion === 0) {
+          return a.name.localeCompare(b.name);
+        }
+        return compareRegion;
+      };
+      const newAlphaSortedRegions = [...fetchedRegions];
+      newAlphaSortedRegions.sort(alphaSortFunction);
+      setRegions(newAlphaSortedRegions);
     } catch (error: any) {
       showNotification({
         title: 'Error fetching regions',
@@ -182,7 +193,72 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         color: 'red',
       });
     }
+  }, []);
+
+  const getLocationSortedRegions = useCallback(
+    (location: Location | null) => {
+      if (location) {
+        const locationSortFunction = (a: Region, b: Region) => {
+          const isInA = a.isLatLngInside(location.latlng);
+          const isInB = b.isLatLngInside(location.latlng);
+          const aDistance = isInA ? 0 : a.getDistanceTo(location.latlng);
+          const bDistance = isInB ? 0 : b.getDistanceTo(location.latlng);
+          return aDistance - bDistance;
+        };
+        const locationSortedRegions = [...regions];
+        locationSortedRegions.sort(locationSortFunction);
+
+        return locationSortedRegions;
+      } else {
+        return [];
+      }
+    },
+    [regions]
+  );
+
+  const lengthSortedRegions = useMemo(async () => {
+    console.log('length sorting regions');
+    const regionsWithLengths = await Promise.all(
+      regions.map(async (region) => {
+        return {
+          region,
+          length: await region.getTotalNogoLength(),
+        };
+      })
+    );
+    const sortFunction = (
+      a: { region: Region; length: number },
+      b: { region: Region; length: number }
+    ) => b.length - a.length;
+    regionsWithLengths.sort(sortFunction);
+    const sortedRegions = regionsWithLengths.map((obj) => obj.region);
+    return sortedRegions;
+  }, [regions]);
+
+  const getLengthSortedRegions = useCallback(async () => {
+    return lengthSortedRegions;
+  }, [lengthSortedRegions]);
+
+  const refreshUserNogoGroups = async () => {
+    try {
+      if (!loggedInUser) {
+        setUserNogoGroups([]);
+      } else {
+        const fetchedUserNogoGroups = await NogoGroupApi.getAllForUser();
+        setUserNogoGroups(fetchedUserNogoGroups);
+      }
+    } catch (error: any) {
+      showNotification({
+        title: 'Error fetching nogo groups',
+        message: error.message ?? 'Unhandled error',
+        color: 'red',
+      });
+    }
   };
+
+  useEffect(() => {
+    refreshUserNogoGroups();
+  }, [loggedInUser]);
 
   useEffect(() => {
     window.localStorage.setItem(
@@ -240,7 +316,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         selectedComfortLevel,
         showAlternateRoutes,
         regions,
-        showTour,
+        userNogoGroups,
         isLoading,
         updateLoggedInUser,
         logoutUser,
@@ -256,7 +332,9 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         setSelectedComfortLevel,
         setShowAlternateRoutes,
         refreshRegions,
-        setShowTour,
+        refreshUserNogoGroups,
+        getLocationSortedRegions,
+        getLengthSortedRegions,
         setIsLoading,
       }}
     >
