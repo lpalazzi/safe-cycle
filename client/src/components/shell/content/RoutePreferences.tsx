@@ -12,20 +12,16 @@ import {
   Title,
   Select,
   Group,
-  ActionIcon,
   Chip,
+  Button,
+  Badge,
+  Collapse,
 } from '@mantine/core';
 import { useModals } from '@mantine/modals';
 import { useMediaQuery } from '@mantine/hooks';
-import {
-  IconChevronsDown,
-  IconChevronsUp,
-  IconRoute2,
-  IconUserCog,
-} from '@tabler/icons-react';
+import { IconRoute2, IconUserCog } from '@tabler/icons-react';
 import { ComfortLevel, ID, RouteOptions, SurfacePreference } from 'types';
 import { useGlobalContext } from 'contexts/globalContext';
-import { SidebarTitle } from '../common/SidebarTitle';
 
 import LowComfortIcon from 'assets/comfortlevels/2-low.png';
 import MediumComfortIcon from 'assets/comfortlevels/3-medium.png';
@@ -66,7 +62,6 @@ export const RoutePreferences: React.FC = () => {
     selectedComfortLevel,
     showAlternateRoutes,
     isMobileSize,
-    isNavbarCondensed,
     selectedNogoGroups,
     selectedRegions,
     regions,
@@ -74,7 +69,6 @@ export const RoutePreferences: React.FC = () => {
     setSelectedComfortLevel,
     setSelectedNogoGroups,
     setSelectedRegions,
-    toggleNavbarExpanded,
     updateRouteOptions,
     setShowAlternateRoutes,
     getLocationSortedRegions,
@@ -89,6 +83,9 @@ export const RoutePreferences: React.FC = () => {
   const [suggestedNogoGroups, setSuggestedNogoGroups] = useState<NogoGroup[]>(
     []
   );
+  const [expandedSetting, setExpandedSetting] = useState<
+    'nogos' | 'comfort' | 'all' | false
+  >(false);
 
   const chips = useMemo(
     () =>
@@ -174,273 +171,295 @@ export const RoutePreferences: React.FC = () => {
     if (value !== 'Custom') updateRouteOptions(comfortPresets[value]);
   };
 
-  const condensed = (
-    <Paper shadow='sm' radius='md' p='sm' bg={theme.colors.gray[1]}>
-      <Stack justify='flex-start' spacing='xs'>
-        <Group position='left' spacing='0.25rem'>
-          <Text size='xs'>Avoid nogos: </Text>
-          {chips.map((chip) => {
-            const isSelected = [
-              ...selectedNogoGroups,
-              ...selectedRegions,
-            ].includes(chip.value);
-            return (
-              <Chip
+  const handleCondensedSettingButtonClicked = (
+    selected: 'nogos' | 'comfort' | 'all'
+  ) => {
+    if (selected === expandedSetting) {
+      setExpandedSetting(false);
+    } else {
+      setExpandedSetting(selected);
+    }
+  };
+
+  const selectedGroupsOrRegions =
+    selectedRegions.length + selectedNogoGroups.length;
+
+  let selectedComfortLevelIcon = <></>;
+  switch (selectedComfortLevel) {
+    case 'Low':
+      selectedComfortLevelIcon = (
+        <Image src={LowComfortIcon} width={14} mih={14} />
+      );
+      break;
+    case 'Medium':
+      selectedComfortLevelIcon = (
+        <Image src={MediumComfortIcon} width={14} mih={14} />
+      );
+      break;
+    case 'High':
+      selectedComfortLevelIcon = (
+        <Image src={HighComfortIcon} width={14} mih={14} />
+      );
+      break;
+    case 'Shortest':
+      selectedComfortLevelIcon = <IconRoute2 size={14} />;
+      break;
+    case 'Custom':
+      selectedComfortLevelIcon = <IconUserCog size={14} />;
+      break;
+  }
+
+  return (
+    <Stack justify='flex-start' spacing='xs'>
+      <Button.Group ml='auto' mr='auto' w='100%'>
+        <Button
+          fullWidth
+          variant={expandedSetting === 'nogos' ? 'filled' : 'default'}
+          size='xs'
+          onClick={() => handleCondensedSettingButtonClicked('nogos')}
+        >
+          Avoid nogos
+          {selectedGroupsOrRegions > 0 && (
+            <span style={{ marginLeft: '0.25rem' }}>
+              <Badge
+                color='green'
+                w={14}
+                h={14}
+                sx={{ pointerEvents: 'none' }}
+                variant='filled'
                 size='xs'
-                checked={isSelected}
-                onChange={() =>
-                  handleRegionChipToggled(chip.value, chip.isRegion)
-                }
-                styles={{ root: { height: 26 } }}
+                p={0}
               >
-                {chip.label}
-              </Chip>
-            );
-          })}
-          <Chip
-            size='xs'
-            checked={false}
-            variant='light'
-            onChange={() =>
-              openModal(SelectNogosModal(isMobileSize, 'regions'))
-            }
-          >
-            More
-          </Chip>
-        </Group>
-        <Group position='apart' spacing={0}>
-          <Group
-            position='left'
-            spacing='xs'
-            style={{ position: 'relative', zIndex: 0 }}
-          >
-            <Text size='sm'>Comfort level: </Text>
-            <SegmentedControl
-              value={selectedComfortLevel}
-              onChange={handleComfortLevelSelected}
-              radius='xl'
-              size='xs'
-              transitionDuration={0}
-              styles={{
-                label: { padding: '0.375rem', fontSize: 0 },
-                indicator: { translate: '0.5px 0' },
-              }}
-              data={[
-                {
-                  value: 'Low',
-                  label: (
-                    <Image src={LowComfortIcon} width='1.5rem' mih='1.5rem' />
-                  ),
-                },
-                {
-                  value: 'Medium',
-                  label: (
-                    <Image
-                      src={MediumComfortIcon}
-                      width='1.5rem'
-                      mih='1.5rem'
-                    />
-                  ),
-                },
-                {
-                  value: 'High',
-                  label: (
-                    <Image src={HighComfortIcon} width='1.5rem' mih='1.5rem' />
-                  ),
-                },
-                {
-                  value: 'Shortest',
-                  label: <IconRoute2 size={20} />,
-                },
-              ]}
-            />
-          </Group>
-          <ActionIcon onClick={toggleNavbarExpanded} size='lg'>
-            <IconChevronsDown color='black' size={26} />
-          </ActionIcon>
-        </Group>
-      </Stack>
-    </Paper>
-  );
-
-  const expanded = (
-    <Stack spacing='xs'>
-      <Group position='apart'>
-        <SidebarTitle title='Route Preferences' />
-        {isMobileSize ? (
-          <ActionIcon onClick={toggleNavbarExpanded} size='lg'>
-            <IconChevronsUp color='black' size={26} />
-          </ActionIcon>
-        ) : (
-          <div></div>
-        )}
-      </Group>
-
-      <Stack
-        spacing='xs'
-        className='comfort-level'
-        style={{ position: 'relative', zIndex: 0 }}
+                {selectedGroupsOrRegions}
+              </Badge>
+            </span>
+          )}
+        </Button>
+        <Button
+          fullWidth
+          variant={expandedSetting === 'comfort' ? 'filled' : 'default'}
+          size='xs'
+          onClick={() => handleCondensedSettingButtonClicked('comfort')}
+        >
+          Comfort level
+          <span style={{ marginLeft: '0.25rem' }}>
+            {selectedComfortLevelIcon}
+          </span>
+        </Button>
+        <Button
+          fullWidth
+          variant={expandedSetting === 'all' ? 'filled' : 'default'}
+          size='xs'
+          onClick={() => handleCondensedSettingButtonClicked('all')}
+        >
+          All preferences
+        </Button>
+      </Button.Group>
+      <Paper
+        display={expandedSetting ? 'block' : 'none'}
+        shadow='sm'
+        radius='md'
+        p='sm'
+        bg={theme.colors.gray[1]}
       >
-        <Input.Wrapper label='Avoid nogos'>
-          <Group position='left' spacing='0.25rem'>
-            {chips.map((chip) => {
-              const isSelected = [
-                ...selectedNogoGroups,
-                ...selectedRegions,
-              ].includes(chip.value);
-              return (
-                <Chip
-                  size='xs'
-                  checked={isSelected}
-                  onChange={() =>
-                    handleRegionChipToggled(chip.value, chip.isRegion)
-                  }
-                  styles={{ root: { height: 26 } }}
-                >
-                  {chip.label}
-                </Chip>
-              );
-            })}
-            <Chip
-              size='xs'
-              checked={false}
-              variant='light'
-              onChange={() =>
-                openModal(SelectNogosModal(isMobileSize, 'regions'))
+        <Stack spacing='sm'>
+          <Collapse
+            in={expandedSetting && ['nogos', 'all'].includes(expandedSetting)}
+          >
+            <Input.Wrapper
+              label={
+                expandedSetting === 'all' ? 'Select nogos to avoid' : undefined
               }
             >
-              More
-            </Chip>
-          </Group>
-        </Input.Wrapper>
-        <Input.Wrapper label='Select a comfort level'>
-          <SegmentedControl
-            fullWidth
-            value={selectedComfortLevel}
-            onChange={handleComfortLevelSelected}
-            transitionDuration={0}
-            data={[
-              {
-                value: 'Low',
-                label: (
-                  <Stack align='center' spacing={0}>
-                    <Image src={LowComfortIcon} width='2rem' mih='2rem' />
-                    Low
-                  </Stack>
-                ),
-              },
-              {
-                value: 'Medium',
-                label: (
-                  <Stack align='center' spacing={0}>
-                    <Image src={MediumComfortIcon} width='2rem' mih='2rem' />
-                    Medium
-                  </Stack>
-                ),
-              },
-              {
-                value: 'High',
-                label: (
-                  <Stack align='center' spacing={0}>
-                    <Image src={HighComfortIcon} width='2rem' mih='2rem' />
-                    High
-                  </Stack>
-                ),
-              },
-              {
-                value: 'Shortest',
-                label: (
-                  <Stack align='center' spacing={0}>
-                    <IconRoute2 size='2rem' />
-                    Shortest
-                  </Stack>
-                ),
-              },
-              {
-                value: 'Custom',
-                label: (
-                  <Stack align='center' spacing={0}>
-                    <IconUserCog size='2rem' />
-                    Custom
-                  </Stack>
-                ),
-              },
-            ]}
-          />
-        </Input.Wrapper>
-        {selectedComfortLevel === 'Custom' ? (
-          <>
-            <Checkbox
-              label='Prefer bike-friendly roads'
-              checked={routeOptions.preferBikeFriendly}
-              disabled={routeOptions.preferCycleRoutes || routeOptions.shortest}
-              onChange={(e) =>
-                updateRouteOptions({
-                  preferBikeFriendly: e.currentTarget.checked,
-                })
+              <Group position='left' spacing='0.25rem'>
+                {chips.map((chip) => {
+                  const isSelected = [
+                    ...selectedNogoGroups,
+                    ...selectedRegions,
+                  ].includes(chip.value);
+                  return (
+                    <Chip
+                      size='xs'
+                      checked={isSelected}
+                      onChange={() =>
+                        handleRegionChipToggled(chip.value, chip.isRegion)
+                      }
+                      styles={{ root: { height: 26 } }}
+                    >
+                      {chip.label}
+                    </Chip>
+                  );
+                })}
+                <Chip
+                  size='xs'
+                  checked={false}
+                  variant='light'
+                  onChange={() =>
+                    openModal(SelectNogosModal(isMobileSize, 'regions'))
+                  }
+                >
+                  More
+                </Chip>
+              </Group>
+            </Input.Wrapper>
+          </Collapse>
+          <Collapse
+            in={expandedSetting && ['comfort', 'all'].includes(expandedSetting)}
+          >
+            <Input.Wrapper
+              label={
+                expandedSetting === 'all' ? 'Select comfort level' : undefined
               }
-            />
-            <Checkbox
-              label='Prefer dedicated cycle routes'
-              checked={routeOptions.preferCycleRoutes}
-              disabled={routeOptions.shortest}
-              onChange={(e) =>
-                updateRouteOptions({
-                  preferCycleRoutes: e.currentTarget.checked,
-                  preferBikeFriendly: e.currentTarget.checked
-                    ? true
-                    : routeOptions.preferBikeFriendly,
-                })
-              }
-            />
-            <Checkbox
-              label='Find shortest available route'
-              checked={routeOptions.shortest}
-              onChange={(e) =>
-                updateRouteOptions({
-                  shortest: e.currentTarget.checked,
-                  preferBikeFriendly: e.currentTarget.checked
-                    ? false
-                    : routeOptions.preferBikeFriendly,
-                  preferCycleRoutes: e.currentTarget.checked
-                    ? false
-                    : routeOptions.preferCycleRoutes,
-                })
-              }
-            />
-          </>
-        ) : (
-          <ComfortLevel comfortLevel={selectedComfortLevel} />
-        )}
-      </Stack>
-      <Stack spacing='xs' className='additional-preferences'>
-        <Input.Wrapper label='Surface preference'>
-          <Select
-            value={routeOptions.surfacePreference || 'none'}
-            onChange={(val) =>
-              updateRouteOptions({
-                surfacePreference: val as SurfacePreference,
-              })
-            }
-            data={[
-              { label: 'No preference', value: 'none' },
-              { label: 'Prefer paved surfaces', value: 'preferPaved' },
-              { label: 'Only use paved surfaces', value: 'strictPaved' },
-              { label: 'Prefer unpaved surfaces', value: 'preferUnpaved' },
-            ]}
-          />
-        </Input.Wrapper>
-        <Checkbox
-          label='Show alternate routes'
-          checked={showAlternateRoutes}
-          onChange={(e) => setShowAlternateRoutes(e.currentTarget.checked)}
-          disabled={routeOptions.shortest}
-        />
-      </Stack>
+            >
+              <Stack
+                spacing='xs'
+                className='comfort-level'
+                style={{ position: 'relative', zIndex: 0 }}
+              >
+                <SegmentedControl
+                  fullWidth
+                  value={selectedComfortLevel}
+                  onChange={handleComfortLevelSelected}
+                  transitionDuration={0}
+                  data={[
+                    {
+                      value: 'Low',
+                      label: (
+                        <Stack align='center' spacing={0}>
+                          <Image src={LowComfortIcon} width='2rem' mih='2rem' />
+                          Low
+                        </Stack>
+                      ),
+                    },
+                    {
+                      value: 'Medium',
+                      label: (
+                        <Stack align='center' spacing={0}>
+                          <Image
+                            src={MediumComfortIcon}
+                            width='2rem'
+                            mih='2rem'
+                          />
+                          Medium
+                        </Stack>
+                      ),
+                    },
+                    {
+                      value: 'High',
+                      label: (
+                        <Stack align='center' spacing={0}>
+                          <Image
+                            src={HighComfortIcon}
+                            width='2rem'
+                            mih='2rem'
+                          />
+                          High
+                        </Stack>
+                      ),
+                    },
+                    {
+                      value: 'Shortest',
+                      label: (
+                        <Stack align='center' spacing={0}>
+                          <IconRoute2 size='2rem' />
+                          Shortest
+                        </Stack>
+                      ),
+                    },
+                    {
+                      value: 'Custom',
+                      label: (
+                        <Stack align='center' spacing={0}>
+                          <IconUserCog size='2rem' />
+                          Custom
+                        </Stack>
+                      ),
+                    },
+                  ]}
+                />
+                {selectedComfortLevel === 'Custom' ? (
+                  <>
+                    <Checkbox
+                      label='Prefer bike-friendly roads'
+                      checked={routeOptions.preferBikeFriendly}
+                      disabled={
+                        routeOptions.preferCycleRoutes || routeOptions.shortest
+                      }
+                      onChange={(e) =>
+                        updateRouteOptions({
+                          preferBikeFriendly: e.currentTarget.checked,
+                        })
+                      }
+                    />
+                    <Checkbox
+                      label='Prefer dedicated cycle routes'
+                      checked={routeOptions.preferCycleRoutes}
+                      disabled={routeOptions.shortest}
+                      onChange={(e) =>
+                        updateRouteOptions({
+                          preferCycleRoutes: e.currentTarget.checked,
+                          preferBikeFriendly: e.currentTarget.checked
+                            ? true
+                            : routeOptions.preferBikeFriendly,
+                        })
+                      }
+                    />
+                    <Checkbox
+                      label='Find shortest available route'
+                      checked={routeOptions.shortest}
+                      onChange={(e) =>
+                        updateRouteOptions({
+                          shortest: e.currentTarget.checked,
+                          preferBikeFriendly: e.currentTarget.checked
+                            ? false
+                            : routeOptions.preferBikeFriendly,
+                          preferCycleRoutes: e.currentTarget.checked
+                            ? false
+                            : routeOptions.preferCycleRoutes,
+                        })
+                      }
+                    />
+                  </>
+                ) : (
+                  <ComfortLevel comfortLevel={selectedComfortLevel} />
+                )}
+              </Stack>
+            </Input.Wrapper>
+          </Collapse>
+          <Collapse in={expandedSetting === 'all'}>
+            <Stack spacing='xs' className='additional-preferences'>
+              <Select
+                label='Surface preference'
+                value={routeOptions.surfacePreference || 'none'}
+                onChange={(val) =>
+                  updateRouteOptions({
+                    surfacePreference: val as SurfacePreference,
+                  })
+                }
+                data={[
+                  { label: 'No preference', value: 'none' },
+                  { label: 'Prefer paved surfaces', value: 'preferPaved' },
+                  { label: 'Only use paved surfaces', value: 'strictPaved' },
+                  {
+                    label: 'Prefer unpaved surfaces',
+                    value: 'preferUnpaved',
+                  },
+                ]}
+              />
+              <Checkbox
+                label='Show alternate routes'
+                checked={showAlternateRoutes}
+                onChange={(e) =>
+                  setShowAlternateRoutes(e.currentTarget.checked)
+                }
+                disabled={routeOptions.shortest}
+              />
+            </Stack>
+          </Collapse>
+        </Stack>
+      </Paper>
     </Stack>
   );
-
-  return isNavbarCondensed ? condensed : expanded;
 };
 
 const ComfortLevel: React.FC<{ comfortLevel: string }> = React.memo(
@@ -477,7 +496,7 @@ const ComfortLevel: React.FC<{ comfortLevel: string }> = React.memo(
     }
 
     return (
-      <Paper shadow='sm' radius='md' p='sm' bg={theme.colors.gray[1]}>
+      <Paper shadow='sm' radius='md' p='sm'>
         <Grid align='center' gutter={0} mih={100}>
           <Grid.Col span={5}>
             <div

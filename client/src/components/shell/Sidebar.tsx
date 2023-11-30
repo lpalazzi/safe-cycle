@@ -1,14 +1,13 @@
 import React from 'react';
-import { Divider, Navbar, ScrollArea } from '@mantine/core';
+import { Navbar, ScrollArea } from '@mantine/core';
 import { useGlobalContext } from 'contexts/globalContext';
-import { SidebarContent } from './SidebarContent';
 import { SidebarHeader } from './SidebarHeader';
-import { SidebarFooter } from './SidebarFooter';
 import { MapControls } from './MapControls';
+import { WaypointsList } from './content/WaypointsList';
+import { RoutePreferences } from './content/RoutePreferences';
 
 export const Sidebar: React.FC = () => {
-  const { loggedInUser, isMobileSize, isNavbarOpen, isNavbarCondensed } =
-    useGlobalContext();
+  const { isMobileSize, isNavbarOpen } = useGlobalContext();
 
   return (
     <>
@@ -17,37 +16,23 @@ export const Sidebar: React.FC = () => {
         hiddenBreakpoint='sm'
         hidden={!isMobileSize && !isNavbarOpen}
         width={{ sm: 400 }}
-        height={isNavbarCondensed ? 'fit-content' : '100%'}
+        height={'fit-content'}
         style={isNavbarOpen ? {} : { display: 'none' }}
         bottom='unset'
         top={0}
+        styles={{ root: { borderRadius: '0 0 0.5rem 0.5rem' } }}
       >
-        <Navbar.Section>
-          <SidebarHeader />
-        </Navbar.Section>
-        {!isMobileSize ? <Divider my='sm' /> : null}
-        {isNavbarCondensed ? (
+        <ScrollArea.Autosize mah='80dvh' type='scroll'>
           <Navbar.Section>
-            <SidebarContent />
+            <SidebarHeader />
           </Navbar.Section>
-        ) : (
-          <Navbar.Section
-            grow
-            component={ScrollArea}
-            type='scroll'
-            styles={{ scrollbar: { zIndex: 1 } }}
-          >
-            <SidebarContent />
+          <Navbar.Section>
+            <>
+              <WaypointsList />
+              <RoutePreferences />
+            </>
           </Navbar.Section>
-        )}
-        {loggedInUser && !isNavbarCondensed ? (
-          <>
-            <Divider my='sm' />{' '}
-            <Navbar.Section>
-              <SidebarFooter />
-            </Navbar.Section>
-          </>
-        ) : null}
+        </ScrollArea.Autosize>
       </Navbar>
       <MapControls />
     </>

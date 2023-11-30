@@ -59,7 +59,6 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     selectedRegions,
     routeOptions,
     showAlternateRoutes,
-    isNavbarCondensed,
     isNavbarOpen,
     clearSelectedNogoGroups,
     setEditingGroupOrRegion,
@@ -190,12 +189,8 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
             )
           );
           map?.fitBounds(L.latLngBounds(bounds.flat()), {
-            paddingTopLeft: isNavbarOpen
-              ? isNavbarCondensed
-                ? [0, 340]
-                : [400, 0]
-              : [0, 0],
-            paddingBottomRight: isNavbarCondensed ? [50, 100] : [0, 0],
+            paddingTopLeft: isNavbarOpen ? [0, 340] : [0, 0],
+            paddingBottomRight: [50, 100],
           });
         })
         .catch((err) => {

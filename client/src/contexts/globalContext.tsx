@@ -20,7 +20,6 @@ type GlobalContextType =
       loggedInUser: User | null;
       isMobileSize: boolean;
       isNavbarOpen: boolean;
-      isNavbarCondensed: boolean;
       isNavModeOn: boolean;
       selectedNogoGroups: ID[];
       selectedRegions: ID[];
@@ -35,7 +34,6 @@ type GlobalContextType =
       updateLoggedInUser: () => void;
       logoutUser: () => void;
       toggleNavbar: () => void;
-      toggleNavbarExpanded: () => void;
       toggleNavMode: () => void;
       setSelectedNogoGroups: (nogoGroupIds: ID[]) => void;
       setSelectedRegions: (regionIds: ID[]) => void;
@@ -65,7 +63,6 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   const isMobileSize = useMediaQuery('(max-width: 767px)');
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
   const [isNavbarOpen, setIsNavbarOpen] = useState(true);
-  const [isNavbarExpanded, setIsNavbarExpanded] = useState(false);
   const [isNavModeOn, setIsNavModeOn] = useState(false);
   const [selectedNogoGroups, setSelectedNogoGroups] = useState<ID[]>([]);
   const [selectedRegions, setSelectedRegions] = useState<ID[]>([]);
@@ -153,11 +150,6 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
 
   const toggleNavbar = () => {
     setIsNavbarOpen(!isNavbarOpen);
-    if (!isNavbarOpen) setIsNavbarExpanded(false);
-  };
-
-  const toggleNavbarExpanded = () => {
-    setIsNavbarExpanded(!isNavbarExpanded);
   };
 
   const toggleNavMode = () => {
@@ -217,7 +209,6 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   );
 
   const lengthSortedRegions = useMemo(async () => {
-    console.log('length sorting regions');
     const regionsWithLengths = await Promise.all(
       regions.map(async (region) => {
         return {
@@ -307,7 +298,6 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         loggedInUser,
         isMobileSize,
         isNavbarOpen,
-        isNavbarCondensed: isMobileSize && !isNavbarExpanded,
         isNavModeOn,
         selectedNogoGroups,
         selectedRegions,
@@ -321,7 +311,6 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         updateLoggedInUser,
         logoutUser,
         toggleNavbar,
-        toggleNavbarExpanded,
         toggleNavMode,
         setSelectedNogoGroups,
         setSelectedRegions,
