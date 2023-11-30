@@ -4,6 +4,8 @@ import {
   Button,
   Checkbox,
   Group,
+  Paper,
+  Select,
   Stack,
   Text,
   useMantineTheme,
@@ -24,6 +26,7 @@ export const Regions: React.FC<{
   const {
     regions,
     loggedInUser,
+    isMobileSize,
     getLengthSortedRegions,
     getLocationSortedRegions,
   } = useGlobalContext();
@@ -52,7 +55,6 @@ export const Regions: React.FC<{
     }
   }, [sortMethod, regions, currentLocation]);
 
-  // TODO: option to sort by alpha, nogo length, or location
   return (
     <Stack spacing='md' align='stretch' justify='flext-start'>
       {loggedInUser?.role === 'admin' && (
@@ -62,24 +64,56 @@ export const Regions: React.FC<{
           onChange={() => setShowHidden((prev) => !prev)}
         />
       )}
-      <Text size='sm' c='dimmed'>
-        Regions contain pre-defined nogos that are maintained by verified
-        contributors.{' '}
-        {showMoreInfo ? (
-          <span>
-            Our contributors have extensive knowledge of local roads and cycling
-            routes in their region, and select nogos based on roads that most
-            cyclists should avoid.{' '}
-            <Anchor onClick={() => setShowMoreInfo(false)} inherit>
-              Hide
-            </Anchor>
-          </span>
-        ) : (
-          <Anchor onClick={() => setShowMoreInfo(true)} inherit>
-            More info
-          </Anchor>
-        )}
-      </Text>
+      <Group position='apart' align='flex-end' noWrap={!isMobileSize}>
+        <Paper radius='md' p='sm' bg={theme.colors.gray[1]}>
+          <Text size='sm'>
+            Regions contain pre-defined nogos that are maintained by verified
+            contributors.{' '}
+            {showMoreInfo ? (
+              <span>
+                Our contributors have extensive knowledge of local roads and
+                cycling routes in their region, and select nogos based on roads
+                that most cyclists should avoid.{' '}
+                <Anchor onClick={() => setShowMoreInfo(false)} inherit>
+                  Hide
+                </Anchor>
+              </span>
+            ) : (
+              <Anchor onClick={() => setShowMoreInfo(true)} inherit>
+                More info
+              </Anchor>
+            )}
+          </Text>
+        </Paper>
+
+        <Group
+          position='right'
+          align='center'
+          spacing='xs'
+          noWrap
+          w={200}
+          maw={200}
+          miw={200}
+          ml='auto'
+        >
+          <Text size='xs' style={{ whiteSpace: 'nowrap' }}>
+            Sort by
+          </Text>
+          <Select
+            size='xs'
+            value={sortMethod}
+            data={[
+              { value: 'alpha', label: 'Country' },
+              { value: 'location', label: 'Closest to you' },
+              { value: 'nogoLength', label: 'Most nogos' },
+            ]}
+            onChange={(value) => {
+              if (value && ['alpha', 'location', 'nogoLength'].includes(value))
+                setSortMethod(value as SortMethod);
+            }}
+          />
+        </Group>
+      </Group>
 
       {sortMethod === 'location' && !currentLocation && (
         <Group position='center' spacing='xs'>
