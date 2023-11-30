@@ -24,9 +24,7 @@ const UserSchema = new mongoose.Schema<IUser>({
     bio: String,
     imageFilename: String,
   },
-  settings: {
-    privateNogosEnabled: Boolean,
-  },
+  settings: {},
 });
 
 export const UserModel = mongoose.model<IUser>('User', UserSchema);

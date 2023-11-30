@@ -430,59 +430,60 @@ describe('POST /user/updateUserRole', () => {
   });
 });
 
-describe('POST /user/updateUserSettings', () => {
-  test('successfully enables privateNogosEnabled setting', async () => {
-    const user = await createTestUser();
-    const userSettings: Partial<UserSettings> = { privateNogosEnabled: true };
-    const res = await makeRequest({
-      url: '/user/updateUserSettings',
-      method: 'POST',
-      data: { userSettings },
-      loggedInUserEmail: user.email,
-    });
-    expect(res.statusCode).toBe(200);
-    expect(res.body?.success).toBe(true);
-    const updatedUser = await UserModel.findById(user._id);
-    expect(updatedUser?.settings?.privateNogosEnabled).toBe(true);
-  });
+// TODO: Re-enable when settings are implemented
+// describe('POST /user/updateUserSettings', () => {
+//   test('successfully enables exampleSetting setting', async () => {
+//     const user = await createTestUser();
+//     const userSettings: Partial<UserSettings> = { exampleSetting: true };
+//     const res = await makeRequest({
+//       url: '/user/updateUserSettings',
+//       method: 'POST',
+//       data: { userSettings },
+//       loggedInUserEmail: user.email,
+//     });
+//     expect(res.statusCode).toBe(200);
+//     expect(res.body?.success).toBe(true);
+//     const updatedUser = await UserModel.findById(user._id);
+//     expect(updatedUser?.settings?.exampleSetting).toBe(true);
+//   });
 
-  test('throws UnauthorizedError when not logged in', async () => {
-    const user = await createTestUser();
-    const userSettings: Partial<UserSettings> = { privateNogosEnabled: true };
-    const res = await makeRequest({
-      url: '/user/updateUserSettings',
-      method: 'POST',
-      data: { userSettings },
-    });
-    expect(res.statusCode).toBe(401);
-    const updatedUser = await UserModel.findById(user._id);
-    expect(updatedUser?.settings?.privateNogosEnabled).toBeFalsy();
-  });
+//   test('throws UnauthorizedError when not logged in', async () => {
+//     const user = await createTestUser();
+//     const userSettings: Partial<UserSettings> = { exampleSetting: true };
+//     const res = await makeRequest({
+//       url: '/user/updateUserSettings',
+//       method: 'POST',
+//       data: { userSettings },
+//     });
+//     expect(res.statusCode).toBe(401);
+//     const updatedUser = await UserModel.findById(user._id);
+//     expect(updatedUser?.settings?.exampleSetting).toBeFalsy();
+//   });
 
-  test('throws BadRequestError when userSettings is not provided', async () => {
-    const user = await createTestUser();
-    const res = await makeRequest({
-      url: '/user/updateUserSettings',
-      method: 'POST',
-      data: {},
-      loggedInUserEmail: user.email,
-    });
-    expect(res.statusCode).toBe(400);
-    const updatedUser = await UserModel.findById(user._id);
-    expect(updatedUser?.settings?.privateNogosEnabled).toBeFalsy();
-  });
+//   test('throws BadRequestError when userSettings is not provided', async () => {
+//     const user = await createTestUser();
+//     const res = await makeRequest({
+//       url: '/user/updateUserSettings',
+//       method: 'POST',
+//       data: {},
+//       loggedInUserEmail: user.email,
+//     });
+//     expect(res.statusCode).toBe(400);
+//     const updatedUser = await UserModel.findById(user._id);
+//     expect(updatedUser?.settings?.exampleSetting).toBeFalsy();
+//   });
 
-  test('throws BadRequestError when userSettings is not correct type', async () => {
-    const user = await createTestUser();
-    const userSettings = { privateNogosEnabled: 'not a boolean' };
-    const res = await makeRequest({
-      url: '/user/updateUserSettings',
-      method: 'POST',
-      data: { userSettings },
-      loggedInUserEmail: user.email,
-    });
-    expect(res.statusCode).toBe(400);
-    const updatedUser = await UserModel.findById(user._id);
-    expect(updatedUser?.settings?.privateNogosEnabled).toBeFalsy();
-  });
-});
+//   test('throws BadRequestError when userSettings is not correct type', async () => {
+//     const user = await createTestUser();
+//     const userSettings = { exampleSetting: 'not a boolean' };
+//     const res = await makeRequest({
+//       url: '/user/updateUserSettings',
+//       method: 'POST',
+//       data: { userSettings },
+//       loggedInUserEmail: user.email,
+//     });
+//     expect(res.statusCode).toBe(400);
+//     const updatedUser = await UserModel.findById(user._id);
+//     expect(updatedUser?.settings?.exampleSetting).toBeFalsy();
+//   });
+// });

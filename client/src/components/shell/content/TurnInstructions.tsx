@@ -44,30 +44,28 @@ export const TurnInstructions: React.FC<{ show: boolean }> = ({ show }) => {
     setStreetsFetched(false);
   }, [routes, selectedRouteIndex]);
 
-  return show ? (
-    turnInstructions ? (
-      streetsFetched ? (
-        <Stack>
-          {turnInstructions.map((turnInstruction) => (
-            <TurnInstructionComponent turnInstruction={turnInstruction} />
-          ))}
-        </Stack>
-      ) : (
-        <Group position='center'>
-          <Loader color='gray' />
-          <Title order={6} color='dimmed'>
-            Loading turn instructions
-          </Title>
-        </Group>
-      )
+  return turnInstructions ? (
+    streetsFetched ? (
+      <Stack>
+        {turnInstructions.map((turnInstruction) => (
+          <TurnInstructionComponent turnInstruction={turnInstruction} />
+        ))}
+      </Stack>
     ) : (
       <Group position='center'>
+        <Loader color='gray' />
         <Title order={6} color='dimmed'>
-          No turn instructions available
+          Loading turn instructions
         </Title>
       </Group>
     )
-  ) : null;
+  ) : (
+    <Group position='center'>
+      <Title order={6} color='dimmed'>
+        No turn instructions available
+      </Title>
+    </Group>
+  );
 };
 
 const TurnInstructionComponent: React.FC<{

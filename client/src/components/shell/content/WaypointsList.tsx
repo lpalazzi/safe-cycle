@@ -253,145 +253,92 @@ export const WaypointsList: React.FC = () => {
 
   return (
     <DndProvider backend={MultiBackend} options={HTML5toTouch}>
-      <Stack spacing={0} mt='1rem'>
-        <Timeline
-          style={{ position: 'relative', zIndex: 1 }}
-          active={draggableWaypoints.length - 1}
-          reverseActive={askForStartingLocation}
-          bulletSize={20}
-          styles={{
-            item: {
-              marginTop: '0px !important',
-              '::before': {
-                inset: '0px auto -16px -4px',
-              },
-              ':nth-child(2)': askForStartingLocation
-                ? {
-                    marginTop: '8px !important',
-                  }
-                : {},
+      <Timeline
+        mt='1rem'
+        style={{ position: 'relative', zIndex: 1 }}
+        active={draggableWaypoints.length - 1}
+        reverseActive={askForStartingLocation}
+        bulletSize={20}
+        styles={{
+          item: {
+            marginTop: '0px !important',
+            '::before': {
+              inset: '0px auto -16px -4px',
             },
-            itemContent: {
-              transform: 'translateY(-15px)',
-            },
-            itemBullet: { zIndex: 2 },
-          }}
-        >
-          {askForStartingLocation ? (
-            <Timeline.Item lineVariant='dotted' style={{ zIndex: 2 }}>
-              <Select
-                key={draggableWaypoints.length}
-                searchable
-                placeholder='Search for a starting point'
-                value={null}
-                data={geoSearchResultOptions}
-                onSearchChange={setGeoSearchValue}
-                onChange={handleLocationSelect}
-                searchValue={geoSearchValue}
-                nothingFound='No results found'
-                filter={() => true}
-                rightSection={<div></div>}
-                pt={8}
-                withinPortal
-              />
-            </Timeline.Item>
-          ) : null}
-          {draggableWaypoints.map((waypoint, index) => {
-            return (
-              <Timeline.Item
-                bullet={
-                  <Text size={12}>
-                    {index + (askForStartingLocation ? 2 : 1)}
-                  </Text>
+            ':nth-child(2)': askForStartingLocation
+              ? {
+                  marginTop: '8px !important',
                 }
-                lineVariant='dotted'
-              >
-                <DraggableWaypointItem
-                  id={waypoint.label + waypoint.latlng.toString()}
-                  index={index}
-                  waypoint={waypoint}
-                  disableDrag={draggableWaypoints.length === 1}
-                  reorderDraggableWaypoint={reorderDraggableWaypoint}
-                  onDrop={reorderWaypoint}
-                  onCancel={() => setDraggableWaypoints(waypoints)}
-                  removeWaypoint={removeWaypoint}
-                />
-              </Timeline.Item>
-            );
-          })}
-          {!askForStartingLocation ? (
-            <Timeline.Item lineVariant='dotted'>
-              <Select
-                key={draggableWaypoints.length}
-                searchable
-                placeholder='Search for a location'
-                value={null}
-                data={geoSearchResultOptions}
-                onSearchChange={setGeoSearchValue}
-                onChange={handleLocationSelect}
-                searchValue={geoSearchValue}
-                nothingFound='No results found'
-                filter={() => true}
-                rightSection={<div></div>}
-                pt={8}
-                withinPortal
+              : {},
+          },
+          itemContent: {
+            transform: 'translateY(-15px)',
+          },
+          itemBullet: { zIndex: 2 },
+        }}
+      >
+        {askForStartingLocation ? (
+          <Timeline.Item lineVariant='dotted' style={{ zIndex: 2 }}>
+            <Select
+              key={draggableWaypoints.length}
+              searchable
+              placeholder='Search for a starting point'
+              value={null}
+              data={geoSearchResultOptions}
+              onSearchChange={setGeoSearchValue}
+              onChange={handleLocationSelect}
+              searchValue={geoSearchValue}
+              nothingFound='No results found'
+              filter={() => true}
+              rightSection={<div></div>}
+              pt={8}
+              withinPortal
+            />
+          </Timeline.Item>
+        ) : null}
+        {draggableWaypoints.map((waypoint, index) => {
+          return (
+            <Timeline.Item
+              bullet={
+                <Text size={12}>
+                  {index + (askForStartingLocation ? 2 : 1)}
+                </Text>
+              }
+              lineVariant='dotted'
+            >
+              <DraggableWaypointItem
+                id={waypoint.label + waypoint.latlng.toString()}
+                index={index}
+                waypoint={waypoint}
+                disableDrag={draggableWaypoints.length === 1}
+                reorderDraggableWaypoint={reorderDraggableWaypoint}
+                onDrop={reorderWaypoint}
+                onCancel={() => setDraggableWaypoints(waypoints)}
+                removeWaypoint={removeWaypoint}
               />
             </Timeline.Item>
-          ) : null}
-        </Timeline>
-        <Stack spacing='md'>
-          {waypoints.length > 0 ? (
-            <Group position='apart'>
-              <Group position='left' spacing={0}>
-                {!!routes &&
-                (selectedRouteIndex || selectedRouteIndex === 0) &&
-                waypoints.length > 1 ? (
-                  <>
-                    {FeatureFlags.TurnInstructions.isEnabledForUser(
-                      loggedInUser?._id
-                    ) ? (
-                      <Button
-                        size='xs'
-                        variant='subtle'
-                        color='gray'
-                        leftIcon={<IconList size={16} />}
-                        styles={{ leftIcon: { marginRight: 5 } }}
-                        onClick={() => setShowTurnInstructions((prev) => !prev)}
-                      >
-                        Details
-                      </Button>
-                    ) : null}
-                    <Button
-                      size='xs'
-                      variant='subtle'
-                      color='gray'
-                      leftIcon={<IconDownload size={16} />}
-                      styles={{ leftIcon: { marginRight: 5 } }}
-                      onClick={downloadGPX}
-                    >
-                      GPX
-                    </Button>
-                  </>
-                ) : null}
-              </Group>
-              <Button
-                size='xs'
-                variant='subtle'
-                color='gray'
-                leftIcon={<IconX size={16} />}
-                styles={{ leftIcon: { marginRight: 5 } }}
-                onClick={() => {
-                  setShowTurnInstructions(false);
-                  clearWaypoints();
-                }}
-              >
-                Clear
-              </Button>
-            </Group>
-          ) : null}
-          <TurnInstructions show={showTurnInstructions} />
-        </Stack>
-      </Stack>
+          );
+        })}
+        {!askForStartingLocation ? (
+          <Timeline.Item lineVariant='dotted'>
+            <Select
+              key={draggableWaypoints.length}
+              searchable
+              placeholder='Search for a location'
+              value={null}
+              data={geoSearchResultOptions}
+              onSearchChange={setGeoSearchValue}
+              onChange={handleLocationSelect}
+              searchValue={geoSearchValue}
+              nothingFound='No results found'
+              filter={() => true}
+              rightSection={<div></div>}
+              pt={8}
+              withinPortal
+            />
+          </Timeline.Item>
+        ) : null}
+      </Timeline>
       <CustomPreviewLayer />
     </DndProvider>
   );

@@ -85,7 +85,7 @@ const AboutModalContent: React.FC = () => {
         position='center'
         spacing='xl'
         noWrap
-        style={{ maxWidth: 230, margin: 'auto' }}
+        style={{ maxWidth: 230, maxHeight: 100, margin: 'auto' }}
       >
         <MantineTooltip label='XYZ Digital Inc.'>
           <Image

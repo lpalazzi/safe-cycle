@@ -53,11 +53,9 @@ const comfortPresets: { [key: string]: Partial<RouteOptions> } = {
   },
 };
 
-// TODO:
-//   - see drawings for new design
-//   - hide regions with less than 5km of nogos
 export const RoutePreferences: React.FC = () => {
   const {
+    loggedInUser,
     routeOptions,
     selectedComfortLevel,
     showAlternateRoutes,
@@ -65,6 +63,7 @@ export const RoutePreferences: React.FC = () => {
     selectedNogoGroups,
     selectedRegions,
     regions,
+    regionLengths,
     userNogoGroups,
     setSelectedComfortLevel,
     setSelectedNogoGroups,
@@ -95,13 +94,19 @@ export const RoutePreferences: React.FC = () => {
           value: group._id,
           isRegion: false,
         })),
-        ...suggestedRegions.map((region) => ({
-          label: region.shortName,
-          value: region._id,
-          isRegion: true,
-        })),
-      ].slice(0, 5),
-    [suggestedRegions, suggestedNogoGroups, isMobileSize]
+        ...suggestedRegions
+          .filter(
+            (region) =>
+              (loggedInUser && region.isUserContributor(loggedInUser._id)) ||
+              regionLengths[region._id] >= 5000
+          )
+          .map((region) => ({
+            label: region.shortName,
+            value: region._id,
+            isRegion: true,
+          })),
+      ].slice(0, 4),
+    [suggestedRegions, suggestedNogoGroups, isMobileSize, regionLengths]
   );
 
   useEffect(() => {
@@ -122,7 +127,7 @@ export const RoutePreferences: React.FC = () => {
     const selectedRegionObjs = regions.filter((region) =>
       selectedRegions.includes(region._id)
     );
-    if (selectedRegionObjs.length >= 4) {
+    if (selectedRegionObjs.length >= 5) {
       setSuggestedRegions(selectedRegionObjs);
     } else if (currentLocation) {
       const locationSortedRegions = getLocationSortedRegions(currentLocation);
@@ -460,8 +465,6 @@ export const RoutePreferences: React.FC = () => {
 
 const ComfortLevel: React.FC<{ comfortLevel: string }> = React.memo(
   ({ comfortLevel }) => {
-    const theme = useMantineTheme();
-
     let imgSrc;
     let description: string = '';
     let riderHint: string = '';

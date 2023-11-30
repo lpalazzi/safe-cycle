@@ -21,14 +21,10 @@ export const RouteProperties: React.FC = () => {
       maw={isMobileSize ? 210 : undefined}
       style={{
         position: 'fixed',
-        bottom: 25.8,
-        left: isMobileSize ? '8px' : '50%',
-        transform:
-          isNavbarOpen && !isMobileSize
-            ? 'translate(192px, 0) translate(-50%, 0)'
-            : isMobileSize
-            ? 'unset'
-            : 'translate(-50%, 0)',
+        bottom: isMobileSize ? 25.8 : undefined,
+        top: isMobileSize ? undefined : 8,
+        right: isMobileSize ? '50%' : 8,
+        transform: isMobileSize ? 'translate(50%, 0)' : undefined,
         zIndex: 1,
       }}
       onClick={(e) => {

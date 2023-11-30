@@ -29,6 +29,7 @@ type GlobalContextType =
       showAlternateRoutes: boolean;
       regions: Region[];
       userNogoGroups: NogoGroup[];
+      regionLengths: { [key: string]: number };
       isLoading: boolean;
       // functions
       updateLoggedInUser: () => void;
@@ -80,6 +81,9 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   const [showAlternateRoutes, setShowAlternateRoutes] = useState(false);
   const [regions, setRegions] = useState<Region[]>([]);
   const [userNogoGroups, setUserNogoGroups] = useState<NogoGroup[]>([]);
+  const [regionLengths, setRegionLengths] = useState<{ [key: string]: number }>(
+    {}
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -186,6 +190,17 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
       });
     }
   }, []);
+
+  useEffect(() => {
+    regions.forEach((region) => {
+      region.getTotalNogoLength().then((length) => {
+        setRegionLengths((prev) => ({
+          ...prev,
+          [region._id]: length,
+        }));
+      });
+    });
+  }, [regions]);
 
   const getLocationSortedRegions = useCallback(
     (location: Location | null) => {
@@ -307,6 +322,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         showAlternateRoutes,
         regions,
         userNogoGroups,
+        regionLengths,
         isLoading,
         updateLoggedInUser,
         logoutUser,

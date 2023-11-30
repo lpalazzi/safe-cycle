@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Anchor, Button, Group, Stack, TextInput } from '@mantine/core';
+import { Anchor, Button, Stack, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { closeAllModals, modals, openModal } from '@mantine/modals';
 import { ModalSettings } from '@mantine/modals/lib/context';
@@ -11,6 +11,7 @@ import { IUserLoginDTO as LoginFormValues } from 'api/interfaces/User';
 import { validateEmail } from 'utils/validation';
 import { useGlobalContext } from 'contexts/globalContext';
 import { ResetPasswordModal } from './ResetPasswordModal';
+import { SignupModal } from './SignupModal';
 
 export const LoginModal = (nextModal?: ModalSettings) => {
   return {
@@ -85,9 +86,21 @@ const LoginForm: React.FC = () => {
           I forgot my password
         </Anchor>
       </Stack>
-      <Group position='right' mt='md'>
-        <Button type='submit'>Submit</Button>
-      </Group>
+      <Button type='submit' mt='md' fullWidth>
+        Submit
+      </Button>
+      <Text size='sm' align='center' mt='sm'>
+        Don't have an account?{' '}
+        <Anchor
+          inherit
+          onClick={() => {
+            closeAllModals();
+            openModal(SignupModal());
+          }}
+        >
+          Create one now.
+        </Anchor>
+      </Text>
     </form>
   );
 };

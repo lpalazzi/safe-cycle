@@ -25,7 +25,6 @@ import booleanWithin from '@turf/boolean-within';
 import { point } from '@turf/helpers';
 import { Nogo, Region } from 'models';
 import { metresToDistanceString } from 'utils/formatting';
-import { getTotalLengthOfNogos } from 'utils/nogos';
 import { RegionContributorCard } from './RegionContributorCard';
 import { useMapContext } from 'contexts/mapContext';
 import { useGlobalContext } from 'contexts/globalContext';
@@ -39,12 +38,11 @@ export const RegionCard: React.FC<{
 }> = ({ region, isSelected, showHidden, toggleSelect }) => {
   const theme = useMantineTheme();
   const { currentLocation, map } = useMapContext();
-  const { loggedInUser, isMobileSize, setEditingGroupOrRegion } =
+  const { loggedInUser, isMobileSize, regionLengths, setEditingGroupOrRegion } =
     useGlobalContext();
   const [showDetails, setShowDetails] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [nogos, setNogos] = useState<Nogo[]>([]);
-  const [totalLength, setTotalLength] = useState<number | null>(null);
   const [userIsWithinRegion, setUserIsWithinRegion] = useState(false);
 
   const userIsContributor =
@@ -53,7 +51,6 @@ export const RegionCard: React.FC<{
   useEffect(() => {
     region.getAllNogos().then((nogos) => {
       setNogos(nogos);
-      setTotalLength(getTotalLengthOfNogos(nogos));
     });
   }, []);
 
@@ -79,6 +76,7 @@ export const RegionCard: React.FC<{
     setShowDetails((prev) => !prev);
   };
 
+  const totalLength = regionLengths[region._id];
   const isHidden = (totalLength || 0) < 5000;
 
   return !isHidden || showHidden || userIsContributor ? (
