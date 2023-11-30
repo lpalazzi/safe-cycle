@@ -23,7 +23,7 @@ export const RegionContributorCard: React.FC<{
   const [showBio, { toggle: toggleShowBio }] = useDisclosure();
 
   return (
-    <Paper shadow='xs' p='xs' radius='md' bg='white'>
+    <Paper p='xs' radius='md' bg='white'>
       {contributor.contributorProfile ? (
         <Stack spacing='xs'>
           <Group position='left' noWrap>

@@ -17,7 +17,6 @@ export const RouteProperties: React.FC = () => {
 
   return (
     <Paper
-      shadow='xs'
       p='md'
       maw={isMobileSize ? 210 : undefined}
       style={{

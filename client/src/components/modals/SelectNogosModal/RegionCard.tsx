@@ -83,7 +83,6 @@ export const RegionCard: React.FC<{
 
   return !isHidden || showHidden || userIsContributor ? (
     <Paper
-      shadow='xs'
       p='md'
       radius='md'
       withBorder
@@ -237,7 +236,6 @@ export const RegionCard: React.FC<{
           )}
 
           <Paper
-            shadow='xs'
             p='xs'
             radius='md'
             bg={theme.colors.gray[1]}

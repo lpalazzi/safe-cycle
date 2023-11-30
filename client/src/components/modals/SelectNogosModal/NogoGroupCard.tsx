@@ -73,7 +73,6 @@ export const NogoGroupCard: React.FC<{
 
   return (
     <Paper
-      shadow='xs'
       p='md'
       radius='md'
       withBorder
@@ -165,7 +164,7 @@ export const NogoGroupCard: React.FC<{
           </Anchor>
         </Stack>
         <Group position='right' spacing='xs' noWrap>
-          <Menu shadow='md' position='left-start' zIndex={500}>
+          <Menu position='left-start' zIndex={500}>
             <Menu.Target>
               <ActionIcon
                 size={36}

@@ -15,7 +15,6 @@ export const EditingNogoIndicator: React.FC = () => {
   } = useGlobalContext();
   return (
     <Paper
-      shadow='xs'
       p='md'
       style={{
         position: 'fixed',

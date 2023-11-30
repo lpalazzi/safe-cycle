@@ -19,7 +19,7 @@ import {
 } from '@mantine/core';
 import { useModals } from '@mantine/modals';
 import { useMediaQuery } from '@mantine/hooks';
-import { IconRoute2, IconUserCog } from '@tabler/icons-react';
+import { IconRoute2, IconSettings, IconUserCog } from '@tabler/icons-react';
 import { ComfortLevel, ID, RouteOptions, SurfacePreference } from 'types';
 import { useGlobalContext } from 'contexts/globalContext';
 
@@ -84,7 +84,7 @@ export const RoutePreferences: React.FC = () => {
     []
   );
   const [expandedSetting, setExpandedSetting] = useState<
-    'nogos' | 'comfort' | 'all' | false
+    'nogos' | 'comfort' | 'other' | false
   >(false);
 
   const chips = useMemo(
@@ -172,7 +172,7 @@ export const RoutePreferences: React.FC = () => {
   };
 
   const handleCondensedSettingButtonClicked = (
-    selected: 'nogos' | 'comfort' | 'all'
+    selected: 'nogos' | 'comfort' | 'other'
   ) => {
     if (selected === expandedSetting) {
       setExpandedSetting(false);
@@ -217,58 +217,54 @@ export const RoutePreferences: React.FC = () => {
           variant={expandedSetting === 'nogos' ? 'filled' : 'default'}
           size='xs'
           onClick={() => handleCondensedSettingButtonClicked('nogos')}
+          rightIcon={
+            <Badge
+              color={selectedGroupsOrRegions > 0 ? 'green' : 'gray'}
+              w={14}
+              h={14}
+              sx={{ pointerEvents: 'none' }}
+              variant='filled'
+              size='xs'
+              p={0}
+            >
+              {selectedGroupsOrRegions}
+            </Badge>
+          }
         >
           Avoid nogos
-          {selectedGroupsOrRegions > 0 && (
-            <span style={{ marginLeft: '0.25rem' }}>
-              <Badge
-                color='green'
-                w={14}
-                h={14}
-                sx={{ pointerEvents: 'none' }}
-                variant='filled'
-                size='xs'
-                p={0}
-              >
-                {selectedGroupsOrRegions}
-              </Badge>
-            </span>
-          )}
         </Button>
         <Button
           fullWidth
           variant={expandedSetting === 'comfort' ? 'filled' : 'default'}
           size='xs'
           onClick={() => handleCondensedSettingButtonClicked('comfort')}
+          rightIcon={selectedComfortLevelIcon}
         >
           Comfort level
-          <span style={{ marginLeft: '0.25rem' }}>
-            {selectedComfortLevelIcon}
-          </span>
         </Button>
         <Button
           fullWidth
-          variant={expandedSetting === 'all' ? 'filled' : 'default'}
+          variant={expandedSetting === 'other' ? 'filled' : 'default'}
           size='xs'
-          onClick={() => handleCondensedSettingButtonClicked('all')}
+          onClick={() => handleCondensedSettingButtonClicked('other')}
+          rightIcon={<IconSettings size={14} />}
         >
-          All preferences
+          Other
         </Button>
       </Button.Group>
       <Paper
         display={expandedSetting ? 'block' : 'none'}
-        shadow='sm'
         radius='md'
         p='sm'
         bg={theme.colors.gray[1]}
       >
         <Stack spacing='sm'>
-          <Collapse
-            in={expandedSetting && ['nogos', 'all'].includes(expandedSetting)}
-          >
+          <Collapse in={expandedSetting === 'nogos'}>
             <Input.Wrapper
               label={
-                expandedSetting === 'all' ? 'Select nogos to avoid' : undefined
+                expandedSetting === 'other'
+                  ? 'Select nogos to avoid'
+                  : undefined
               }
             >
               <Group position='left' spacing='0.25rem'>
@@ -303,12 +299,10 @@ export const RoutePreferences: React.FC = () => {
               </Group>
             </Input.Wrapper>
           </Collapse>
-          <Collapse
-            in={expandedSetting && ['comfort', 'all'].includes(expandedSetting)}
-          >
+          <Collapse in={expandedSetting === 'comfort'}>
             <Input.Wrapper
               label={
-                expandedSetting === 'all' ? 'Select comfort level' : undefined
+                expandedSetting === 'other' ? 'Select comfort level' : undefined
               }
             >
               <Stack
@@ -426,8 +420,8 @@ export const RoutePreferences: React.FC = () => {
               </Stack>
             </Input.Wrapper>
           </Collapse>
-          <Collapse in={expandedSetting === 'all'}>
-            <Stack spacing='xs' className='additional-preferences'>
+          <Collapse in={expandedSetting === 'other'}>
+            <Stack spacing='xs'>
               <Select
                 label='Surface preference'
                 value={routeOptions.surfacePreference || 'none'}
@@ -445,9 +439,11 @@ export const RoutePreferences: React.FC = () => {
                     value: 'preferUnpaved',
                   },
                 ]}
+                withinPortal
               />
               <Checkbox
                 label='Show alternate routes'
+                labelPosition='left'
                 checked={showAlternateRoutes}
                 onChange={(e) =>
                   setShowAlternateRoutes(e.currentTarget.checked)
@@ -496,7 +492,7 @@ const ComfortLevel: React.FC<{ comfortLevel: string }> = React.memo(
     }
 
     return (
-      <Paper shadow='sm' radius='md' p='sm'>
+      <Paper radius='md' p='sm'>
         <Grid align='center' gutter={0} mih={100}>
           <Grid.Col span={5}>
             <div
@@ -515,10 +511,10 @@ const ComfortLevel: React.FC<{ comfortLevel: string }> = React.memo(
                 ? 'Shortest Available'
                 : comfortLevel + ' Comfort'}
             </Title>
-            <Text size='sm'>{description}</Text>
+            <Text size='xs'>{description}</Text>
           </Grid.Col>
         </Grid>
-        <Text align='center' size='sm' italic fw='bold'>
+        <Text align='center' size='xs' italic fw='bold'>
           {riderHint}
         </Text>
       </Paper>

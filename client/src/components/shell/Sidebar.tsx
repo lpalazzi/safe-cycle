@@ -20,9 +20,13 @@ export const Sidebar: React.FC = () => {
         style={isNavbarOpen ? {} : { display: 'none' }}
         bottom='unset'
         top={0}
-        styles={{ root: { borderRadius: '0 0 0.5rem 0.5rem' } }}
+        styles={
+          isMobileSize
+            ? { root: { borderRadius: '0 0 1rem 1rem' } }
+            : { root: { borderRadius: '0 0 1rem 0' } }
+        }
       >
-        <ScrollArea.Autosize mah='80dvh' type='scroll'>
+        <ScrollArea.Autosize mah='70dvh' type='scroll'>
           <Navbar.Section>
             <SidebarHeader />
           </Navbar.Section>

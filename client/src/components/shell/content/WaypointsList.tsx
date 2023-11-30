@@ -292,6 +292,7 @@ export const WaypointsList: React.FC = () => {
                 filter={() => true}
                 rightSection={<div></div>}
                 pt={8}
+                withinPortal
               />
             </Timeline.Item>
           ) : null}
@@ -333,6 +334,7 @@ export const WaypointsList: React.FC = () => {
                 filter={() => true}
                 rightSection={<div></div>}
                 pt={8}
+                withinPortal
               />
             </Timeline.Item>
           ) : null}
