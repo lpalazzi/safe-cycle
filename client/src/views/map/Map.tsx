@@ -25,7 +25,7 @@ export const Map: React.FC = () => {
   const [guessedLocation, setGuessedLocation] = useState<LatLng | null>(null);
 
   useEffect(() => {
-    makeRequest('http://ip-api.com/json')
+    makeRequest('https://ip-api.com/json')
       .then(({ lat, lon }: { lat: number; lon: number }) => {
         try {
           const newLatLng = new LatLng(lat, lon);
