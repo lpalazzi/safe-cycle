@@ -78,11 +78,4 @@ export class GeocodingApi {
     });
     return response.results as (IReverseGeocodeResult | null)[];
   }
-
-  static async approxGeolocation() {
-    const response: { lat: number; lon: number } = await makeRequest(
-      `${this.baseUrl}/approxGeolocation`
-    );
-    return new L.LatLng(response.lat, response.lon);
-  }
 }

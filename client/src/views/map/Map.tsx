@@ -15,8 +15,8 @@ import { Region } from './Region';
 import { EditingNogoIndicator } from './EditingNogoIndicator';
 import { RecenterButton } from './RecenterButton';
 import { RouteProperties } from './RouteProperties';
+import { makeRequest } from 'api/reqHelpers';
 import { LatLng } from 'leaflet';
-import { GeocodingApi } from 'api';
 
 export const Map: React.FC = () => {
   const { editingGroupOrRegion, isNavModeOn } = useGlobalContext();
@@ -25,13 +25,15 @@ export const Map: React.FC = () => {
   const [guessedLocation, setGuessedLocation] = useState<LatLng | null>(null);
 
   useEffect(() => {
-    setTimeout(() => {
-      setInitMap(true);
-    }, 500);
-    GeocodingApi.approxGeolocation()
-      .then((latLng) => {
-        setGuessedLocation(latLng);
-        setInitMap(true);
+    makeRequest('https://ip-api.com/json')
+      .then(({ lat, lon }: { lat: number; lon: number }) => {
+        try {
+          const newLatLng = new LatLng(lat, lon);
+          setGuessedLocation(newLatLng);
+          setInitMap(true);
+        } catch (err) {
+          setInitMap(true);
+        }
       })
       .catch(() => setInitMap(true));
   }, []);

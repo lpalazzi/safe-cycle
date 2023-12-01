@@ -1,5 +1,4 @@
 import express from 'express';
-import axios from 'axios';
 import joi from 'joi';
 import { container } from 'tsyringe';
 import { BingMapsService, NominatimService } from 'services';
@@ -137,24 +136,6 @@ export const geocoding = (app: express.Router) => {
       if (error) throw new BadRequestError(error.message);
       const results = await nominatimService.bulkReverse(positions, zoom);
       return res.json({ results });
-    } catch (err) {
-      next(err);
-    }
-  });
-
-  route.get('/approxGeolocation', async (req, res, next) => {
-    try {
-      const data = await axios
-        .get<{ lat: number; lon: number }>('http://ip-api.com/json')
-        .catch((error) => {
-          throw new Error(
-            error.response?.data ?? error.message ?? 'Nominatim error'
-          );
-        });
-      return res.json({
-        lat: data.data.lat,
-        lon: data.data.lon,
-      });
     } catch (err) {
       next(err);
     }
