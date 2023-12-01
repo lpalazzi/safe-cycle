@@ -320,6 +320,14 @@ export const RoutePreferences: React.FC = () => {
                   value={selectedComfortLevel}
                   onChange={handleComfortLevelSelected}
                   transitionDuration={0}
+                  styles={{
+                    root: {
+                      padding: 0,
+                    },
+                    indicator: {
+                      marginLeft: 4,
+                    },
+                  }}
                   data={[
                     {
                       value: 'Low',

@@ -14,6 +14,7 @@ export const MapControls: React.FC = () => {
         onClick={() => map?.zoomIn()}
         variant='default'
         size='lg'
+        radius='lg'
         style={{ borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}
       >
         <IconPlus size='1.25rem' />
@@ -22,6 +23,7 @@ export const MapControls: React.FC = () => {
         onClick={() => map?.zoomOut()}
         variant='default'
         size='lg'
+        radius='lg'
         style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
       >
         <IconMinus size='1.25rem' />
@@ -43,6 +45,7 @@ export const MapControls: React.FC = () => {
         }}
         variant='default'
         size='lg'
+        radius='lg'
       >
         <IconCurrentLocation size='1.25rem' />
       </ActionIcon>
@@ -61,7 +64,7 @@ export const MapControls: React.FC = () => {
       style={{
         position: 'absolute',
         bottom: 24.8,
-        right: 8,
+        right: 12,
         zIndex: 1,
       }}
     >

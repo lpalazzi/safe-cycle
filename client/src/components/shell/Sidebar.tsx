@@ -148,9 +148,7 @@ export const Sidebar: React.FC = () => {
               rightIcon: { marginLeft: '0.25rem' },
             }}
             onClick={toggleNavbar}
-          >
-            {isNavbarOpen ? 'Hide menu' : 'Show menu'}
-          </Button>
+          ></Button>
         </Group>
       </Navbar>
       <MapControls />
