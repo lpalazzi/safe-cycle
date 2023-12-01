@@ -19,9 +19,12 @@ const UserSchema = new mongoose.Schema<IUser>({
     type: String,
     enum: [null, 'admin', 'verified contributor'],
   },
-  settings: {
-    privateNogosEnabled: Boolean,
+  contributorProfile: {
+    title: String,
+    bio: String,
+    imageFilename: String,
   },
+  settings: {},
 });
 
 export const UserModel = mongoose.model<IUser>('User', UserSchema);

@@ -1,7 +1,15 @@
 import React from 'react';
-import { Button, Group, PasswordInput, Stack, TextInput } from '@mantine/core';
+import {
+  Anchor,
+  Button,
+  Group,
+  PasswordInput,
+  Stack,
+  TextInput,
+  Text,
+} from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { closeAllModals } from '@mantine/modals';
+import { closeAllModals, modals, openModal } from '@mantine/modals';
 import { ModalSettings } from '@mantine/modals/lib/context';
 import { showNotification } from '@mantine/notifications';
 
@@ -10,6 +18,17 @@ import { IUserSignupDTO as SignupFormValues } from 'api/interfaces/User';
 import { validateEmail, validatePassword } from 'utils/validation';
 import { useGlobalContext } from 'contexts/globalContext';
 import { PasswordPopover } from 'components/common/PasswordPopover';
+import { LoginModal } from './LoginModal';
+
+export const SignupModal = (nextModal?: ModalSettings) => {
+  return {
+    title: 'Create account',
+    children: <SignupForm />,
+    onClose: () => {
+      if (nextModal) modals.open(nextModal);
+    },
+  } as ModalSettings;
+};
 
 const SignupForm: React.FC = () => {
   const { updateLoggedInUser } = useGlobalContext();
@@ -98,14 +117,21 @@ const SignupForm: React.FC = () => {
           />
         </PasswordPopover>
       </Stack>
-      <Group position='right' mt='md'>
-        <Button type='submit'>Submit</Button>
-      </Group>
+      <Button type='submit' mt='md' fullWidth>
+        Submit
+      </Button>
+      <Text size='sm' align='center' mt='sm'>
+        Already have an account?{' '}
+        <Anchor
+          inherit
+          onClick={() => {
+            closeAllModals();
+            openModal(LoginModal());
+          }}
+        >
+          Sign in here.
+        </Anchor>
+      </Text>
     </form>
   );
-};
-
-export const SignupModal: ModalSettings = {
-  title: 'Create account',
-  children: <SignupForm />,
 };

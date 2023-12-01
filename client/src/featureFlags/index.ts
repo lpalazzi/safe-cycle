@@ -16,6 +16,7 @@ class FeatureFlag {
 export const FeatureFlags = {
   TurnInstructions: new FeatureFlag([
     '63af4f33e82801490125705a', // Lucas dev
+    '63bcca41d88ce1a6f70b68a0', // Lucas dev
     '63c068b419395f46b8a65c94', // Lucas
     '63c2f08440bcca4499f0d543', // Tom
     '63c2eeac40bcca4499f0d52d', // Adam

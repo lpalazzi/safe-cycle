@@ -75,8 +75,8 @@ export const Markers: React.FC = () => {
             icon={createMarker(
               draggable ? (
                 <IconArrowsMove
-                  color='white'
-                  style={{ verticalAlign: 'middle' }}
+                  color='#252525'
+                  style={{ verticalAlign: 'text-bottom' }}
                 />
               ) : (
                 <>
@@ -84,8 +84,7 @@ export const Markers: React.FC = () => {
                     ? ''
                     : (index + (askForStartingLocation ? 2 : 1)).toString()}
                 </>
-              ),
-              'blue'
+              )
             )}
             eventHandlers={{
               dragend: (e) => {

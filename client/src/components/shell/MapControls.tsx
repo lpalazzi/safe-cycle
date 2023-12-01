@@ -1,20 +1,12 @@
 import React from 'react';
 import { ActionIcon, Button, Flex, Tooltip } from '@mantine/core';
 import { useGlobalContext } from 'contexts/globalContext';
-import {
-  IconArrowsMaximize,
-  IconCurrentLocation,
-  IconMenu2,
-  IconMinus,
-  IconPlus,
-  IconTrash,
-} from '@tabler/icons-react';
+import { IconCurrentLocation, IconMinus, IconPlus } from '@tabler/icons-react';
 import { useMapContext } from 'contexts/mapContext';
 
 export const MapControls: React.FC = () => {
-  const { isMobileSize, isNavbarOpen, isNavModeOn, toggleNavbar } =
-    useGlobalContext();
-  const { map, clearWaypoints } = useMapContext();
+  const { isMobileSize, isNavModeOn } = useGlobalContext();
+  const { map } = useMapContext();
 
   const zoomButtons = (
     <Button.Group orientation='vertical'>
@@ -22,6 +14,7 @@ export const MapControls: React.FC = () => {
         onClick={() => map?.zoomIn()}
         variant='default'
         size='lg'
+        radius='lg'
         style={{ borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }}
       >
         <IconPlus size='1.25rem' />
@@ -30,6 +23,7 @@ export const MapControls: React.FC = () => {
         onClick={() => map?.zoomOut()}
         variant='default'
         size='lg'
+        radius='lg'
         style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
       >
         <IconMinus size='1.25rem' />
@@ -51,42 +45,15 @@ export const MapControls: React.FC = () => {
         }}
         variant='default'
         size='lg'
+        radius='lg'
       >
         <IconCurrentLocation size='1.25rem' />
       </ActionIcon>
     </Tooltip>
   );
 
-  const clearButton = (
-    <Tooltip label='Clear markers' position='left'>
-      <ActionIcon onClick={clearWaypoints} variant='default' size='lg'>
-        <IconTrash size='1.25rem' />
-      </ActionIcon>
-    </Tooltip>
-  );
-
-  const toggleNavbarButton = (
-    <Tooltip
-      label={isNavbarOpen ? 'Fullscreen map' : 'Show menu'}
-      position='left'
-    >
-      <ActionIcon onClick={toggleNavbar} variant='default' size='lg'>
-        {isNavbarOpen ? (
-          <IconArrowsMaximize size='1.25rem' />
-        ) : (
-          <IconMenu2 size='1.25rem' />
-        )}
-      </ActionIcon>
-    </Tooltip>
-  );
-
-  const mobileButtons = [clearButton, locationButton, toggleNavbarButton];
-  const desktopButtons = [
-    toggleNavbarButton,
-    clearButton,
-    locationButton,
-    zoomButtons,
-  ];
+  const mobileButtons = [locationButton];
+  const desktopButtons = [locationButton, zoomButtons];
 
   return (
     <Flex
@@ -97,7 +64,7 @@ export const MapControls: React.FC = () => {
       style={{
         position: 'absolute',
         bottom: 24.8,
-        right: 8,
+        right: 12,
         zIndex: 1,
       }}
     >

@@ -1,4 +1,4 @@
-import { ID, Name, UserRole } from 'types';
+import { ContributorProfile, ID, Name, UserRole } from 'types';
 
 export interface IRegionReturnDTO {
   _id: ID;
@@ -9,7 +9,9 @@ export interface IRegionReturnDTO {
     _id: ID;
     name: Name;
     role: UserRole;
+    contributorProfile?: ContributorProfile;
   }[];
+  shortName?: string;
 }
 
 export interface IRegionCreateDTO

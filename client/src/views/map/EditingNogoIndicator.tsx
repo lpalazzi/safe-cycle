@@ -2,13 +2,19 @@ import React from 'react';
 import { Paper, Group, Stack, Text, Button } from '@mantine/core';
 import { IconEditOff } from '@tabler/icons-react';
 import { useGlobalContext } from 'contexts/globalContext';
+import { openModal } from '@mantine/modals';
+import { SelectNogosModal } from 'components/modals/SelectNogosModal/SelectNogosModal';
 
 export const EditingNogoIndicator: React.FC = () => {
-  const { isMobileSize, editingGroupOrRegion, setEditingGroupOrRegion } =
-    useGlobalContext();
+  const {
+    isMobileSize,
+    editingGroupOrRegion,
+    isNavbarOpen,
+    setEditingGroupOrRegion,
+    toggleNavbar,
+  } = useGlobalContext();
   return (
     <Paper
-      shadow='xs'
       p='md'
       style={{
         position: 'fixed',
@@ -34,6 +40,15 @@ export const EditingNogoIndicator: React.FC = () => {
           onClick={(e) => {
             e.stopPropagation();
             setEditingGroupOrRegion(null);
+            if (!isNavbarOpen) toggleNavbar();
+            openModal(
+              SelectNogosModal(
+                isMobileSize,
+                !!editingGroupOrRegion && !editingGroupOrRegion.isRegion
+                  ? 'custom'
+                  : 'regions'
+              )
+            );
           }}
         >
           <Group position='center' spacing='xs' noWrap>

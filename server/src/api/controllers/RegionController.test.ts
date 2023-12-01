@@ -21,6 +21,7 @@ describe('POST /region/create', () => {
     const user = await createTestUser('admin');
     const region: IRegionCreateDTO = {
       name: 'Test Region',
+      shortName: 'Test',
       iso31662: 'CA-ON',
       polygon: {
         type: 'Polygon',
@@ -50,6 +51,7 @@ describe('POST /region/create', () => {
     const user = await createTestUser();
     const region: IRegionCreateDTO = {
       name: 'Test Region',
+      shortName: 'Test',
       iso31662: 'CA-ON',
       polygon: {
         type: 'Polygon',
@@ -76,6 +78,7 @@ describe('POST /region/create', () => {
   test('throws UnauthorizedError when not logged in', async () => {
     const region: IRegionCreateDTO = {
       name: 'Test Region',
+      shortName: 'Test',
       iso31662: 'CA-ON',
       polygon: {
         type: 'Polygon',
@@ -119,6 +122,7 @@ describe('POST /region/create', () => {
     const user = await createTestUser('admin');
     const region: IRegionCreateDTO = {
       name: 'Test Region',
+      shortName: 'Test',
       iso31662: 'CA-ON',
       polygon: {
         type: 'Polygon',

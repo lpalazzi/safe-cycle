@@ -7,14 +7,17 @@ import { Nogo, TurnInstruction } from 'models';
 import { GeocodingApi, NogoApi, RouterApi } from 'api';
 import { RouteData } from 'api/interfaces/Router';
 import { FeatureFlags } from 'featureFlags';
+import { isTouchDevice } from 'utils/device';
 
 type MapContextType =
   | {
       // states
       map: L.Map | null;
+      zoomLevel: number | null;
       currentLocation: Location | null;
       followUser: boolean;
       waypoints: Waypoint[];
+      nogoWaypoints: L.LatLng[];
       askForStartingLocation: boolean;
       routes: RouteData[] | null;
       selectedRouteIndex: number | null;
@@ -23,6 +26,7 @@ type MapContextType =
       lineToCursor: [L.LatLng, L.LatLng] | null;
       // functions
       setMap: (map: L.Map) => void;
+      setZoomLevel: (zoomLevel: number | null) => void;
       setCurrentLocation: (location: Location | null) => void;
       setFollowUser: (val: boolean) => void;
       addWaypoint: (latlng: L.LatLng, label?: string) => void;
@@ -52,10 +56,9 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     loggedInUser,
     editingGroupOrRegion,
     selectedNogoGroups,
+    selectedRegions,
     routeOptions,
     showAlternateRoutes,
-    regions,
-    isNavbarCondensed,
     isNavbarOpen,
     clearSelectedNogoGroups,
     setEditingGroupOrRegion,
@@ -63,6 +66,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     setIsLoading,
   } = useGlobalContext();
 
+  const [zoomLevel, setZoomLevel] = useState<number | null>(null);
   const [currentLocation, setCurrentLocation] = useState<Location | null>(null);
   const [followUser, setFollowUser] = useState(false);
   const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
@@ -94,16 +98,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     if (!editingGroupOrRegion) {
       const newWaypoints: Waypoint[] = [];
       if (label && waypoints.length === 0 && !askForStartingLocation) {
-        // if (currentLocation) {
-        //   const startingWaypoint: Waypoint = {
-        //     latlng: currentLocation.latlng,
-        //     label: 'Current location',
-        //   };
-        //   newWaypoints.push(startingWaypoint);
-        //   setAskForStartingLocation(false);
-        // } else {
         setAskForStartingLocation(true);
-        // }
       } else setAskForStartingLocation(false);
       newWaypoints.push(newWaypoint);
 
@@ -162,7 +157,12 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   };
 
   const refreshWaypointLineToCursor = (mousePosition: L.LatLng | null) => {
-    if (mousePosition && editingGroupOrRegion && nogoWaypoints.length === 1) {
+    if (
+      !isTouchDevice() &&
+      mousePosition &&
+      editingGroupOrRegion &&
+      nogoWaypoints.length === 1
+    ) {
       setLineToCursor([nogoWaypoints[0], mousePosition]);
     } else {
       setLineToCursor(null);
@@ -171,14 +171,11 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
 
   const fetchRoute = () => {
     if (!editingGroupOrRegion && waypoints.length >= 2) {
-      const regionIds: ID[] = routeOptions.avoidNogos
-        ? regions.map((region) => region._id)
-        : [];
       setFetchingCount((prev) => prev + 1);
       RouterApi.generateRoute(
         waypoints.map((waypoint) => waypoint.latlng),
         selectedNogoGroups,
-        regionIds,
+        selectedRegions,
         { ...routeOptions, showAlternateRoutes },
         loggedInUser
       )
@@ -192,12 +189,8 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
             )
           );
           map?.fitBounds(L.latLngBounds(bounds.flat()), {
-            paddingTopLeft: isNavbarOpen
-              ? isNavbarCondensed
-                ? [0, 340]
-                : [400, 0]
-              : [0, 0],
-            paddingBottomRight: isNavbarCondensed ? [50, 100] : [0, 0],
+            paddingTopLeft: isNavbarOpen ? [0, 340] : [0, 0],
+            paddingBottomRight: [50, 100],
           });
         })
         .catch((err) => {
@@ -217,13 +210,10 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
   };
 
   const downloadGPX = () => {
-    const regionIds: ID[] = routeOptions.avoidNogos
-      ? regions.map((region) => region._id)
-      : [];
     RouterApi.downloadGPX(
       waypoints.map((waypoint) => waypoint.latlng),
       selectedNogoGroups,
-      regionIds,
+      selectedRegions,
       { ...routeOptions, showAlternateRoutes: false },
       loggedInUser,
       selectedRouteIndex ?? 0
@@ -267,11 +257,14 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
           })
         );
     } else {
-      Promise.all(
-        selectedNogoGroups.map((selectedNogoGroup) =>
-          NogoApi.getAllByGroup(selectedNogoGroup, false)
-        )
-      )
+      Promise.all([
+        ...selectedNogoGroups.map((groupId) =>
+          NogoApi.getAllByGroup(groupId, false)
+        ),
+        ...selectedRegions.map((regionId) =>
+          NogoApi.getAllByGroup(regionId, true)
+        ),
+      ])
         .then((val) => setNogoRoutes(val.flat()))
         .catch((error) =>
           showNotification({
@@ -324,7 +317,13 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
 
   useEffect(() => {
     fetchRoute();
-  }, [waypoints, editingGroupOrRegion, selectedNogoGroups, routeOptions]);
+  }, [
+    waypoints,
+    editingGroupOrRegion,
+    selectedNogoGroups,
+    selectedRegions,
+    routeOptions,
+  ]);
 
   useEffect(() => {
     calculateTurnInstructions();
@@ -345,7 +344,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
 
   useEffect(() => {
     refreshNogoRoutes();
-  }, [selectedNogoGroups]);
+  }, [selectedNogoGroups, selectedRegions]);
 
   useEffect(() => {
     refreshNogoRoutes();
@@ -366,9 +365,11 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     <MapContext.Provider
       value={{
         map,
+        zoomLevel,
         currentLocation,
         followUser,
         waypoints,
+        nogoWaypoints,
         routes,
         askForStartingLocation,
         selectedRouteIndex,
@@ -376,6 +377,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         nogoRoutes,
         lineToCursor,
         setMap,
+        setZoomLevel,
         setCurrentLocation,
         setFollowUser,
         addWaypoint,
@@ -399,7 +401,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
 export const useMapContext = () => {
   const context = useContext(MapContext);
   if (!context) {
-    throw new Error('useMap must be inside a MapContextProvider');
+    throw new Error('useMapContext must be inside a MapContextProvider');
   }
   return context;
 };

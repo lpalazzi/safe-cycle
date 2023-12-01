@@ -20,6 +20,9 @@ const RegionSchema = new mongoose.Schema<IRegion>({
     type: String,
     required: true,
   },
+  shortName: {
+    type: String,
+  },
 });
 
 export const RegionModel = mongoose.model<IRegion>('Region', RegionSchema);

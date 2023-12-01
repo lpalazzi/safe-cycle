@@ -1,3 +1,4 @@
+import { NogoApi } from 'api';
 import { ID, Name } from 'types';
 
 interface NogoGroupParams {
@@ -23,5 +24,9 @@ export class NogoGroup {
 
   public getOwner() {
     return this.user.name.first + ' ' + this.user.name.last;
+  }
+
+  public async getAllNogos() {
+    return NogoApi.getAllByGroup(this._id, false);
   }
 }

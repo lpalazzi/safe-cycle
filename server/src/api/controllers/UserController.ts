@@ -261,12 +261,7 @@ export const user = (app: express.Router) => {
       const userSettings: Partial<UserSettings> = req.body.userSettings;
       if (!userSettings)
         throw new BadRequestError('No settings update provided');
-      const { error } = joi
-        .object({
-          privateNogosEnabled: joi.boolean(),
-        })
-        .required()
-        .validate(userSettings);
+      const { error } = joi.object({}).required().validate(userSettings);
       if (error)
         throw new BadRequestError('Validation error: ' + error.message);
 

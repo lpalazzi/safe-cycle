@@ -7,6 +7,7 @@ export interface IRegion {
   iso31662: string;
   polygon: GeoJSON.Polygon;
   contributors: mongoose.Types.ObjectId[];
+  shortName?: string;
 }
 
 export interface IRegionReturnDTO extends Omit<IRegion, 'contributors'> {

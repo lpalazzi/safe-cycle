@@ -31,16 +31,21 @@ const AddRegionForm: React.FC = () => {
   const form = useForm({
     initialValues: {
       name: '',
+      shortName: '',
       iso31662: '',
       polygon: '',
     } as {
       name: string;
+      shortName: string;
       iso31662: string;
       polygon: string;
     },
     validate: {
       name: (value) => {
         if (!value || value === '') return 'Name is required';
+      },
+      shortName: (value) => {
+        if (!value || value === '') return 'Short name is required';
       },
       iso31662: (value) => {
         if (!value || value === '') return 'Country/Subdivision is required';
@@ -56,6 +61,7 @@ const AddRegionForm: React.FC = () => {
     name: string;
     iso31662: string;
     polygon: string;
+    shortName?: string;
   }) => {
     try {
       const regionToCreate: IRegionCreateDTO = {
@@ -98,6 +104,12 @@ const AddRegionForm: React.FC = () => {
           label='Name'
           placeholder='Enter a name for this region'
           {...form.getInputProps('name')}
+        />
+        <TextInput
+          withAsterisk
+          label='Short name'
+          placeholder='Enter a shorter name for this region'
+          {...form.getInputProps('shortName')}
         />
         <Select
           withAsterisk
