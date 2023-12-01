@@ -14,7 +14,6 @@ import { AboutModal } from 'components/modals/AboutModal';
 import { LoginModal } from 'components/modals/LoginModal';
 import { ManageAccountModal } from 'components/modals/ManageAccountModal';
 import { AdminControlsModal } from 'components/modals/AdminControlsModal';
-import { isTouchDevice } from 'utils/device';
 
 export const SidebarHeader: React.FC = () => {
   const { loggedInUser, isMobileSize, logoutUser } = useGlobalContext();
@@ -39,11 +38,7 @@ export const SidebarHeader: React.FC = () => {
           <IconInfoCircle size='1.625rem' />
         </ActionIcon>
         {loggedInUser ? (
-          <Menu
-            withinPortal
-            trigger={isTouchDevice() ? 'click' : 'hover'}
-            position='bottom-end'
-          >
+          <Menu withinPortal trigger='click' position='bottom-end'>
             <Menu.Target>
               <ActionIcon size='lg' variant='transparent'>
                 <IconUserCircle size='1.625rem' />

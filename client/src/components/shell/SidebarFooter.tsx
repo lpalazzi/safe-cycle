@@ -1,90 +1,114 @@
 import React from 'react';
+import { Group, Image, Button } from '@mantine/core';
 import {
-  Avatar,
-  Box,
-  Group,
-  Menu,
-  Text,
-  UnstyledButton,
-  useMantineTheme,
-} from '@mantine/core';
-import { openModal } from '@mantine/modals';
-import {
-  IconChevronRight,
-  IconDots,
-  IconKey,
-  IconLogout,
-  IconSettings,
+  IconChevronsDown,
+  IconChevronsUp,
+  IconDownload,
+  IconList,
+  IconX,
 } from '@tabler/icons-react';
 
+import { FeatureFlags } from 'featureFlags';
 import { useGlobalContext } from 'contexts/globalContext';
-import { AdminControlsModal } from 'components/modals/AdminControlsModal';
-import { ManageAccountModal } from 'components/modals/ManageAccountModal';
+import { useMapContext } from 'contexts/mapContext';
 
-export const SidebarFooter: React.FC = () => {
-  const { loggedInUser, isMobileSize, logoutUser } = useGlobalContext();
-  const theme = useMantineTheme();
+import LogoSvg from 'assets/brand/logo-name.svg';
 
-  return !!loggedInUser ? (
-    <Menu position={isMobileSize ? 'top-end' : 'right-end'} offset={24}>
-      <Menu.Target>
-        <UnstyledButton
-          sx={{
-            display: 'block',
-            width: '100%',
-            padding: theme.spacing.xs,
-            borderRadius: theme.radius.sm,
-            color: theme.black,
+type SidebarFooterProps = {
+  setShowTurnInstructions: React.Dispatch<React.SetStateAction<boolean>>;
+};
 
-            '&:hover': {
-              backgroundColor: theme.colors.gray[0],
-            },
-          }}
-        >
-          <Group>
-            <Avatar src={null} radius='xl'>
-              {loggedInUser.getInitials()}
-            </Avatar>
-            <Box sx={{ flex: 1 }}>
-              <Text size='sm' weight={500}>
-                {loggedInUser.getFullName()}
-              </Text>
-              <Text size='xs' color='dimmed'>
-                {loggedInUser.email}
-              </Text>
-            </Box>
-            {isMobileSize ? (
-              <IconDots size={18} />
-            ) : (
-              <IconChevronRight size={18} />
-            )}
+export const SidebarFooter: React.FC<SidebarFooterProps> = ({
+  setShowTurnInstructions,
+}) => {
+  const { loggedInUser, isNavbarOpen, toggleNavbar } = useGlobalContext();
+  const { routes, selectedRouteIndex, waypoints, clearWaypoints, downloadGPX } =
+    useMapContext();
+
+  return (
+    <Group
+      position='apart'
+      style={isNavbarOpen ? {} : { cursor: 'pointer' }}
+      onClick={isNavbarOpen ? undefined : toggleNavbar}
+    >
+      {isNavbarOpen ? (
+        waypoints.length > 0 ? (
+          <Group position='left' spacing={0}>
+            <Button
+              size='xs'
+              compact
+              variant='subtle'
+              color='gray'
+              leftIcon={<IconX size={16} />}
+              styles={{ leftIcon: { marginRight: 5 } }}
+              onClick={() => {
+                setShowTurnInstructions(false);
+                clearWaypoints();
+              }}
+            >
+              Clear
+            </Button>
+            {!!routes &&
+            (selectedRouteIndex || selectedRouteIndex === 0) &&
+            waypoints.length > 1 ? (
+              <>
+                {FeatureFlags.TurnInstructions.isEnabledForUser(
+                  loggedInUser?._id
+                ) ? (
+                  <Button
+                    size='xs'
+                    compact
+                    variant='subtle'
+                    color='gray'
+                    leftIcon={<IconList size={16} />}
+                    styles={{ leftIcon: { marginRight: 5 } }}
+                    onClick={() => setShowTurnInstructions((prev) => !prev)}
+                  >
+                    Details
+                  </Button>
+                ) : null}
+                <Button
+                  size='xs'
+                  compact
+                  variant='subtle'
+                  color='gray'
+                  leftIcon={<IconDownload size={16} />}
+                  styles={{ leftIcon: { marginRight: 5 } }}
+                  onClick={downloadGPX}
+                >
+                  GPX
+                </Button>
+              </>
+            ) : null}
           </Group>
-        </UnstyledButton>
-      </Menu.Target>
-
-      <Menu.Dropdown>
-        <Menu.Item
-          icon={<IconSettings size={14} />}
-          onClick={() => openModal(ManageAccountModal)}
-        >
-          Manage account
-        </Menu.Item>
-        {loggedInUser.role === 'admin' ? (
-          <Menu.Item
-            icon={<IconKey size={14} />}
-            onClick={() => openModal(AdminControlsModal)}
-          >
-            Admin controls
-          </Menu.Item>
-        ) : null}
-        <Menu.Item
-          onClick={() => logoutUser()}
-          color='red'
-          icon={<IconLogout size={14} />}
-        >
-          Sign out
-        </Menu.Item>
-      </Menu.Dropdown>
-    </Menu>
-  ) : null;
+        ) : (
+          <div></div>
+        )
+      ) : (
+        <Image
+          src={LogoSvg}
+          height={30}
+          width='min(max-content, 100%)'
+          fit='contain'
+          alt='SafeCycle Logo'
+          withPlaceholder
+          style={{ flexGrow: 1 }}
+          styles={{ image: { width: 'unset' } }}
+        />
+      )}
+      <Button
+        size='xs'
+        compact
+        variant='transparent'
+        c='dimmed'
+        onClick={toggleNavbar}
+      >
+        {isNavbarOpen ? (
+          <IconChevronsUp size='1rem' />
+        ) : (
+          <IconChevronsDown size='1rem' />
+        )}
+      </Button>
+    </Group>
+  );
 };

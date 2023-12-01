@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { MapContainer, ScaleControl, TileLayer } from 'react-leaflet';
 import 'leaflet-easybutton';
 import 'leaflet-easybutton/src/easy-button.css';
@@ -15,11 +15,30 @@ import { Region } from './Region';
 import { EditingNogoIndicator } from './EditingNogoIndicator';
 import { RecenterButton } from './RecenterButton';
 import { RouteProperties } from './RouteProperties';
+import { makeRequest } from 'api/reqHelpers';
+import { LatLng } from 'leaflet';
 
 export const Map: React.FC = () => {
   const { editingGroupOrRegion, isNavModeOn } = useGlobalContext();
   const { followUser, routes, setMap } = useMapContext();
-  return (
+  const [initMap, setInitMap] = useState(false);
+  const [guessedLocation, setGuessedLocation] = useState<LatLng | null>(null);
+
+  useEffect(() => {
+    makeRequest('http://ip-api.com/json')
+      .then(({ lat, lon }: { lat: number; lon: number }) => {
+        try {
+          const newLatLng = new LatLng(lat, lon);
+          setGuessedLocation(newLatLng);
+          setInitMap(true);
+        } catch (err) {
+          setInitMap(true);
+        }
+      })
+      .catch(() => setInitMap(true));
+  }, []);
+
+  return initMap ? (
     <>
       <MapContainer
         ref={setMap}
@@ -32,8 +51,8 @@ export const Map: React.FC = () => {
           zIndex: 0,
           cursor: 'crosshair',
         }}
-        center={[0, -80]}
-        zoom={2}
+        center={guessedLocation ? guessedLocation : [0, -80]}
+        zoom={guessedLocation ? 6 : 2}
         scrollWheelZoom={true}
         zoomControl={false}
         worldCopyJump={true}
@@ -59,5 +78,5 @@ export const Map: React.FC = () => {
       {editingGroupOrRegion ? <EditingNogoIndicator /> : null}
       {isNavModeOn && !followUser ? <RecenterButton /> : null}
     </>
-  );
+  ) : null;
 };

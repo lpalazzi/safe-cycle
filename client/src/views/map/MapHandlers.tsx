@@ -62,7 +62,7 @@ export const MapHandlers: React.FC = () => {
 
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
-      map.locate({ setView: true, maxZoom: 10 });
+      map.locate({ setView: true, maxZoom: 14 });
       // Geolocation.checkPermissions().then((status) => {
       //   console.log(status);
       //   if (status.location === 'denied') {
@@ -106,7 +106,7 @@ export const MapHandlers: React.FC = () => {
       navigator.permissions.query({ name: 'geolocation' }).then((status) => {
         switch (status.state) {
           case 'granted':
-            map.locate({ setView: true, maxZoom: 10 });
+            map.locate({ setView: true, maxZoom: 14 });
             break;
           case 'denied':
             showNotification({

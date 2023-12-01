@@ -6,7 +6,7 @@ import { useMapContext } from 'contexts/mapContext';
 
 export const MapControls: React.FC = () => {
   const { isMobileSize, isNavModeOn } = useGlobalContext();
-  const { map } = useMapContext();
+  const { map, currentLocation } = useMapContext();
 
   const zoomButtons = (
     <Button.Group orientation='vertical'>
@@ -36,9 +36,14 @@ export const MapControls: React.FC = () => {
       <ActionIcon
         onClick={() => {
           if (map) {
+            if (currentLocation) {
+              map.flyTo(currentLocation.latlng, isNavModeOn ? 19 : 16, {
+                duration: 0.5,
+              });
+            }
             map.once('locationfound', (e) => {
               const { latlng } = e;
-              map.flyTo(latlng, isNavModeOn ? 19 : 14);
+              map.flyTo(latlng, isNavModeOn ? 19 : 16, { duration: 0.5 });
             });
             map.locate({ watch: true, enableHighAccuracy: true });
           }
