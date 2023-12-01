@@ -25,16 +25,18 @@ export const Map: React.FC = () => {
   const [guessedLocation, setGuessedLocation] = useState<LatLng | null>(null);
 
   useEffect(() => {
-    makeRequest('http://ip-api.com/json')
-      .then(({ lat, lon }: { lat: number; lon: number }) => {
-        try {
-          const newLatLng = new LatLng(lat, lon);
-          setGuessedLocation(newLatLng);
-          setInitMap(true);
-        } catch (err) {
-          setInitMap(true);
+    makeRequest('https://ipapi.co/json/')
+      .then(
+        ({ latitude, longitude }: { latitude: number; longitude: number }) => {
+          try {
+            const newLatLng = new LatLng(latitude, longitude);
+            setGuessedLocation(newLatLng);
+            setInitMap(true);
+          } catch (err) {
+            setInitMap(true);
+          }
         }
-      })
+      )
       .catch(() => setInitMap(true));
   }, []);
 
