@@ -20,6 +20,7 @@ import {
   IconEdit,
   IconExclamationCircle,
   IconMapPin,
+  IconPlus,
 } from '@tabler/icons-react';
 import booleanWithin from '@turf/boolean-within';
 import { point } from '@turf/helpers';
@@ -166,7 +167,11 @@ export const RegionCard: React.FC<{
               color='green'
               onClick={toggleSelect}
             >
-              <IconCheck size='1.125rem' />
+              {isSelected ? (
+                <IconCheck size='1.125rem' />
+              ) : (
+                <IconPlus size='1.125rem' />
+              )}
             </ActionIcon>
           </Tooltip>
         </Group>
@@ -217,6 +222,30 @@ export const RegionCard: React.FC<{
                   fillOpacity: 0.1,
                 }}
               ></GeoJSON>
+              <Paper
+                px='xs'
+                py='0.325rem'
+                radius='md'
+                style={{
+                  position: 'absolute',
+                  top: 10,
+                  right: 10,
+                  zIndex: 100000,
+                }}
+              >
+                <Group noWrap align='center' position='center' spacing='xs'>
+                  <Text size='xs'>Nogos</Text>
+                  <hr
+                    style={{
+                      height: 3,
+                      borderWidth: 0,
+                      backgroundColor: theme.colors.red[7],
+                      width: 16,
+                      borderRadius: 50,
+                    }}
+                  />
+                </Group>
+              </Paper>
             </MapContainer>
           ) : (
             <Flex
