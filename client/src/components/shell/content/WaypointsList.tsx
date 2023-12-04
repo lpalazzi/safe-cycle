@@ -24,7 +24,6 @@ import { TouchBackend } from 'react-dnd-touch-backend';
 import { LatLng } from 'leaflet';
 import debounce from 'lodash.debounce';
 import {
-  Stack,
   Timeline,
   Group,
   ActionIcon,
@@ -32,40 +31,28 @@ import {
   Text,
   SelectItem,
   Paper,
-  Button,
 } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import {
-  IconX,
-  IconGripHorizontal,
-  IconList,
-  IconDownload,
-} from '@tabler/icons-react';
+import { IconX, IconGripHorizontal } from '@tabler/icons-react';
 
 import { GeocodingApi } from 'api';
 import { Waypoint, GeocodeSearchResult } from 'types';
 import { useMapContext } from 'contexts/mapContext';
-import { TurnInstructions } from './TurnInstructions';
-import { FeatureFlags } from 'featureFlags';
 import { useGlobalContext } from 'contexts/globalContext';
 
 // ideas:
 //   - collapse multiple waypoints unless editing
 //   - add maximum height on mobile
 export const WaypointsList: React.FC = () => {
-  const { loggedInUser, setIsLoading } = useGlobalContext();
+  const { setIsLoading } = useGlobalContext();
   const {
     map,
     waypoints,
     currentLocation,
-    routes,
     askForStartingLocation,
-    selectedRouteIndex,
     addWaypoint,
     reorderWaypoint,
     removeWaypoint,
-    clearWaypoints,
-    downloadGPX,
   } = useMapContext();
 
   const [draggableWaypoints, setDraggableWaypoints] = useState(waypoints);
@@ -73,7 +60,6 @@ export const WaypointsList: React.FC = () => {
   const [geoSearchResults, setGeoSearchResults] = useState<
     GeocodeSearchResult[]
   >([]);
-  const [showTurnInstructions, setShowTurnInstructions] = useState(false);
   const [savedSearches, setSavedSearches] = useState<GeocodeSearchResult[]>([]);
 
   useEffect(() => {
@@ -99,10 +85,6 @@ export const WaypointsList: React.FC = () => {
   }, []);
 
   useEffect(() => setDraggableWaypoints(waypoints), [waypoints]);
-  useEffect(
-    () => setShowTurnInstructions(false),
-    [waypoints, selectedRouteIndex, routes]
-  );
 
   const reorderDraggableWaypoint = useCallback(
     (srcIndex: number, destIndex: number) => {
@@ -142,6 +124,11 @@ export const WaypointsList: React.FC = () => {
   const handleGeoSearchValueChanged = useMemo(() => {
     return debounce(executeGeoSearch, 300);
   }, [map, currentLocation]);
+
+  const handleUserUpdatedSearchValue = (value: string) => {
+    if (value === ' ') return;
+    setGeoSearchValue(value);
+  };
 
   const handleLocationSelect = async (value: string | null) => {
     if (value === 'location') {
@@ -285,7 +272,7 @@ export const WaypointsList: React.FC = () => {
               placeholder='Search for a starting point'
               value={null}
               data={geoSearchResultOptions}
-              onSearchChange={setGeoSearchValue}
+              onSearchChange={handleUserUpdatedSearchValue}
               onChange={handleLocationSelect}
               searchValue={geoSearchValue}
               nothingFound='No results found'
@@ -327,7 +314,7 @@ export const WaypointsList: React.FC = () => {
               placeholder='Search for a location'
               value={null}
               data={geoSearchResultOptions}
-              onSearchChange={setGeoSearchValue}
+              onSearchChange={handleUserUpdatedSearchValue}
               onChange={handleLocationSelect}
               searchValue={geoSearchValue}
               nothingFound='No results found'
