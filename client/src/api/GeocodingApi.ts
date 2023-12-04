@@ -34,17 +34,24 @@ export class GeocodingApi {
     );
 
     const searchResults: IGeocodeSearchResult[] = response.searchResults;
-    return searchResults.map((searchResult) => {
-      return {
-        label: searchResult.label,
-        latlng: searchResult.position
-          ? new L.LatLng(
-              searchResult.position.latitude,
-              searchResult.position.longitude
-            )
-          : undefined,
-      } as GeocodeSearchResult;
-    });
+    return searchResults
+      .filter((searchResult) => {
+        return (
+          searchResult?.position?.latitude !== null &&
+          searchResult?.position?.longitude !== null
+        );
+      })
+      .map((searchResult) => {
+        return {
+          label: searchResult.label,
+          latlng: searchResult.position
+            ? new L.LatLng(
+                searchResult.position.latitude,
+                searchResult.position.longitude
+              )
+            : undefined,
+        } as GeocodeSearchResult;
+      });
   }
 
   static async geocode(query: string) {
