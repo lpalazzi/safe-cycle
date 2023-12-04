@@ -51,7 +51,11 @@ export class BingMapsService {
 
     const { data } = await axios
       .get<BingAutosuggestResult>(
-        `${this.bingMapsBaseUrl}/Autosuggest?query=${query}&userMapView=${userMapViewStr}&userLocation=${userLocationStr}&maxResults=10&key=${config.bingMapsApiKey}`
+        `${this.bingMapsBaseUrl}/Autosuggest?query=${encodeURIComponent(
+          query
+        )}&userMapView=${userMapViewStr}&userLocation=${userLocationStr}&maxResults=10&key=${
+          config.bingMapsApiKey
+        }`
       )
       .catch((e: AxiosError) => {
         console.error(e.response?.data);
