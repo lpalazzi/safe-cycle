@@ -11,8 +11,6 @@ import { NogoGroupApi, RegionApi, UserApi } from 'api';
 import { NogoGroup, Region, User } from 'models';
 import { ComfortLevel, ID, Location, RouteOptions } from 'types';
 import { useMediaQuery } from '@mantine/hooks';
-import { openModal } from '@mantine/modals';
-import { SurveyModal } from 'components/modals/SurveyModal';
 
 type GlobalContextType =
   | {
@@ -89,7 +87,6 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   useEffect(() => {
     updateLoggedInUser();
     countSiteVisits();
-    openSurveyModalOnManyVisits();
     getStoredSelectedRegions();
     getStoredSelectedNogoGroups();
     refreshRegions();
@@ -100,25 +97,6 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     var visited = Number(window.localStorage.getItem('visited'));
     if (isNaN(visited)) visited = 0;
     window.localStorage.setItem('visited', (visited + 1).toFixed(0));
-  };
-
-  const openSurveyModalOnManyVisits = () => {
-    const surveyClicked =
-      window.localStorage.getItem('surveyClicked') === 'true';
-    if (surveyClicked) return;
-    var timesSurveyModalShown = Number(
-      window.localStorage.getItem('timesSurveyModalShown')
-    );
-    if (isNaN(timesSurveyModalShown)) timesSurveyModalShown = 0;
-    const visited = Number(window.localStorage.getItem('visited'));
-    if (isNaN(visited)) return;
-    if (visited >= 10 && timesSurveyModalShown < 3) {
-      openModal(SurveyModal);
-      window.localStorage.setItem(
-        'timesSurveyModalShown',
-        (timesSurveyModalShown + 1).toFixed(0)
-      );
-    }
   };
 
   const getStoredSelectedNogoGroups = async () => {

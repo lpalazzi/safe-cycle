@@ -25,6 +25,7 @@ export const Map: React.FC = () => {
   const [guessedLocation, setGuessedLocation] = useState<LatLng | null>(null);
 
   useEffect(() => {
+    // TODO: if last known location is stored in cookie, use that instead
     makeRequest('https://ipapi.co/json/')
       .then(
         ({ latitude, longitude }: { latitude: number; longitude: number }) => {
