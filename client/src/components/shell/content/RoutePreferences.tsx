@@ -388,44 +388,44 @@ export const RoutePreferences: React.FC = () => {
                     See all
                   </Anchor>
                 </Group>
-                {currentLocation || regionChips.length > 0 ? (
-                  regionChips.length > 0 ? (
-                    <Group position='left' spacing='0.25rem'>
-                      {regionChips.map((chip, index) => (
-                        <Chip
-                          size='xs'
-                          checked={selectedRegions.includes(chip.value)}
-                          onChange={() => handleRegionChipToggled(chip.value)}
-                          styles={{ root: { height: 26 } }}
-                        >
-                          {chip.label}
-                          {chip.isUserInside && index === 0 && (
-                            <IconCurrentLocation
-                              size='1rem'
-                              style={{ marginLeft: '0.25rem' }}
-                            />
-                          )}
-                        </Chip>
-                      ))}
-                    </Group>
-                  ) : (
-                    !hideRegionWarning && (
-                      <AlertBox onClose={() => setHideRegionWarning(true)}>
-                        You are not near a supported region.{' '}
-                        <Anchor
-                          inline
-                          inherit
-                          onClick={() =>
-                            openModal(SelectNogosModal(isMobileSize, 'regions'))
-                          }
-                          style={{ whiteSpace: 'nowrap' }}
-                        >
-                          View supported regions here.
-                        </Anchor>
-                      </AlertBox>
-                    )
-                  )
-                ) : (
+                {regionChips.length > 0 && (
+                  <Group position='left' spacing='0.25rem'>
+                    {regionChips.map((chip, index) => (
+                      <Chip
+                        size='xs'
+                        checked={selectedRegions.includes(chip.value)}
+                        onChange={() => handleRegionChipToggled(chip.value)}
+                        styles={{ root: { height: 26 } }}
+                      >
+                        {chip.label}
+                        {chip.isUserInside && index === 0 && (
+                          <IconCurrentLocation
+                            size='1rem'
+                            style={{ marginLeft: '0.25rem' }}
+                          />
+                        )}
+                      </Chip>
+                    ))}
+                  </Group>
+                )}
+                {currentLocation &&
+                  !regionChips.length &&
+                  !hideRegionWarning && (
+                    <AlertBox onClose={() => setHideRegionWarning(true)}>
+                      You are not near a supported region.{' '}
+                      <Anchor
+                        inline
+                        inherit
+                        onClick={() =>
+                          openModal(SelectNogosModal(isMobileSize, 'regions'))
+                        }
+                        style={{ whiteSpace: 'nowrap' }}
+                      >
+                        View supported regions here.
+                      </Anchor>
+                    </AlertBox>
+                  )}
+                {!currentLocation && (
                   <AlertBox>
                     <Anchor
                       inline
