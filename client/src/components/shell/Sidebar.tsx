@@ -30,7 +30,7 @@ export const Sidebar: React.FC = () => {
             : { root: { borderRadius: '0 0 1rem 0' } }
         }
       >
-        {isNavbarOpen && (
+        <Collapse in={isNavbarOpen} transitionDuration={100}>
           <ScrollArea.Autosize mah='70dvh' type='scroll' mb='xs'>
             <Navbar.Section>
               <SidebarHeader />
@@ -39,13 +39,13 @@ export const Sidebar: React.FC = () => {
               <>
                 <WaypointsList />
                 <RoutePreferences />
-                <Collapse in={showTurnInstructions}>
+                <Collapse in={showTurnInstructions} transitionDuration={100}>
                   <TurnInstructions show={showTurnInstructions} />
                 </Collapse>
               </>
             </Navbar.Section>
           </ScrollArea.Autosize>
-        )}
+        </Collapse>
         <SidebarFooter setShowTurnInstructions={setShowTurnInstructions} />
       </Navbar>
       <MapControls />

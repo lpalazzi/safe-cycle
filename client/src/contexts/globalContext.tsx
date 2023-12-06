@@ -11,6 +11,11 @@ import { NogoGroupApi, RegionApi, UserApi } from 'api';
 import { NogoGroup, Region, User } from 'models';
 import { ComfortLevel, ID, Location, RouteOptions } from 'types';
 import { useMediaQuery } from '@mantine/hooks';
+import {
+  sortRegionsByCountryFunction,
+  sortRegionsByLocationFunction,
+  sortRegionsByNogoLengthFunction,
+} from 'utils/sorting';
 
 type GlobalContextType =
   | {
@@ -148,17 +153,8 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   const refreshRegions = useCallback(async () => {
     try {
       const fetchedRegions = await RegionApi.getAll();
-      const alphaSortFunction = (a: Region, b: Region) => {
-        const compareRegion = (
-          a.iso31662?.nameWithCountry || 'zzz'
-        ).localeCompare(b.iso31662?.nameWithCountry || 'zzz');
-        if (compareRegion === 0) {
-          return a.name.localeCompare(b.name);
-        }
-        return compareRegion;
-      };
       const newAlphaSortedRegions = [...fetchedRegions];
-      newAlphaSortedRegions.sort(alphaSortFunction);
+      newAlphaSortedRegions.sort(sortRegionsByCountryFunction);
       setRegions(newAlphaSortedRegions);
     } catch (error: any) {
       showNotification({
@@ -183,16 +179,10 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   const getLocationSortedRegions = useCallback(
     (location: Location | null) => {
       if (location) {
-        const locationSortFunction = (a: Region, b: Region) => {
-          const isInA = a.isLatLngInside(location.latlng);
-          const isInB = b.isLatLngInside(location.latlng);
-          const aDistance = isInA ? 0 : a.getDistanceTo(location.latlng);
-          const bDistance = isInB ? 0 : b.getDistanceTo(location.latlng);
-          return aDistance - bDistance;
-        };
         const locationSortedRegions = [...regions];
-        locationSortedRegions.sort(locationSortFunction);
-
+        locationSortedRegions.sort(
+          sortRegionsByLocationFunction(location.latlng)
+        );
         return locationSortedRegions;
       } else {
         return [];
@@ -201,23 +191,11 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     [regions]
   );
 
-  const lengthSortedRegions = useMemo(async () => {
-    const regionsWithLengths = await Promise.all(
-      regions.map(async (region) => {
-        return {
-          region,
-          length: await region.getTotalNogoLength(),
-        };
-      })
-    );
-    const sortFunction = (
-      a: { region: Region; length: number },
-      b: { region: Region; length: number }
-    ) => b.length - a.length;
-    regionsWithLengths.sort(sortFunction);
-    const sortedRegions = regionsWithLengths.map((obj) => obj.region);
+  const lengthSortedRegions = useMemo(() => {
+    const sortedRegions = [...regions];
+    sortedRegions.sort(sortRegionsByNogoLengthFunction(regionLengths));
     return sortedRegions;
-  }, [regions]);
+  }, [regions, regionLengths]);
 
   const getLengthSortedRegions = useCallback(async () => {
     return lengthSortedRegions;
