@@ -92,63 +92,34 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   useEffect(() => {
     updateLoggedInUser();
     countSiteVisits();
-    getStoredSelectedRegions();
-    getStoredSelectedNogoGroups();
+    getStoredSelectedRegions().then(setSelectedRegions);
+    getStoredSelectedNogoGroups().then(setSelectedNogoGroups);
     refreshRegions();
     refreshUserNogoGroups();
   }, []);
 
-  const countSiteVisits = () => {
-    var visited = Number(window.localStorage.getItem('visited'));
-    if (isNaN(visited)) visited = 0;
-    window.localStorage.setItem('visited', (visited + 1).toFixed(0));
-  };
-
-  const getStoredSelectedNogoGroups = async () => {
-    const stored = window.localStorage.getItem('selectedNogoGroups');
-    if (!stored || stored === '') return;
-    const userNogoGroups = await NogoGroupApi.getAllForUser();
-    const filteredStoredSelectedNogoGroups = stored
-      .split(',')
-      .filter((selectedNogoGroup) => {
-        return !!userNogoGroups.find(
-          (nogoGroup) => nogoGroup._id === selectedNogoGroup
-        );
-      });
-    setSelectedNogoGroups(filteredStoredSelectedNogoGroups);
-  };
-
-  const getStoredSelectedRegions = async () => {
-    const stored = window.localStorage.getItem('selectedRegions');
-    if (!stored || stored === '') return;
-    const allRegions = await RegionApi.getAll();
-    const filteredStoredSelectedRegions = stored
-      .split(',')
-      .filter((selectedRegion) => {
-        return !!allRegions.find((region) => region._id === selectedRegion);
-      });
-    setSelectedRegions(filteredStoredSelectedRegions);
-  };
-
-  const updateLoggedInUser = async () => {
+  const updateLoggedInUser = useCallback(async () => {
     const user = await UserApi.getActiveUser();
     setLoggedInUser(user);
-  };
+  }, []);
 
-  const toggleNavbar = () => {
+  const toggleNavbar = useCallback(() => {
     setIsNavbarOpen(!isNavbarOpen);
-  };
+  }, [isNavbarOpen]);
 
-  const toggleNavMode = () => {
+  const toggleNavMode = useCallback(() => {
     setIsNavModeOn(!isNavModeOn);
-  };
+  }, [isNavModeOn]);
 
-  const updateRouteOptions = (update: Partial<RouteOptions>) => {
-    setRouteOptions({
-      ...routeOptions,
-      ...update,
-    });
-  };
+  const updateRouteOptions = useCallback(
+    (update: Partial<RouteOptions>) => {
+      setRouteOptions({
+        ...routeOptions,
+        ...update,
+      });
+    },
+    [routeOptions]
+  );
 
   const refreshRegions = useCallback(async () => {
     try {
@@ -156,6 +127,15 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
       const newAlphaSortedRegions = [...fetchedRegions];
       newAlphaSortedRegions.sort(sortRegionsByCountryFunction);
       setRegions(newAlphaSortedRegions);
+
+      // update nogo lengths
+      newAlphaSortedRegions.forEach(async (region) => {
+        const nogoLength = await region.getTotalNogoLength();
+        setRegionLengths((prev) => ({
+          ...prev,
+          [region._id]: nogoLength,
+        }));
+      });
     } catch (error: any) {
       showNotification({
         title: 'Error fetching regions',
@@ -164,17 +144,6 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
       });
     }
   }, []);
-
-  useEffect(() => {
-    regions.forEach((region) => {
-      region.getTotalNogoLength().then((length) => {
-        setRegionLengths((prev) => ({
-          ...prev,
-          [region._id]: length,
-        }));
-      });
-    });
-  }, [regions]);
 
   const getLocationSortedRegions = useCallback(
     (location: Location | null) => {
@@ -201,7 +170,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     return lengthSortedRegions;
   }, [lengthSortedRegions]);
 
-  const refreshUserNogoGroups = async () => {
+  const refreshUserNogoGroups = useCallback(async () => {
     try {
       if (!loggedInUser) {
         setUserNogoGroups([]);
@@ -216,7 +185,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         color: 'red',
       });
     }
-  };
+  }, [loggedInUser]);
 
   useEffect(() => {
     refreshUserNogoGroups();
@@ -233,24 +202,25 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
     window.localStorage.setItem('selectedRegions', selectedRegions.join());
   }, [selectedRegions]);
 
-  const clearSelectedNogoGroups = () => {
+  const clearSelectedNogoGroups = useCallback(() => {
     setSelectedNogoGroups([]);
-  };
+  }, []);
 
-  const clearSelectedRegions = () => {
+  const clearSelectedRegions = useCallback(() => {
     setSelectedRegions([]);
-  };
+  }, []);
 
-  const handleSetEditingGroupOrRegion = (
-    groupOrRegion: NogoGroup | Region | null
-  ) => {
-    setEditingGroupOrRegion(groupOrRegion);
-    if (groupOrRegion) {
-      setIsNavbarOpen(false);
-    }
-  };
+  const handleSetEditingGroupOrRegion = useCallback(
+    (groupOrRegion: NogoGroup | Region | null) => {
+      setEditingGroupOrRegion(groupOrRegion);
+      if (groupOrRegion) {
+        setIsNavbarOpen(false);
+      }
+    },
+    []
+  );
 
-  const logoutUser = async () => {
+  const logoutUser = useCallback(async () => {
     try {
       await UserApi.logout();
     } catch (error: any) {
@@ -261,7 +231,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
       });
     }
     updateLoggedInUser();
-  };
+  }, []);
 
   return (
     <GlobalContext.Provider
@@ -310,4 +280,36 @@ export const useGlobalContext = () => {
     throw new Error('useGlobalContext must be inside a GlobalContextProvider');
   }
   return context;
+};
+
+const countSiteVisits = () => {
+  var visited = Number(window.localStorage.getItem('visited'));
+  if (isNaN(visited)) visited = 0;
+  window.localStorage.setItem('visited', (visited + 1).toFixed(0));
+};
+
+const getStoredSelectedRegions = async () => {
+  const stored = window.localStorage.getItem('selectedRegions');
+  if (!stored || stored === '') return [];
+  const allRegions = await RegionApi.getAll();
+  const filteredStoredSelectedRegions = stored
+    .split(',')
+    .filter((selectedRegion) => {
+      return !!allRegions.find((region) => region._id === selectedRegion);
+    });
+  return filteredStoredSelectedRegions;
+};
+
+const getStoredSelectedNogoGroups = async () => {
+  const stored = window.localStorage.getItem('selectedNogoGroups');
+  if (!stored || stored === '') return [];
+  const userNogoGroups = await NogoGroupApi.getAllForUser();
+  const filteredStoredSelectedNogoGroups = stored
+    .split(',')
+    .filter((selectedNogoGroup) => {
+      return !!userNogoGroups.find(
+        (nogoGroup) => nogoGroup._id === selectedNogoGroup
+      );
+    });
+  return filteredStoredSelectedNogoGroups;
 };

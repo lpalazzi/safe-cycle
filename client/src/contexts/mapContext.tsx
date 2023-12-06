@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 import L from 'leaflet';
 import { showNotification } from '@mantine/notifications';
 import { useGlobalContext } from './globalContext';
@@ -34,7 +40,6 @@ type MapContextType =
       reorderWaypoint: (sourceIndex: number, destIndex: number) => void;
       removeWaypoint: (index: number) => void;
       clearWaypoints: () => void;
-      fetchRoute: () => void;
       selectRouteAlternative: (index: number) => void;
       deleteNogo: (nogoId: ID) => void;
       clearNogoWaypoints: () => void;
@@ -89,85 +94,102 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     setIsLoading(fetchingCount > 0);
   }, [fetchingCount]);
 
-  const addWaypoint = (latlng: L.LatLng, label?: string) => {
-    const newWaypoint: Waypoint = {
-      latlng,
-      label:
-        label ?? GeocodingApi.reverse(latlng).then((res) => res?.label ?? null),
-    };
-    if (!editingGroupOrRegion) {
-      const newWaypoints: Waypoint[] = [];
-      if (label && waypoints.length === 0 && !askForStartingLocation) {
-        setAskForStartingLocation(true);
-      } else setAskForStartingLocation(false);
-      newWaypoints.push(newWaypoint);
+  const addWaypoint = useCallback(
+    (latlng: L.LatLng, label?: string) => {
+      const newWaypoint: Waypoint = {
+        latlng,
+        label:
+          label ??
+          GeocodingApi.reverse(latlng).then((res) => res?.label ?? null),
+      };
+      if (!editingGroupOrRegion) {
+        const newWaypoints: Waypoint[] = [];
+        if (label && waypoints.length === 0 && !askForStartingLocation) {
+          setAskForStartingLocation(true);
+        } else setAskForStartingLocation(false);
+        newWaypoints.push(newWaypoint);
 
-      setWaypoints(
-        askForStartingLocation && label
-          ? [newWaypoint, ...waypoints]
-          : [...waypoints, ...newWaypoints]
-      );
-      if (label) {
-        const bounds = new L.LatLngBounds(latlng, latlng);
-        [...waypoints, ...newWaypoints].forEach((waypoint) => {
-          bounds.extend(waypoint.latlng);
-        });
+        setWaypoints(
+          askForStartingLocation && label
+            ? [newWaypoint, ...waypoints]
+            : [...waypoints, ...newWaypoints]
+        );
+        if (label) {
+          const bounds = new L.LatLngBounds(latlng, latlng);
+          [...waypoints, ...newWaypoints].forEach((waypoint) => {
+            bounds.extend(waypoint.latlng);
+          });
+        }
+      } else {
+        setNogoWaypoints([...nogoWaypoints, latlng]);
       }
-    } else {
-      setNogoWaypoints([...nogoWaypoints, latlng]);
-    }
-  };
+    },
+    [editingGroupOrRegion, askForStartingLocation, waypoints, nogoWaypoints]
+  );
 
-  const updateWaypoint = (index: number, latlng: L.LatLng, label?: string) => {
-    const updatedWaypoint: Waypoint = {
-      latlng,
-      label:
-        label ?? GeocodingApi.reverse(latlng).then((res) => res?.label ?? null),
-    };
-    const newWaypoints = [...waypoints];
-    newWaypoints.splice(index, 1, updatedWaypoint);
-    setWaypoints(newWaypoints);
-  };
+  const updateWaypoint = useCallback(
+    (index: number, latlng: L.LatLng, label?: string) => {
+      const updatedWaypoint: Waypoint = {
+        latlng,
+        label:
+          label ??
+          GeocodingApi.reverse(latlng).then((res) => res?.label ?? null),
+      };
+      const newWaypoints = [...waypoints];
+      newWaypoints.splice(index, 1, updatedWaypoint);
+      setWaypoints(newWaypoints);
+    },
+    [waypoints]
+  );
 
-  const reorderWaypoint = (srcIndex: number, destIndex: number) => {
-    if (srcIndex === destIndex) return;
-    const newWaypoints = [...waypoints];
-    const [reorderedWaypoint] = newWaypoints.splice(srcIndex, 1);
-    newWaypoints.splice(destIndex, 0, reorderedWaypoint);
-    setWaypoints(newWaypoints);
-  };
+  const reorderWaypoint = useCallback(
+    (srcIndex: number, destIndex: number) => {
+      if (srcIndex === destIndex) return;
+      const newWaypoints = [...waypoints];
+      const [reorderedWaypoint] = newWaypoints.splice(srcIndex, 1);
+      newWaypoints.splice(destIndex, 0, reorderedWaypoint);
+      setWaypoints(newWaypoints);
+    },
+    [waypoints]
+  );
 
-  const removeWaypoint = (index: number) => {
-    const newWaypoints = [...waypoints];
-    newWaypoints.splice(index, 1);
-    setWaypoints(newWaypoints);
-    if (waypoints.length > 1 && index === 0) setAskForStartingLocation(true);
-    if (waypoints.length === 1) setAskForStartingLocation(false);
-  };
+  const removeWaypoint = useCallback(
+    (index: number) => {
+      const newWaypoints = [...waypoints];
+      newWaypoints.splice(index, 1);
+      setWaypoints(newWaypoints);
+      if (waypoints.length > 1 && index === 0) setAskForStartingLocation(true);
+      if (waypoints.length === 1) setAskForStartingLocation(false);
+    },
+    [waypoints]
+  );
 
-  const clearWaypoints = () => {
+  const clearWaypoints = useCallback(() => {
     setWaypoints([]);
     setRoutes(null);
     setSelectedRouteIndex(null);
     setAskForStartingLocation(false);
-  };
+  }, []);
 
-  const clearNogoWaypoints = () => {
+  const clearNogoWaypoints = useCallback(() => {
     setNogoWaypoints([]);
-  };
+  }, []);
 
-  const refreshWaypointLineToCursor = (mousePosition: L.LatLng | null) => {
-    if (
-      !isTouchDevice() &&
-      mousePosition &&
-      editingGroupOrRegion &&
-      nogoWaypoints.length === 1
-    ) {
-      setLineToCursor([nogoWaypoints[0], mousePosition]);
-    } else {
-      setLineToCursor(null);
-    }
-  };
+  const refreshWaypointLineToCursor = useCallback(
+    (mousePosition: L.LatLng | null) => {
+      if (
+        !isTouchDevice() &&
+        mousePosition &&
+        editingGroupOrRegion &&
+        nogoWaypoints.length === 1
+      ) {
+        setLineToCursor([nogoWaypoints[0], mousePosition]);
+      } else {
+        setLineToCursor(null);
+      }
+    },
+    [editingGroupOrRegion, nogoWaypoints]
+  );
 
   const fetchRoute = () => {
     if (!editingGroupOrRegion && waypoints.length >= 2) {
@@ -242,7 +264,7 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     } else setTurnInstructions(null);
   };
 
-  const refreshNogoRoutes = () => {
+  const refreshNogoRoutes = useCallback(() => {
     if (editingGroupOrRegion) {
       NogoApi.getAllByGroup(
         editingGroupOrRegion._id,
@@ -274,12 +296,12 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
           })
         );
     }
-  };
+  }, [editingGroupOrRegion, selectedNogoGroups, selectedRegions]);
 
-  const selectRouteAlternative = (index: number) => {
+  const selectRouteAlternative = useCallback((index: number) => {
     setSelectedRouteIndex(index);
     setShowAlternateRoutes(false);
-  };
+  }, []);
 
   const createNogo = () => {
     if (editingGroupOrRegion && nogoWaypoints.length >= 2) {
@@ -303,17 +325,20 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
     }
   };
 
-  const deleteNogo = (nogoId: ID) => {
-    NogoApi.delete(nogoId)
-      .then(() => refreshNogoRoutes())
-      .catch((error) =>
-        showNotification({
-          title: 'Error deleting nogo',
-          message: error.message || 'Undefined error',
-          color: 'red',
-        })
-      );
-  };
+  const deleteNogo = useCallback(
+    (nogoId: ID) => {
+      NogoApi.delete(nogoId)
+        .then(() => refreshNogoRoutes())
+        .catch((error) =>
+          showNotification({
+            title: 'Error deleting nogo',
+            message: error.message || 'Undefined error',
+            color: 'red',
+          })
+        );
+    },
+    [refreshNogoRoutes]
+  );
 
   useEffect(() => {
     fetchRoute();
@@ -385,7 +410,6 @@ export const MapContextProvider: React.FC<MapContextProviderType> = (props) => {
         reorderWaypoint,
         removeWaypoint,
         clearWaypoints,
-        fetchRoute,
         selectRouteAlternative,
         deleteNogo,
         clearNogoWaypoints,
