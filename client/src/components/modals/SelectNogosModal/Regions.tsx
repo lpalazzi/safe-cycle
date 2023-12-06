@@ -111,6 +111,7 @@ export const Regions: React.FC<{
               if (value && ['alpha', 'location', 'nogoLength'].includes(value))
                 setSortMethod(value as SortMethod);
             }}
+            withinPortal
           />
         </Group>
       </Group>
