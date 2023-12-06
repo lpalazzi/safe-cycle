@@ -447,7 +447,7 @@ export const RoutePreferences: React.FC = () => {
               }
             >
               <Stack
-                spacing='xs'
+                spacing='0.5rem'
                 className='comfort-level'
                 style={{ position: 'relative', zIndex: 0 }}
               >
@@ -456,14 +456,6 @@ export const RoutePreferences: React.FC = () => {
                   value={selectedComfortLevel}
                   onChange={handleComfortLevelSelected}
                   transitionDuration={0}
-                  styles={{
-                    root: {
-                      padding: 0,
-                    },
-                    indicator: {
-                      marginLeft: 4,
-                    },
-                  }}
                   data={[
                     {
                       value: 'Low',
