@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   useMantineTheme,
   Stack,
@@ -16,10 +16,17 @@ import {
   Button,
   Badge,
   Collapse,
+  Anchor,
+  Alert,
 } from '@mantine/core';
 import { useModals } from '@mantine/modals';
-import { useMediaQuery } from '@mantine/hooks';
-import { IconRoute2, IconSettings, IconUserCog } from '@tabler/icons-react';
+import {
+  IconAlertCircle,
+  IconCurrentLocation,
+  IconRoute2,
+  IconSettings,
+  IconUserCog,
+} from '@tabler/icons-react';
 import { ComfortLevel, ID, RouteOptions, SurfacePreference } from 'types';
 import { useGlobalContext } from 'contexts/globalContext';
 
@@ -28,7 +35,11 @@ import MediumComfortIcon from 'assets/comfortlevels/3-medium.png';
 import HighComfortIcon from 'assets/comfortlevels/4-high.png';
 import { SelectNogosModal } from 'components/modals/SelectNogosModal/SelectNogosModal';
 import { useMapContext } from 'contexts/mapContext';
-import { NogoGroup, Region } from 'models';
+import {
+  sortRegionsByLocationFunction,
+  sortRegionsByNogoLengthFunction,
+} from 'utils/sorting';
+import { LoginModal } from 'components/modals/LoginModal';
 
 const comfortPresets: { [key: string]: Partial<RouteOptions> } = {
   Shortest: {
@@ -70,104 +81,124 @@ export const RoutePreferences: React.FC = () => {
     setSelectedRegions,
     updateRouteOptions,
     setShowAlternateRoutes,
-    getLocationSortedRegions,
-    getLengthSortedRegions,
   } = useGlobalContext();
-  const { currentLocation } = useMapContext();
+  const { map, currentLocation } = useMapContext();
   const { openModal } = useModals();
   const theme = useMantineTheme();
-  const isSmallWidth = useMediaQuery('(max-width: 382px)');
-  const isExtraSmallWidth = useMediaQuery('(max-width: 363px)');
-  const [suggestedRegions, setSuggestedRegions] = useState<Region[]>([]);
-  const [suggestedNogoGroups, setSuggestedNogoGroups] = useState<NogoGroup[]>(
-    []
-  );
+  const previouslySelectedRegions = useRef<ID[]>([]);
+  const previouslySelectedNogoGroups = useRef<ID[]>([]);
   const [expandedSetting, setExpandedSetting] = useState<
     'nogos' | 'comfort' | 'other' | false
   >(false);
+  const [hideRegionWarning, setHideRegionWarning] = useState(false);
 
-  const chips = useMemo(
-    () =>
-      [
-        ...suggestedNogoGroups.map((group) => ({
-          label: group.name,
-          value: group._id,
-          isRegion: false,
-        })),
-        ...suggestedRegions
-          .filter(
-            (region) =>
-              (loggedInUser && region.isUserContributor(loggedInUser._id)) ||
-              regionLengths[region._id] >= 5000
+  useMemo(() => {
+    selectedRegions.forEach((id) => {
+      if (!previouslySelectedRegions.current.includes(id))
+        previouslySelectedRegions.current.push(id);
+    });
+  }, [selectedRegions]);
+
+  useMemo(() => {
+    selectedNogoGroups.forEach((id) => {
+      if (!previouslySelectedNogoGroups.current.includes(id))
+        previouslySelectedNogoGroups.current.push(id);
+    });
+  }, [selectedNogoGroups]);
+
+  const regionChips = useMemo(() => {
+    const filteredRegions = regions
+      .filter((region) => {
+        if (loggedInUser && region.isUserContributor(loggedInUser._id))
+          return true; // contributor's regions are always suggested
+        if (regionLengths[region._id] < 5000) return false; // regions w/ less than 5km of nogos are otherwise hidden
+        if (!currentLocation) return false;
+        if (region.getDistanceTo(currentLocation.latlng) < 300000) return true; // regions within 300km of current location are suggested
+        return false;
+      })
+      .slice(0, 4);
+
+    if (filteredRegions.length > 1)
+      filteredRegions.sort(
+        currentLocation
+          ? sortRegionsByLocationFunction(currentLocation.latlng)
+          : sortRegionsByNogoLengthFunction(regionLengths)
+      );
+
+    const suggestedRegions = filteredRegions.slice(0, 4);
+
+    const otherSelectedRegions = regions
+      .filter((region) =>
+        [...selectedRegions, ...previouslySelectedRegions.current].includes(
+          region._id
+        )
+      )
+      .filter(
+        (selectedRegion) =>
+          !suggestedRegions.some(
+            (suggestedRegion) => suggestedRegion._id === selectedRegion._id
           )
-          .map((region) => ({
-            label: region.shortName,
-            value: region._id,
-            isRegion: true,
-          })),
-      ].slice(0, 4),
-    [suggestedRegions, suggestedNogoGroups, isMobileSize, regionLengths]
-  );
+      );
 
-  useEffect(() => {
-    const allSelectedNogoGroupsInSuggestedNogoGroups = selectedNogoGroups.every(
-      (id) => chips.some((chip) => chip.value === id)
-    );
-    if (allSelectedNogoGroupsInSuggestedNogoGroups) return;
-    setSuggestedNogoGroups(
-      userNogoGroups.filter((group) => selectedNogoGroups.includes(group._id))
-    );
-  }, [userNogoGroups, selectedNogoGroups]);
+    return [...suggestedRegions, ...otherSelectedRegions].map((region) => ({
+      label: region.shortName,
+      value: region._id,
+      isUserInside:
+        !!currentLocation && region.isLatLngInside(currentLocation.latlng),
+    }));
+  }, [
+    regions,
+    regionLengths,
+    loggedInUser,
+    currentLocation,
+    selectedRegions,
+    previouslySelectedRegions.current,
+  ]);
 
-  useEffect(() => {
-    const allSelectedRegionsInSuggestedRegions =
-      selectedRegions.length > 0 &&
-      selectedRegions.every((id) => chips.some((chip) => chip.value === id));
-    if (allSelectedRegionsInSuggestedRegions) return;
-    const selectedRegionObjs = regions.filter((region) =>
-      selectedRegions.includes(region._id)
-    );
-    if (selectedRegionObjs.length >= 5) {
-      setSuggestedRegions(selectedRegionObjs);
-    } else if (currentLocation) {
-      const locationSortedRegions = getLocationSortedRegions(currentLocation);
-      const regionsToSuggest = [
-        ...selectedRegionObjs,
-        ...locationSortedRegions.filter(
-          (region) => !selectedRegions.includes(region._id)
-        ),
-      ];
-      setSuggestedRegions(regionsToSuggest);
+  const nogoGroupChips = useMemo(() => {
+    const suggestedNogoGroups = [...userNogoGroups].slice(0, 2);
+    const otherNogoGroupsToShow = userNogoGroups
+      .filter((group) =>
+        previouslySelectedNogoGroups.current.includes(group._id)
+      )
+      .filter(
+        (selectedNogoGroup) =>
+          !suggestedNogoGroups.some(
+            (suggestedNogoGroup) =>
+              suggestedNogoGroup._id === selectedNogoGroup._id
+          )
+      );
+    return [...suggestedNogoGroups, ...otherNogoGroupsToShow].map((group) => ({
+      label: group.name,
+      value: group._id,
+    }));
+  }, [
+    userNogoGroups,
+    selectedNogoGroups,
+    loggedInUser,
+    selectedNogoGroups,
+    previouslySelectedNogoGroups.current,
+  ]);
+
+  const handleNogoGroupChipToggled = (id: ID) => {
+    if (selectedNogoGroups.includes(id)) {
+      setSelectedNogoGroups(
+        [...selectedNogoGroups].filter((group) => group !== id)
+      );
     } else {
-      getLengthSortedRegions().then((lengthSortedRegions) => {
-        const regionsToSuggest = [
-          ...selectedRegionObjs,
-          ...lengthSortedRegions.filter(
-            (region) => !selectedRegions.includes(region._id)
-          ),
-        ];
-        setSuggestedRegions(regionsToSuggest);
-      });
+      setSelectedNogoGroups([...selectedNogoGroups, id]);
+      if (!previouslySelectedNogoGroups.current.includes(id))
+        previouslySelectedNogoGroups.current.push(id);
     }
-  }, [regions, currentLocation, selectedRegions]);
+  };
 
-  const handleRegionChipToggled = (id: ID, isRegion: boolean) => {
-    if (isRegion) {
-      if (selectedRegions.includes(id)) {
-        setSelectedRegions(
-          [...selectedRegions].filter((region) => region !== id)
-        );
-      } else {
-        setSelectedRegions([...selectedRegions, id]);
-      }
+  const handleRegionChipToggled = (id: ID) => {
+    if (selectedRegions.includes(id)) {
+      setSelectedRegions(
+        [...selectedRegions].filter((region) => region !== id)
+      );
     } else {
-      if (selectedNogoGroups.includes(id)) {
-        setSelectedNogoGroups(
-          [...selectedNogoGroups].filter((group) => group !== id)
-        );
-      } else {
-        setSelectedNogoGroups([...selectedNogoGroups, id]);
-      }
+      setSelectedRegions([...selectedRegions, id]);
     }
   };
 
@@ -185,9 +216,6 @@ export const RoutePreferences: React.FC = () => {
       setExpandedSetting(selected);
     }
   };
-
-  const selectedGroupsOrRegions =
-    selectedRegions.length + selectedNogoGroups.length;
 
   let selectedComfortLevelIcon = <></>;
   switch (selectedComfortLevel) {
@@ -214,17 +242,21 @@ export const RoutePreferences: React.FC = () => {
       break;
   }
 
+  const selectedGroupsOrRegionsLength =
+    selectedRegions.length + selectedNogoGroups.length;
+
   return (
     <Stack justify='flex-start' spacing='xs'>
       <Button.Group ml='auto' mr='auto' w='100%'>
         <Button
-          fullWidth
-          variant={expandedSetting === 'nogos' ? 'filled' : 'default'}
           size='xs'
+          variant={expandedSetting === 'nogos' ? 'filled' : 'default'}
+          style={{ borderRightWidth: 0 }}
+          fullWidth
           onClick={() => handleCondensedSettingButtonClicked('nogos')}
           rightIcon={
             <Badge
-              color={selectedGroupsOrRegions > 0 ? 'green' : 'gray'}
+              color={selectedGroupsOrRegionsLength > 0 ? 'green' : 'gray'}
               w={14}
               h={14}
               sx={{ pointerEvents: 'none' }}
@@ -232,25 +264,26 @@ export const RoutePreferences: React.FC = () => {
               size='xs'
               p={0}
             >
-              {selectedGroupsOrRegions}
+              {selectedGroupsOrRegionsLength}
             </Badge>
           }
         >
           Avoid nogos
         </Button>
         <Button
-          fullWidth
-          variant={expandedSetting === 'comfort' ? 'filled' : 'default'}
           size='xs'
+          variant={expandedSetting === 'comfort' ? 'filled' : 'default'}
+          style={{ borderRightWidth: 0 }}
+          fullWidth
           onClick={() => handleCondensedSettingButtonClicked('comfort')}
           rightIcon={selectedComfortLevelIcon}
         >
           Comfort level
         </Button>
         <Button
-          fullWidth
-          variant={expandedSetting === 'other' ? 'filled' : 'default'}
           size='xs'
+          variant={expandedSetting === 'other' ? 'filled' : 'default'}
+          fullWidth
           onClick={() => handleCondensedSettingButtonClicked('other')}
           rightIcon={<IconSettings size={14} />}
         >
@@ -264,47 +297,150 @@ export const RoutePreferences: React.FC = () => {
         bg={theme.colors.gray[1]}
       >
         <Stack spacing='sm'>
-          <Collapse in={expandedSetting === 'nogos'}>
-            <Input.Wrapper
-              label={
-                expandedSetting === 'other'
-                  ? 'Select nogos to avoid'
-                  : undefined
-              }
-            >
-              <Group position='left' spacing='0.25rem'>
-                {chips.map((chip) => {
-                  const isSelected = [
-                    ...selectedNogoGroups,
-                    ...selectedRegions,
-                  ].includes(chip.value);
-                  return (
-                    <Chip
+          <Collapse in={expandedSetting === 'nogos'} transitionDuration={100}>
+            <Stack spacing='md'>
+              <Stack spacing={0}>
+                <Group position='apart'>
+                  <Text size='xs' c='dimmed'>
+                    Your nogos
+                  </Text>
+                  {loggedInUser ? (
+                    <Anchor
                       size='xs'
-                      checked={isSelected}
-                      onChange={() =>
-                        handleRegionChipToggled(chip.value, chip.isRegion)
+                      onClick={() =>
+                        openModal(SelectNogosModal(isMobileSize, 'custom'))
                       }
-                      styles={{ root: { height: 26 } }}
                     >
-                      {chip.label}
-                    </Chip>
-                  );
-                })}
-                <Chip
-                  size='xs'
-                  checked={false}
-                  variant='light'
-                  onChange={() =>
-                    openModal(SelectNogosModal(isMobileSize, 'regions'))
-                  }
-                >
-                  More
-                </Chip>
-              </Group>
-            </Input.Wrapper>
+                      Manage
+                    </Anchor>
+                  ) : (
+                    <div />
+                  )}
+                </Group>
+                {loggedInUser ? (
+                  nogoGroupChips.length > 0 ? (
+                    <Group position='left' spacing='0.25rem'>
+                      {nogoGroupChips.map((chip) => (
+                        <Chip
+                          size='xs'
+                          checked={selectedNogoGroups.includes(chip.value)}
+                          onChange={() =>
+                            handleNogoGroupChipToggled(chip.value)
+                          }
+                          styles={{ root: { height: 26 } }}
+                        >
+                          {chip.label}
+                        </Chip>
+                      ))}
+                      {userNogoGroups.length > nogoGroupChips.length && (
+                        <Chip
+                          size='xs'
+                          checked={false}
+                          variant='light'
+                          onChange={() =>
+                            openModal(SelectNogosModal(isMobileSize, 'custom'))
+                          }
+                        >
+                          More
+                        </Chip>
+                      )}
+                    </Group>
+                  ) : (
+                    <AlertBox>
+                      You have no nogo groups to select from.{' '}
+                      <Anchor
+                        inherit
+                        inline
+                        onClick={() =>
+                          openModal(SelectNogosModal(isMobileSize, 'custom'))
+                        }
+                        style={{ whiteSpace: 'nowrap' }}
+                      >
+                        Create one here.
+                      </Anchor>
+                    </AlertBox>
+                  )
+                ) : (
+                  <AlertBox>
+                    <Anchor
+                      inherit
+                      inline
+                      onClick={() => openModal(LoginModal())}
+                      style={{ whiteSpace: 'nowrap' }}
+                    >
+                      Sign in
+                    </Anchor>{' '}
+                    to add your own nogos.
+                  </AlertBox>
+                )}
+              </Stack>
+              <Stack spacing={0}>
+                <Group position='apart'>
+                  <Text size='xs' c='dimmed'>
+                    Regions
+                  </Text>
+                  <Anchor
+                    size='xs'
+                    onClick={() =>
+                      openModal(SelectNogosModal(isMobileSize, 'regions'))
+                    }
+                  >
+                    See all
+                  </Anchor>
+                </Group>
+                {currentLocation || regionChips.length > 0 ? (
+                  regionChips.length > 0 ? (
+                    <Group position='left' spacing='0.25rem'>
+                      {regionChips.map((chip, index) => (
+                        <Chip
+                          size='xs'
+                          checked={selectedRegions.includes(chip.value)}
+                          onChange={() => handleRegionChipToggled(chip.value)}
+                          styles={{ root: { height: 26 } }}
+                        >
+                          {chip.label}
+                          {chip.isUserInside && index === 0 && (
+                            <IconCurrentLocation
+                              size='1rem'
+                              style={{ marginLeft: '0.25rem' }}
+                            />
+                          )}
+                        </Chip>
+                      ))}
+                    </Group>
+                  ) : (
+                    !hideRegionWarning && (
+                      <AlertBox onClose={() => setHideRegionWarning(true)}>
+                        You are not near a supported region.{' '}
+                        <Anchor
+                          inline
+                          inherit
+                          onClick={() =>
+                            openModal(SelectNogosModal(isMobileSize, 'regions'))
+                          }
+                          style={{ whiteSpace: 'nowrap' }}
+                        >
+                          View supported regions here.
+                        </Anchor>
+                      </AlertBox>
+                    )
+                  )
+                ) : (
+                  <AlertBox>
+                    <Anchor
+                      inline
+                      inherit
+                      onClick={() => map?.locate({ enableHighAccuracy: true })}
+                    >
+                      Grant location access
+                    </Anchor>{' '}
+                    to show regions near you.
+                  </AlertBox>
+                )}
+              </Stack>
+            </Stack>
           </Collapse>
-          <Collapse in={expandedSetting === 'comfort'}>
+          <Collapse in={expandedSetting === 'comfort'} transitionDuration={100}>
             <Input.Wrapper
               label={
                 expandedSetting === 'other' ? 'Select comfort level' : undefined
@@ -433,7 +569,7 @@ export const RoutePreferences: React.FC = () => {
               </Stack>
             </Input.Wrapper>
           </Collapse>
-          <Collapse in={expandedSetting === 'other'}>
+          <Collapse in={expandedSetting === 'other'} transitionDuration={100}>
             <Stack spacing='xs'>
               <Select
                 label='Surface preference'
@@ -532,3 +668,33 @@ const ComfortLevel: React.FC<{ comfortLevel: string }> = React.memo(
     );
   }
 );
+
+const AlertBox: React.FC<{
+  children: JSX.Element | JSX.Element[] | string | (JSX.Element | string)[];
+  onClose?: () => void;
+}> = ({ children, onClose }) => {
+  return (
+    <Alert
+      icon={<IconAlertCircle size='1rem' />}
+      color='gray'
+      variant='outline'
+      withCloseButton={!!onClose}
+      onClose={onClose}
+      styles={{
+        root: {
+          padding: '0.5rem 0.5rem 0.5rem 1rem',
+          backgroundColor: 'transparent',
+        },
+        icon: {
+          width: '1rem',
+          height: '1rem',
+          marginTop: 0,
+        },
+      }}
+    >
+      <Text size='xs' align='left'>
+        {children}
+      </Text>
+    </Alert>
+  );
+};
