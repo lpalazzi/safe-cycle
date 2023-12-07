@@ -12,7 +12,7 @@ import { FeatureFlags } from 'featureFlags';
 import { useGlobalContext } from 'contexts/globalContext';
 import { useMapContext } from 'contexts/mapContext';
 
-import LogoName from 'assets/brand/logo-name.png';
+import LogoName from 'assets/brand/logo-name-smaller.png';
 
 type SidebarFooterProps = {
   setShowTurnInstructions: React.Dispatch<React.SetStateAction<boolean>>;

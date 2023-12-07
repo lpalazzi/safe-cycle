@@ -8,7 +8,7 @@ import {
   IconUserCircle,
 } from '@tabler/icons-react';
 import { useGlobalContext } from 'contexts/globalContext';
-import LogoName from 'assets/brand/logo-name.png';
+import LogoName from 'assets/brand/logo-name-smaller.png';
 import { openModal } from '@mantine/modals';
 import { AboutModal } from 'components/modals/AboutModal';
 import { LoginModal } from 'components/modals/LoginModal';

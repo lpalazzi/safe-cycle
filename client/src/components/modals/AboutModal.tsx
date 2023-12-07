@@ -17,7 +17,7 @@ import {
   Textarea,
   LoadingOverlay,
 } from '@mantine/core';
-import LogoName from 'assets/brand/logo-name.png';
+import LogoName from 'assets/brand/logo-name-smaller.png';
 import LogoXYZ from 'assets/sponsors/logo-xyz.png';
 import LogoSTR from 'assets/sponsors/logo-sharetheroad.png';
 import { EmailApi } from 'api';
