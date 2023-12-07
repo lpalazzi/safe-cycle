@@ -12,7 +12,7 @@ import { FeatureFlags } from 'featureFlags';
 import { useGlobalContext } from 'contexts/globalContext';
 import { useMapContext } from 'contexts/mapContext';
 
-import LogoSvg from 'assets/brand/logo-name.svg';
+import LogoName from 'assets/brand/logo-name.png';
 
 type SidebarFooterProps = {
   setShowTurnInstructions: React.Dispatch<React.SetStateAction<boolean>>;
@@ -86,7 +86,7 @@ export const SidebarFooter: React.FC<SidebarFooterProps> = ({
         )
       ) : (
         <Image
-          src={LogoSvg}
+          src={LogoName}
           height={30}
           width='min(max-content, 100%)'
           fit='contain'

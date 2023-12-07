@@ -17,7 +17,7 @@ import {
   Textarea,
   LoadingOverlay,
 } from '@mantine/core';
-import LogoSvg from 'assets/brand/logo-name.svg';
+import LogoName from 'assets/brand/logo-name.png';
 import LogoXYZ from 'assets/sponsors/logo-xyz.png';
 import LogoSTR from 'assets/sponsors/logo-sharetheroad.png';
 import { EmailApi } from 'api';
@@ -49,7 +49,7 @@ const AboutModalContent: React.FC = () => {
       <Group align='center' position='center' spacing='xl'>
         <Image
           width='unset'
-          src={LogoSvg}
+          src={LogoName}
           height={75}
           fit='contain'
           alt='SafeCycle'

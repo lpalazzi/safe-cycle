@@ -8,7 +8,7 @@ import {
   IconUserCircle,
 } from '@tabler/icons-react';
 import { useGlobalContext } from 'contexts/globalContext';
-import LogoSvg from 'assets/brand/logo-name.svg';
+import LogoName from 'assets/brand/logo-name.png';
 import { openModal } from '@mantine/modals';
 import { AboutModal } from 'components/modals/AboutModal';
 import { LoginModal } from 'components/modals/LoginModal';
@@ -20,7 +20,7 @@ export const SidebarHeader: React.FC = () => {
   return (
     <Group position='apart' noWrap w='100%'>
       <Image
-        src={LogoSvg}
+        src={LogoName}
         height={isMobileSize ? 44 : 48}
         width='min(max-content, 100%)'
         fit='contain'
