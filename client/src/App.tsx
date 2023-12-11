@@ -32,7 +32,7 @@ function App() {
                       inner: { marginTop: 'env(safe-area-inset-top)' },
                     },
                   }
-                : {}
+                : undefined
             }
           >
             <LoadingIndicator />

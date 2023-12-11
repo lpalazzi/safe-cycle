@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { ModalSettings } from '@mantine/modals/lib/context';
 import {
   Anchor,
@@ -35,6 +36,10 @@ export const SelectNogosModal = (
       ? {
           inner: {
             padding: '5dvh 0 0 !important',
+            marginTop:
+              Capacitor.getPlatform() === 'ios'
+                ? 'env(safe-area-inset-top)'
+                : undefined,
           },
           content: {
             maxHeight: 'calc(100dvh - 5dvh) !important',
