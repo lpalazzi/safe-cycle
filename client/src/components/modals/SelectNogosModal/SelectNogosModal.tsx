@@ -247,7 +247,7 @@ const SelectNogosContent: React.FC<{ defaultValue: 'regions' | 'custom' }> = ({
           zIndex: 400,
         }}
       >
-        <Group position='right'>
+        <Group position='right' pb='env(safe-area-inset-bottom)'>
           <Button variant='outline' onClick={() => modals.closeAll()}>
             Cancel
           </Button>
