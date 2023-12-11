@@ -6,6 +6,7 @@ import { MapContextProvider } from 'contexts/mapContext';
 import { GlobalContextProvider } from 'contexts/globalContext';
 import { Map } from 'views/map/Map';
 import { LoadingIndicator } from 'views/map/LoadingIndicator';
+import { Capacitor } from '@capacitor/core';
 
 function App() {
   return (
@@ -23,7 +24,17 @@ function App() {
       >
         <Notifications position='top-right' />
         <MapContextProvider>
-          <ModalsProvider>
+          <ModalsProvider
+            modalProps={
+              Capacitor.getPlatform() === 'ios'
+                ? {
+                    styles: {
+                      inner: { marginTop: 'env(safe-area-inset-top)' },
+                    },
+                  }
+                : {}
+            }
+          >
             <LoadingIndicator />
             <Shell>
               <Map />

@@ -16,6 +16,7 @@ import {
   sortRegionsByLocationFunction,
   sortRegionsByNogoLengthFunction,
 } from 'utils/sorting';
+import { setAndroidStatusBar } from 'utils/device';
 
 type GlobalContextType =
   | {
@@ -91,11 +92,12 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
 
   useEffect(() => {
     updateLoggedInUser();
-    countSiteVisits();
+    setAndroidStatusBar();
     getStoredSelectedRegions().then(setSelectedRegions);
     getStoredSelectedNogoGroups().then(setSelectedNogoGroups);
     refreshRegions();
     refreshUserNogoGroups();
+    countSiteVisits();
   }, []);
 
   const updateLoggedInUser = useCallback(async () => {
