@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Capacitor } from '@capacitor/core';
 import { Tooltip as MantineTooltip } from '@mantine/core';
 import { ModalSettings } from '@mantine/modals/lib/context';
 import { useForm } from '@mantine/form';
@@ -34,10 +33,6 @@ export const AboutModal = (isMobileSize: boolean) => {
       ? {
           inner: {
             padding: '5dvh 0 5dvh !important',
-            marginTop:
-              Capacitor.getPlatform() === 'ios'
-                ? 'env(safe-area-inset-top)'
-                : undefined,
           },
           content: {
             maxHeight: 'calc(100dvh - (5dvh * 2)) !important',

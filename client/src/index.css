@@ -21,3 +21,7 @@ code {
 .mantine-ScrollArea-scrollbar {
   z-index: 500;
 }
+
+.mantine-Modal-inner {
+  top: env(safe-area-inset-top);
+}
