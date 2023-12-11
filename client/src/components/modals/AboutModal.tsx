@@ -35,7 +35,8 @@ export const AboutModal = (isMobileSize: boolean) => {
             padding: '5dvh 0 5dvh !important',
           },
           content: {
-            maxHeight: 'calc(100dvh - (5dvh * 2)) !important',
+            maxHeight:
+              'calc(100dvh - (5dvh * 2) - env(safe-area-inset-top)) !important',
             borderRadius: '0.5rem !important',
           },
         }
