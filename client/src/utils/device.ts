@@ -1,5 +1,5 @@
 import { Capacitor } from '@capacitor/core';
-import { StatusBar } from '@capacitor/status-bar';
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 export const isTouchDevice = () =>
   Capacitor.isNativePlatform() ||
@@ -7,12 +7,13 @@ export const isTouchDevice = () =>
   navigator.maxTouchPoints > 0 ||
   (navigator as any).msMaxTouchPoints > 0;
 
-export const setAndroidStatusBar = async () => {
+export const setAndroidStatusBar = () => {
   if (
     Capacitor.getPlatform() === 'android' &&
     Capacitor.isPluginAvailable('StatusBar')
   ) {
-    await StatusBar.setOverlaysWebView({ overlay: false });
-    await StatusBar.setBackgroundColor({ color: '#ffffff' });
+    StatusBar.setOverlaysWebView({ overlay: false });
+    StatusBar.setBackgroundColor({ color: '#ffffff' });
+    StatusBar.setStyle({ style: Style.Light });
   }
 };
