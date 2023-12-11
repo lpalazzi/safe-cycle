@@ -37,7 +37,8 @@ export const SelectNogosModal = (
             padding: '5dvh 0 0 !important',
           },
           content: {
-            maxHeight: 'calc(100dvh - 5dvh) !important',
+            maxHeight:
+              'calc(100dvh - 5dvh - env(safe-area-inset-top)) !important',
             borderTopLeftRadius: '0.5rem !important',
             borderTopRightRadius: '0.5rem !important',
           },
