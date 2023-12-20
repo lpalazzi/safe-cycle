@@ -1,4 +1,4 @@
-# safe-cycle
+# SafeCycle
 
 Web-based routing app for finding safe cycling routes with the option to avoid user-specified "nogo" paths.
 
