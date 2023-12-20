@@ -10,13 +10,19 @@ export interface IRegion {
   shortName?: string;
 }
 
-export interface IRegionReturnDTO extends Omit<IRegion, 'contributors'> {
+export interface IRegionHydrated extends IRegion {
+  nogoLength: Promise<number>;
+}
+
+export interface IRegionReturnDTO
+  extends Omit<IRegionHydrated, 'contributors' | 'nogoLength'> {
   contributors: {
     _id: mongoose.Types.ObjectId;
     name: Name;
     role: UserRole;
   }[];
+  nogoLength: number;
 }
 
 export interface IRegionCreateDTO
-  extends Omit<IRegion, '_id' | 'contributors'> {}
+  extends Omit<IRegion, '_id' | 'contributors' | 'nogoLength'> {}

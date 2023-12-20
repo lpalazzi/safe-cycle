@@ -1,9 +1,10 @@
 import setupDB from 'test/setupDB';
 import { makeRequest } from 'test/helpers';
-import { createTestUser, createTestNogoGroup } from 'test/data';
+import { createTestUser, createTestNogoGroup, createTestNogo } from 'test/data';
 import {
   INogoGroup,
   INogoGroupCreateDTO,
+  INogoGroupReturnDTO,
   INogoGroupUpdateDTO,
 } from 'interfaces';
 import { NogoGroupModel } from 'models';
@@ -41,15 +42,22 @@ describe('GET /nogoGroup/getAll', () => {
 describe('GET /nogoGroup/getAllForUser', () => {
   test('returns all nogo groups for logged in user', async () => {
     const user = await createTestUser();
-    await createTestNogoGroup(user._id);
-    await createTestNogoGroup(user._id);
+    const nogoGroup1 = await createTestNogoGroup(user._id);
+    const nogoGroup2 = await createTestNogoGroup(user._id);
     await createTestNogoGroup();
+    await createTestNogo(nogoGroup1._id);
+    await createTestNogo(nogoGroup2._id);
     const res = await makeRequest({
       url: '/nogoGroup/getAllForUser',
       loggedInUserEmail: user.email,
     });
     expect(res.statusCode).toBe(200);
     expect(res.body?.nogoGroups?.length).toBeGreaterThanOrEqual(2);
+    expect(
+      res.body?.nogoGroups?.every(
+        (nogoGroup: INogoGroupReturnDTO) => nogoGroup.nogoLength > 5000
+      )
+    ).toBe(true);
   });
 
   test('throws UnauthorizedError when not logged in', async () => {

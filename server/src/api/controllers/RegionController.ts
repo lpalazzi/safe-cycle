@@ -14,7 +14,11 @@ export const region = (app: express.Router) => {
 
   route.get('/getAll', async (req, res, next) => {
     try {
-      const regions = await regionService.getAll();
+      const userId =
+        req.session?.userId && mongoose.isValidObjectId(req.session?.userId)
+          ? new mongoose.Types.ObjectId(req.session?.userId)
+          : undefined;
+      const regions = await regionService.getAll(userId);
       return res.json({
         regions,
       });

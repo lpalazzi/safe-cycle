@@ -7,9 +7,10 @@ export interface INogoGroupReturnDTO {
     name: Name;
   };
   name: string;
+  nogoLength: number;
 }
 
 export interface INogoGroupCreateDTO
-  extends Omit<INogoGroupReturnDTO, '_id' | 'user'> {}
+  extends Omit<INogoGroupReturnDTO, '_id' | 'user' | 'nogoLength'> {}
 
 export interface INogoGroupUpdateDTO extends INogoGroupCreateDTO {}

@@ -16,3 +16,19 @@ export const asyncCallWithTimeout = async <T>(
     return result;
   });
 };
+
+export const asyncFilter = async <T>(
+  array: T[],
+  predicate: (item: T) => Promise<boolean>
+): Promise<T[]> => {
+  const results = await Promise.all(
+    array.map(async (item) => ({
+      item,
+      isValid: await predicate(item),
+    }))
+  );
+
+  return results
+    .filter((result) => result.isValid)
+    .map((result) => result.item);
+};

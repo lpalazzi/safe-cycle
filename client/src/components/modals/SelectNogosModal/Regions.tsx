@@ -32,7 +32,6 @@ export const Regions: React.FC<{
   } = useGlobalContext();
   const { map, currentLocation } = useMapContext();
   const [showMoreInfo, setShowMoreInfo] = useState(false);
-  const [showHidden, setShowHidden] = useState(false);
   const [sortedRegions, setSortedRegions] = useState<Region[]>([]);
   const [sortMethod, setSortMethod] = useState<SortMethod>(
     currentLocation ? 'location' : 'nogoLength'
@@ -57,13 +56,6 @@ export const Regions: React.FC<{
 
   return (
     <Stack spacing='md' align='stretch' justify='flext-start'>
-      {loggedInUser?.role === 'admin' && (
-        <Checkbox
-          label='Show hidden regions'
-          checked={showHidden}
-          onChange={() => setShowHidden((prev) => !prev)}
-        />
-      )}
       <Group position='apart' align='flex-end' noWrap={!isMobileSize}>
         <Paper radius='md' p='sm' bg={theme.colors.gray[1]}>
           <Text size='sm'>
@@ -131,7 +123,6 @@ export const Regions: React.FC<{
           key={region._id + 'alpha'}
           region={region}
           isSelected={unsavedSelectedRegions.includes(region._id)}
-          showHidden={showHidden}
           toggleSelect={() => toggleRegion(region._id)}
         />
       ))}

@@ -2,7 +2,7 @@ export const metresToDistanceString = (
   metres: number,
   kmDecimals: number = 2
 ) => {
-  if (metres <= 0) return null;
+  if (metres <= 0) return '0km';
   if (metres < 1000) return metres.toFixed(0) + 'm';
   return (metres / 1000).toFixed(kmDecimals) + 'km';
 };

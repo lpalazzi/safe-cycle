@@ -28,7 +28,7 @@ import {
   IconX,
 } from '@tabler/icons-react';
 import { modals } from '@mantine/modals';
-import { getBoundsForNogos, getTotalLengthOfNogos } from 'utils/nogos';
+import { getBoundsForNogos } from 'utils/nogos';
 import { NogoGroupApi } from 'api';
 
 export const NogoGroupCard: React.FC<{
@@ -42,18 +42,12 @@ export const NogoGroupCard: React.FC<{
   const [showDetails, setShowDetails] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [nogos, setNogos] = useState<Nogo[]>([]);
-  const [totalLength, setTotalLength] = useState<number | null>(null);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(nogoGroup.name);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
-    nogoGroup.getAllNogos().then((fetchedNogos) => {
-      setNogos(fetchedNogos);
-      setTotalLength(
-        fetchedNogos.length > 0 ? getTotalLengthOfNogos(fetchedNogos) : 0
-      );
-    });
+    nogoGroup.getAllNogos().then(setNogos);
   }, []);
 
   useEffect(() => {
@@ -141,10 +135,13 @@ export const NogoGroupCard: React.FC<{
             )}
           </Group>
           <Text size='sm' color='dimmed'>
-            {!!totalLength
-              ? `Total nogos: ${metresToDistanceString(totalLength || 0, 1)}`
+            {!!nogoGroup.nogoLength
+              ? `Total nogos: ${metresToDistanceString(
+                  nogoGroup.nogoLength,
+                  1
+                )}`
               : 'This group has no nogos. '}
-            {!totalLength && (
+            {!nogoGroup.nogoLength && (
               <Anchor
                 inherit
                 onClick={() => {
@@ -159,7 +156,7 @@ export const NogoGroupCard: React.FC<{
           <Anchor
             size='sm'
             onClick={toggleDetails}
-            style={totalLength ? {} : { visibility: 'hidden' }}
+            style={nogoGroup.nogoLength ? {} : { visibility: 'hidden' }}
           >
             {showDetails ? 'Hide nogos' : 'See nogos in this group'}
           </Anchor>

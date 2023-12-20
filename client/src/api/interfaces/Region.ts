@@ -11,8 +11,9 @@ export interface IRegionReturnDTO {
     role: UserRole;
     contributorProfile?: ContributorProfile;
   }[];
+  nogoLength: number;
   shortName?: string;
 }
 
 export interface IRegionCreateDTO
-  extends Omit<IRegionReturnDTO, '_id' | 'contributors'> {}
+  extends Omit<IRegionReturnDTO, '_id' | 'contributors' | 'nogoLength'> {}

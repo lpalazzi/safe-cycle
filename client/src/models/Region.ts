@@ -18,6 +18,7 @@ interface RegionParams {
     role: UserRole;
     contributorProfile?: ContributorProfile;
   }[];
+  nogoLength: number;
   shortName?: string;
 }
 
@@ -27,6 +28,7 @@ export class Region {
   public iso31662;
   public polygon;
   public contributors;
+  public nogoLength;
   public shortName;
   public isRegion = true;
 
@@ -35,6 +37,7 @@ export class Region {
     this.name = params.name;
     this.polygon = params.polygon;
     this.contributors = params.contributors;
+    this.nogoLength = params.nogoLength;
     this.shortName = params.shortName ?? params.name;
 
     const subdivisionEntry = iso31662.find(
@@ -83,10 +86,5 @@ export class Region {
 
   public isLatLngInside(latlng: L.LatLng) {
     return this.getBounds().contains(latlng);
-  }
-
-  public async getTotalNogoLength() {
-    const nogos = await this.getAllNogos();
-    return getTotalLengthOfNogos(nogos);
   }
 }

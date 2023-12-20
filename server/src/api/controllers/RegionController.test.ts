@@ -1,16 +1,47 @@
 import setupDB from 'test/setupDB';
 import { makeRequest } from 'test/helpers';
-import { createTestUser, createTestRegion } from 'test/data';
+import { createTestUser, createTestRegion, createTestNogo } from 'test/data';
 import { IRegion, IRegionCreateDTO } from 'interfaces';
 import { RegionModel } from 'models';
 
 setupDB('RegionController');
 
 describe('GET /region/getAll', () => {
-  test('returns all regions in db', async () => {
-    await createTestRegion();
-    await createTestRegion();
-    const res = await makeRequest({ url: '/region/getAll' });
+  test('returns regions in db with more than 5km of nogos when requested by normal user', async () => {
+    const region1 = await createTestRegion();
+    const region2 = await createTestRegion();
+    const res1 = await makeRequest({ url: '/region/getAll' });
+    expect(res1.statusCode).toBe(200);
+    expect(res1.body?.regions?.length).toBe(0);
+
+    await createTestNogo(undefined, region1._id);
+    await createTestNogo(undefined, region2._id);
+    const res2 = await makeRequest({ url: '/region/getAll' });
+    expect(res2.statusCode).toBe(200);
+    expect(res2.body?.regions?.length).toBe(2);
+  });
+
+  test('returns all regions in db when requested by admin', async () => {
+    const user = await createTestUser('admin');
+    createTestRegion();
+    createTestRegion();
+    const res = await makeRequest({
+      url: '/region/getAll',
+      loggedInUserEmail: user.email,
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.body?.regions?.length).toBe(2);
+  });
+
+  test('returns regions in db with less than 5km when requested by verified contributor', async () => {
+    const user = await createTestUser('verified contributor');
+    createTestRegion([user._id]);
+    createTestRegion([user._id]);
+    createTestRegion();
+    const res = await makeRequest({
+      url: '/region/getAll',
+      loggedInUserEmail: user.email,
+    });
     expect(res.statusCode).toBe(200);
     expect(res.body?.regions?.length).toBe(2);
   });

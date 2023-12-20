@@ -1,16 +1,33 @@
 import mongoose from 'mongoose';
 import geojsonWithin from '@turf/boolean-within';
-import { injectable } from 'tsyringe';
+import { inject, injectable } from 'tsyringe';
 import { NoID } from 'types';
 import { RegionDao } from 'daos';
 import { IRegion, IRegionCreateDTO } from 'interfaces';
+import { UserService } from 'services';
 
 @injectable()
 export class RegionService {
-  constructor(private regionDao: RegionDao) {}
+  constructor(
+    private regionDao: RegionDao,
+    @inject('UserService') private userService: UserService
+  ) {}
 
-  async getAll() {
-    return this.regionDao.get({});
+  async getAll(userId?: mongoose.Types.ObjectId) {
+    const allRegions = await this.regionDao.get({});
+    const admin = userId ? await this.userService.isUserAdmin(userId) : false;
+    // if admin, return all regions
+    if (admin) return allRegions;
+    // else, return only regions with nogoLength >= 5km, or where user is a contributor
+    return allRegions.filter((region) => {
+      if (region.nogoLength >= 5000) return true;
+      return (
+        !!userId &&
+        !!region.contributors.find((contributor) =>
+          contributor._id.equals(userId)
+        )
+      );
+    });
   }
 
   async existsById(regionId: mongoose.Types.ObjectId) {

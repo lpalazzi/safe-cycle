@@ -21,12 +21,5 @@ export const sortRegionsByCountryFunction = (a: Region, b: Region) => {
   return compareRegion;
 };
 
-export const sortRegionsByNogoLengthFunction = (regionLengths: {
-  [key: string]: number;
-}) => {
-  return (a: Region, b: Region) => {
-    const aLength = regionLengths[a._id] || 0;
-    const bLength = regionLengths[b._id] || 0;
-    return bLength - aLength;
-  };
-};
+export const sortRegionsByNogoLengthFunction = (a: Region, b: Region) =>
+  b.nogoLength - a.nogoLength;

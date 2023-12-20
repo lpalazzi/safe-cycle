@@ -32,7 +32,6 @@ type GlobalContextType =
       showAlternateRoutes: boolean;
       regions: Region[];
       userNogoGroups: NogoGroup[];
-      regionLengths: { [key: string]: number };
       isLoading: boolean;
       // functions
       updateLoggedInUser: () => void;
@@ -84,9 +83,6 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   const [showAlternateRoutes, setShowAlternateRoutes] = useState(false);
   const [regions, setRegions] = useState<Region[]>([]);
   const [userNogoGroups, setUserNogoGroups] = useState<NogoGroup[]>([]);
-  const [regionLengths, setRegionLengths] = useState<{ [key: string]: number }>(
-    {}
-  );
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -127,15 +123,6 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
       const newAlphaSortedRegions = [...fetchedRegions];
       newAlphaSortedRegions.sort(sortRegionsByCountryFunction);
       setRegions(newAlphaSortedRegions);
-
-      // update nogo lengths
-      newAlphaSortedRegions.forEach(async (region) => {
-        const nogoLength = await region.getTotalNogoLength();
-        setRegionLengths((prev) => ({
-          ...prev,
-          [region._id]: nogoLength,
-        }));
-      });
     } catch (error: any) {
       showNotification({
         title: 'Error fetching regions',
@@ -143,7 +130,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         color: 'red',
       });
     }
-  }, []);
+  }, [loggedInUser]);
 
   const getLocationSortedRegions = useCallback(
     (location: Location | null) => {
@@ -162,9 +149,9 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
 
   const lengthSortedRegions = useMemo(() => {
     const sortedRegions = [...regions];
-    sortedRegions.sort(sortRegionsByNogoLengthFunction(regionLengths));
+    sortedRegions.sort(sortRegionsByNogoLengthFunction);
     return sortedRegions;
-  }, [regions, regionLengths]);
+  }, [regions]);
 
   const getLengthSortedRegions = useCallback(async () => {
     return lengthSortedRegions;
@@ -188,6 +175,7 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
   }, [loggedInUser]);
 
   useEffect(() => {
+    refreshRegions();
     refreshUserNogoGroups();
   }, [loggedInUser]);
 
@@ -248,7 +236,6 @@ export const GlobalContextProvider: React.FC<GlobalContextProviderType> = (
         showAlternateRoutes,
         regions,
         userNogoGroups,
-        regionLengths,
         isLoading,
         updateLoggedInUser,
         logoutUser,

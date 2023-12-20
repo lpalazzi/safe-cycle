@@ -34,12 +34,11 @@ import { modals } from '@mantine/modals';
 export const RegionCard: React.FC<{
   region: Region;
   isSelected: boolean;
-  showHidden: boolean;
   toggleSelect: () => void;
-}> = ({ region, isSelected, showHidden, toggleSelect }) => {
+}> = ({ region, isSelected, toggleSelect }) => {
   const theme = useMantineTheme();
   const { currentLocation, map } = useMapContext();
-  const { loggedInUser, isMobileSize, regionLengths, setEditingGroupOrRegion } =
+  const { loggedInUser, isMobileSize, setEditingGroupOrRegion } =
     useGlobalContext();
   const [showDetails, setShowDetails] = useState(false);
   const [showMap, setShowMap] = useState(false);
@@ -77,10 +76,7 @@ export const RegionCard: React.FC<{
     setShowDetails((prev) => !prev);
   };
 
-  const totalLength = regionLengths[region._id];
-  const isHidden = (totalLength || 0) < 5000;
-
-  return !isHidden || showHidden || userIsContributor ? (
+  return (
     <Paper
       p='md'
       radius='md'
@@ -101,16 +97,17 @@ export const RegionCard: React.FC<{
               You are a contributor for this region
             </Text>
           )}
-          {userIsContributor && isHidden && (
-            <Text color='red' size='xs'>
-              <IconExclamationCircle
-                size={16}
-                style={{ verticalAlign: 'text-bottom' }}
-              />{' '}
-              This region is hidden from users until it has at least 5km of
-              nogos
-            </Text>
-          )}
+          {(userIsContributor || loggedInUser?.role === 'admin') &&
+            region.nogoLength < 5000 && (
+              <Text color='red' size='xs'>
+                <IconExclamationCircle
+                  size={16}
+                  style={{ verticalAlign: 'text-bottom' }}
+                />{' '}
+                This region is hidden from users until it has at least 5km of
+                nogos
+              </Text>
+            )}
           <Text>{region.name}</Text>
           {!!region.iso31662?.nameWithCountry && (
             <Text size='sm' color='dimmed'>
@@ -118,7 +115,7 @@ export const RegionCard: React.FC<{
             </Text>
           )}
           <Text size='sm' color='dimmed'>
-            Total nogos: {metresToDistanceString(totalLength || 0, 1)}
+            Total nogos: {metresToDistanceString(region.nogoLength, 1)}
           </Text>
           <Anchor size='sm' onClick={toggleDetails}>
             {showDetails ? 'Hide details' : 'See details'}
@@ -283,5 +280,5 @@ export const RegionCard: React.FC<{
         </Group>
       </Collapse>
     </Paper>
-  ) : null;
+  );
 };

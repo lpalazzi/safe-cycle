@@ -74,7 +74,6 @@ export const RoutePreferences: React.FC = () => {
     selectedNogoGroups,
     selectedRegions,
     regions,
-    regionLengths,
     userNogoGroups,
     setSelectedComfortLevel,
     setSelectedNogoGroups,
@@ -111,7 +110,6 @@ export const RoutePreferences: React.FC = () => {
       .filter((region) => {
         if (loggedInUser && region.isUserContributor(loggedInUser._id))
           return true; // contributor's regions are always suggested
-        if (regionLengths[region._id] < 5000) return false; // regions w/ less than 5km of nogos are otherwise hidden
         if (!currentLocation) return false;
         if (region.getDistanceTo(currentLocation.latlng) < 300000) return true; // regions within 300km of current location are suggested
         return false;
@@ -122,7 +120,7 @@ export const RoutePreferences: React.FC = () => {
       filteredRegions.sort(
         currentLocation
           ? sortRegionsByLocationFunction(currentLocation.latlng)
-          : sortRegionsByNogoLengthFunction(regionLengths)
+          : sortRegionsByNogoLengthFunction
       );
 
     const suggestedRegions = filteredRegions.slice(0, 4);
@@ -148,7 +146,6 @@ export const RoutePreferences: React.FC = () => {
     }));
   }, [
     regions,
-    regionLengths,
     loggedInUser,
     currentLocation,
     selectedRegions,
