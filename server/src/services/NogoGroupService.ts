@@ -7,6 +7,7 @@ import {
 } from 'interfaces';
 import { NogoDao, NogoGroupDao } from 'daos';
 import { NoID } from 'types';
+import { getLengthForLineString } from 'utils/geo';
 
 @injectable()
 export class NogoGroupService {
@@ -36,6 +37,7 @@ export class NogoGroupService {
       ...newNogoGroup,
       name: newNogoGroup.name.trim(),
       user: userId,
+      nogoLength: 0,
     };
 
     const nameIsTaken = await this.existsWithName(
@@ -91,5 +93,49 @@ export class NogoGroupService {
       nogoGroupId
     );
     return userId.equals(userIdOnNogoGroup);
+  }
+
+  async addToNogoLength(
+    nogoGroupId: mongoose.Types.ObjectId,
+    nogoLength: number
+  ) {
+    const nogoGroup = await this.nogoGroupDao.getById(nogoGroupId);
+    const update = await this.nogoGroupDao.updateById(nogoGroupId, {
+      nogoLength: (nogoGroup?.nogoLength || 0) + nogoLength,
+    });
+    return update.acknowledged && update.modifiedCount === 1;
+  }
+
+  async subtractFromNogoLength(
+    nogoGroupId: mongoose.Types.ObjectId,
+    nogoLength: number
+  ) {
+    const nogoGroup = await this.nogoGroupDao.getById(nogoGroupId);
+    const newNogoLength = (nogoGroup?.nogoLength || 0) - nogoLength;
+    const update = await this.nogoGroupDao.updateById(nogoGroupId, {
+      nogoLength: newNogoLength < 0 ? 0 : newNogoLength,
+    });
+    return update.acknowledged && update.modifiedCount === 1;
+  }
+
+  async refreshNogoLengthForNogoGroup(nogoGroupId: mongoose.Types.ObjectId) {
+    const nogos = await this.nogoDao.get({ nogoGroup: nogoGroupId });
+    const nogoLength = nogos
+      .map((nogo) => getLengthForLineString(nogo.lineString))
+      .reduce((partialSum, a) => partialSum + a, 0);
+    const update = await this.nogoGroupDao.updateById(nogoGroupId, {
+      nogoLength,
+    });
+    return update.acknowledged && update.modifiedCount === 1;
+  }
+
+  async refreshAllNogoLengths() {
+    const nogoGroups = await this.nogoGroupDao.get({});
+    const updates = await Promise.all(
+      nogoGroups.map(async (nogoGroup) =>
+        this.refreshNogoLengthForNogoGroup(nogoGroup._id)
+      )
+    );
+    return updates.every((update) => update);
   }
 }

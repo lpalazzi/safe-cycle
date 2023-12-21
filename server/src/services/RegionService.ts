@@ -2,14 +2,16 @@ import mongoose from 'mongoose';
 import geojsonWithin from '@turf/boolean-within';
 import { inject, injectable } from 'tsyringe';
 import { NoID } from 'types';
-import { RegionDao } from 'daos';
+import { NogoDao, RegionDao } from 'daos';
 import { IRegion, IRegionCreateDTO } from 'interfaces';
 import { UserService } from 'services';
+import { getLengthForLineString } from 'utils/geo';
 
 @injectable()
 export class RegionService {
   constructor(
     private regionDao: RegionDao,
+    private nogoDao: NogoDao,
     @inject('UserService') private userService: UserService
   ) {}
 
@@ -20,7 +22,7 @@ export class RegionService {
     if (admin) return allRegions;
     // else, return only regions with nogoLength >= 5km, or where user is a contributor
     return allRegions.filter((region) => {
-      if (region.nogoLength >= 5000) return true;
+      if (region.nogoLength && region.nogoLength >= 5000) return true;
       return (
         !!userId &&
         !!region.contributors.find((contributor) =>
@@ -62,6 +64,7 @@ export class RegionService {
       ...newRegion,
       name: newRegion.name.trim(),
       contributors: [],
+      nogoLength: 0,
     };
 
     const nameIsTaken = await this.existsWithName(regionToCreate.name);
@@ -106,5 +109,42 @@ export class RegionService {
       contributors,
     });
     return updateResult.acknowledged && updateResult.modifiedCount === 1;
+  }
+
+  async addToNogoLength(regionId: mongoose.Types.ObjectId, nogoLength: number) {
+    const region = await this.regionDao.getById(regionId);
+    const update = await this.regionDao.updateById(regionId, {
+      nogoLength: (region?.nogoLength || 0) + nogoLength,
+    });
+    return update.acknowledged && update.modifiedCount === 1;
+  }
+
+  async subtractFromNogoLength(
+    regionId: mongoose.Types.ObjectId,
+    nogoLength: number
+  ) {
+    const region = await this.regionDao.getById(regionId);
+    const newNogoLength = (region?.nogoLength || 0) - nogoLength;
+    const update = await this.regionDao.updateById(regionId, {
+      nogoLength: newNogoLength < 0 ? 0 : newNogoLength,
+    });
+    return update.acknowledged && update.modifiedCount === 1;
+  }
+
+  async refreshNogoLengthForRegion(regionId: mongoose.Types.ObjectId) {
+    const nogos = await this.nogoDao.get({ region: regionId });
+    const nogoLength = nogos
+      .map((nogo) => getLengthForLineString(nogo.lineString))
+      .reduce((partialSum, a) => partialSum + a, 0);
+    const update = await this.regionDao.updateById(regionId, { nogoLength });
+    return update.acknowledged && update.modifiedCount === 1;
+  }
+
+  async refreshAllNogoLengths() {
+    const regions = await this.regionDao.get({});
+    const updates = await Promise.all(
+      regions.map(async (region) => this.refreshNogoLengthForRegion(region._id))
+    );
+    return updates.every((update) => update);
   }
 }

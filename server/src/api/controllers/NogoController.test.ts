@@ -7,8 +7,9 @@ import {
   createTestNogoGroup,
   createTestRegion,
 } from 'test/data';
-import { NogoModel } from 'models';
+import { NogoGroupModel, NogoModel, RegionModel } from 'models';
 import { INogo, INogoCreateDTO } from 'interfaces';
+import { getLengthForLineString } from 'utils/geo';
 
 setupDB('NogoController');
 
@@ -221,6 +222,52 @@ describe('POST /nogo/create', () => {
     });
     expect(res.statusCode).toBe(401);
   });
+
+  test('adds the appropriate nogoLength to its nogo group', async () => {
+    const user = await createTestUser();
+    const nogoGroup = await createTestNogoGroup(user._id);
+    const nogoCreate: INogoCreateDTO = {
+      points: [
+        [-83.017787, 42.320941],
+        [-83.017072, 42.321212],
+      ],
+      nogoGroup: nogoGroup._id,
+    };
+    const res = await makeRequest({
+      url: '/nogo/create',
+      method: 'POST',
+      data: { nogoCreate },
+      loggedInUserEmail: user.email,
+    });
+    const expectedNogoLength = res.body?.nogo?.lineString
+      ? getLengthForLineString(res.body?.nogo?.lineString)
+      : undefined;
+    const updatedNogoGroup = await NogoGroupModel.findById(nogoGroup._id);
+    expect(updatedNogoGroup?.nogoLength).toBe(expectedNogoLength);
+  });
+
+  test('adds the appropriate nogoLength to its region', async () => {
+    const user = await createTestUser('verified contributor');
+    const region = await createTestRegion([user._id]);
+    const nogoCreate: INogoCreateDTO = {
+      points: [
+        [-83.017787, 42.320941],
+        [-83.017072, 42.321212],
+      ],
+      region: region._id,
+    };
+    const res = await makeRequest({
+      url: '/nogo/create',
+      method: 'POST',
+      data: { nogoCreate },
+      loggedInUserEmail: user.email,
+    });
+    const expectedNogoLength = res.body?.nogo?.lineString
+      ? getLengthForLineString(res.body?.nogo?.lineString)
+      : undefined;
+    const updatedRegion = await RegionModel.findById(region._id);
+    expect(updatedRegion?.nogoLength).toBe(expectedNogoLength);
+  });
 });
 
 describe('POST /nogo/transferNogosToRegion', () => {
@@ -427,5 +474,41 @@ describe('DELETE /nogo/delete', () => {
       region: region._id,
     });
     expect(nogosOnRegion.length).toBe(2);
+  });
+
+  test('subtracts the appropriate nogoLength from its nogo group', async () => {
+    const user = await createTestUser();
+    const { _id: nogoGroupId } = await createTestNogoGroup(user._id);
+    const nogo = await createTestNogo(nogoGroupId);
+    await createTestNogo(nogoGroupId);
+    const nogoGroupBefore = await NogoGroupModel.findById(nogoGroupId);
+    const nogoLengthBefore = nogoGroupBefore?.nogoLength || 0;
+    await makeRequest({
+      url: `/nogo/delete/${nogo._id}`,
+      method: 'DELETE',
+      loggedInUserEmail: user.email,
+    });
+    const nogoGroupAfter = await NogoGroupModel.findById(nogoGroupId);
+    const expectedNogoLength =
+      nogoLengthBefore - getLengthForLineString(nogo.lineString);
+    expect(nogoGroupAfter?.nogoLength).toBe(expectedNogoLength);
+  });
+
+  test('subtracts the appropriate nogoLength from its region', async () => {
+    const user = await createTestUser('verified contributor');
+    const { _id: regionId } = await createTestRegion([user._id]);
+    const nogo = await createTestNogo(undefined, regionId);
+    await createTestNogo(undefined, regionId);
+    const regionBefore = await RegionModel.findById(regionId);
+    const nogoLengthBefore = regionBefore?.nogoLength || 0;
+    await makeRequest({
+      url: `/nogo/delete/${nogo._id}`,
+      method: 'DELETE',
+      loggedInUserEmail: user.email,
+    });
+    const regionAfter = await RegionModel.findById(regionId);
+    const expectedNogoLength =
+      nogoLengthBefore - getLengthForLineString(nogo.lineString);
+    expect(regionAfter?.nogoLength).toBe(expectedNogoLength);
   });
 });

@@ -8,7 +8,7 @@ interface NogoGroupParams {
     name: Name;
   };
   name: string;
-  nogoLength: number;
+  nogoLength?: number;
 }
 
 export class NogoGroup {
@@ -22,7 +22,7 @@ export class NogoGroup {
     this._id = params._id;
     this.name = params.name;
     this.user = params.user;
-    this.nogoLength = params.nogoLength;
+    this.nogoLength = params.nogoLength || 0;
   }
 
   public getOwner() {

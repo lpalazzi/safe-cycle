@@ -1,7 +1,8 @@
 import setupDB from 'test/setupDB';
 import { container } from 'tsyringe';
 import { RegionService } from 'services';
-import { createTestUser, createTestRegion } from 'test/data';
+import { createTestUser, createTestRegion, createTestNogo } from 'test/data';
+import { RegionModel } from 'models';
 
 setupDB('RegionService');
 const regionService = container.resolve(RegionService);
@@ -61,5 +62,28 @@ describe('isLineStringInRegion', () => {
       region._id
     );
     expect(lineStringOnRegion).toBe(false);
+  });
+});
+
+describe('addToNogoLength', () => {
+  test("adds correct amount to a region's nogoLength field", async () => {
+    const region = await createTestRegion();
+    const updated = await regionService.addToNogoLength(region._id, 1000);
+    expect(updated).toBe(true);
+    const updatedRegion = await RegionModel.findById(region._id);
+    expect(updatedRegion?.nogoLength).toBe(1000);
+  });
+});
+
+describe('subtractFromNogoLength', () => {
+  test("subtracts correct amount from a region's nogoLength field", async () => {
+    const { _id: regionId } = await createTestRegion();
+    await createTestNogo(undefined, regionId);
+    const region = await RegionModel.findById(regionId);
+    const expectedNogoLength = (region?.nogoLength || 0) - 1000;
+    const updated = await regionService.subtractFromNogoLength(regionId, 1000);
+    expect(updated).toBe(true);
+    const updatedRegion = await RegionModel.findById(regionId);
+    expect(updatedRegion?.nogoLength).toBe(expectedNogoLength);
   });
 });

@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
 import { INogo } from 'interfaces';
 import { NogoModel } from 'models';
+import { container } from 'tsyringe';
+import { NogoGroupService, RegionService } from 'services';
+
+const regionService = container.resolve(RegionService);
+const nogoGroupService = container.resolve(NogoGroupService);
 
 export const createTestNogo = async (
   nogoGroupId?: mongoose.Types.ObjectId,
@@ -28,5 +33,8 @@ export const createTestNogo = async (
     nogoGroup: nogoGroupId,
     region: regionId,
   });
+  if (regionId) await regionService.refreshNogoLengthForRegion(regionId);
+  if (nogoGroupId)
+    await nogoGroupService.refreshNogoLengthForNogoGroup(nogoGroupId);
   return createdNogo;
 };

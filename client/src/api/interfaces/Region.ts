@@ -11,7 +11,7 @@ export interface IRegionReturnDTO {
     role: UserRole;
     contributorProfile?: ContributorProfile;
   }[];
-  nogoLength: number;
+  nogoLength?: number;
   shortName?: string;
 }
 

@@ -8,20 +8,15 @@ export interface IRegion {
   polygon: GeoJSON.Polygon;
   contributors: mongoose.Types.ObjectId[];
   shortName?: string;
+  nogoLength?: number;
 }
 
-export interface IRegionHydrated extends IRegion {
-  nogoLength: Promise<number>;
-}
-
-export interface IRegionReturnDTO
-  extends Omit<IRegionHydrated, 'contributors' | 'nogoLength'> {
+export interface IRegionReturnDTO extends Omit<IRegion, 'contributors'> {
   contributors: {
     _id: mongoose.Types.ObjectId;
     name: Name;
     role: UserRole;
   }[];
-  nogoLength: number;
 }
 
 export interface IRegionCreateDTO

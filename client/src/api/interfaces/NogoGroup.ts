@@ -7,7 +7,7 @@ export interface INogoGroupReturnDTO {
     name: Name;
   };
   name: string;
-  nogoLength: number;
+  nogoLength?: number;
 }
 
 export interface INogoGroupCreateDTO

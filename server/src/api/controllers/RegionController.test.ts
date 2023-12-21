@@ -23,8 +23,8 @@ describe('GET /region/getAll', () => {
 
   test('returns all regions in db when requested by admin', async () => {
     const user = await createTestUser('admin');
-    createTestRegion();
-    createTestRegion();
+    await createTestRegion();
+    await createTestRegion();
     const res = await makeRequest({
       url: '/region/getAll',
       loggedInUserEmail: user.email,
@@ -35,9 +35,9 @@ describe('GET /region/getAll', () => {
 
   test('returns regions in db with less than 5km when requested by verified contributor', async () => {
     const user = await createTestUser('verified contributor');
-    createTestRegion([user._id]);
-    createTestRegion([user._id]);
-    createTestRegion();
+    await createTestRegion([user._id]);
+    await createTestRegion([user._id]);
+    await createTestRegion();
     const res = await makeRequest({
       url: '/region/getAll',
       loggedInUserEmail: user.email,

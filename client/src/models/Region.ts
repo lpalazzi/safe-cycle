@@ -18,7 +18,7 @@ interface RegionParams {
     role: UserRole;
     contributorProfile?: ContributorProfile;
   }[];
-  nogoLength: number;
+  nogoLength?: number;
   shortName?: string;
 }
 
@@ -37,7 +37,7 @@ export class Region {
     this.name = params.name;
     this.polygon = params.polygon;
     this.contributors = params.contributors;
-    this.nogoLength = params.nogoLength;
+    this.nogoLength = params.nogoLength || 0;
     this.shortName = params.shortName ?? params.name;
 
     const subdivisionEntry = iso31662.find(

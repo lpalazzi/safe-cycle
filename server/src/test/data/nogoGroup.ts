@@ -7,6 +7,7 @@ export const createTestNogoGroup = async (userId?: mongoose.Types.ObjectId) => {
     _id: new mongoose.Types.ObjectId(),
     user: userId ?? new mongoose.Types.ObjectId(),
     name: 'Test Group',
+    nogoLength: 0,
   });
   return createdNogoGroup;
 };

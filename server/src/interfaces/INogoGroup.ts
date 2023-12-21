@@ -5,20 +5,16 @@ export interface INogoGroup {
   _id: mongoose.Types.ObjectId;
   user: mongoose.Types.ObjectId;
   name: string;
+  nogoLength?: number;
 }
 
-export interface INogoGroupHydrated extends INogoGroup {
-  nogoLength: Promise<number>;
-}
-
-export interface INogoGroupCreateDTO extends Omit<INogoGroup, '_id' | 'user'> {}
+export interface INogoGroupCreateDTO
+  extends Omit<INogoGroup, '_id' | 'user' | 'nogoLength'> {}
 export interface INogoGroupUpdateDTO extends INogoGroupCreateDTO {}
 
-export interface INogoGroupReturnDTO
-  extends Omit<INogoGroupHydrated, 'user' | 'nogoLength'> {
+export interface INogoGroupReturnDTO extends Omit<INogoGroup, 'user'> {
   user: {
     _id: mongoose.Types.ObjectId;
     name: Name;
   };
-  nogoLength: number;
 }

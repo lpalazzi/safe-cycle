@@ -17,3 +17,9 @@ container.register('RegionService', services.RegionService);
 container.register('BingMapsService', services.BingMapsService);
 container.register('NominatimService', services.NominatimService);
 container.register('EmailService', services.EmailService);
+
+// refreshes all nogoLength values in the database on startup (just in case)
+const regionService = container.resolve(services.RegionService);
+const nogoGroupService = container.resolve(services.NogoGroupService);
+regionService.refreshAllNogoLengths();
+nogoGroupService.refreshAllNogoLengths();

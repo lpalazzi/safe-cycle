@@ -292,6 +292,7 @@ export const createTestRegion = async (
         ],
       ],
     },
+    nogoLength: 0,
   });
   return createdRegion;
 };

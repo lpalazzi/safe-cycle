@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { injectable, inject } from 'tsyringe';
 import { NogoDao } from 'daos';
 import { NogoGroupService, RegionService } from 'services';
+import { getLengthForLineString } from 'utils/geo';
 
 @injectable()
 export class NogoService {
@@ -18,6 +19,17 @@ export class NogoService {
   }
 
   async deleteById(nogoId: mongoose.Types.ObjectId) {
+    const nogo = await this.nogoDao.getById(nogoId);
+    if (nogo && nogo.region)
+      await this.regionService.subtractFromNogoLength(
+        nogo.region,
+        getLengthForLineString(nogo.lineString)
+      );
+    if (nogo && nogo.nogoGroup)
+      await this.nogoGroupService.subtractFromNogoLength(
+        nogo.nogoGroup,
+        getLengthForLineString(nogo.lineString)
+      );
     return this.nogoDao.deleteById(nogoId);
   }
 
@@ -35,6 +47,8 @@ export class NogoService {
       { $unset: { nogoGroup: 1 }, $set: { region: regionId } }
     );
     if (!updateResult.acknowledged) throw new Error('Transfer failed');
+    this.regionService.refreshAllNogoLengths();
+    this.nogoGroupService.refreshAllNogoLengths();
     return updateResult.modifiedCount;
   }
 
@@ -67,10 +81,21 @@ export class NogoService {
     if (routeIsOutsideRegion)
       throw new Error('Nogo is outside selected region');
 
+    const lineString = this.fixStraightLineString(route);
     const nogo = await this.nogoDao.create({
-      lineString: this.fixStraightLineString(route),
+      lineString,
       ...(nogoGroupId ? { nogoGroup: nogoGroupId } : { region: regionId }),
     });
+    if (nogo && nogoGroupId)
+      await this.nogoGroupService.addToNogoLength(
+        nogoGroupId,
+        getLengthForLineString(lineString)
+      );
+    else if (nogo && regionId)
+      await this.regionService.addToNogoLength(
+        regionId,
+        getLengthForLineString(lineString)
+      );
     return nogo;
   }
 

@@ -1,11 +1,7 @@
 import mongoose from 'mongoose';
 import { NoID } from 'types';
 
-export class BaseDao<
-  Interface,
-  ReturnInterface = Interface,
-  CreateInterface = NoID<Interface>
-> {
+export class BaseDao<Interface, ReturnInterface = Interface> {
   constructor(
     protected model: mongoose.Model<Interface>,
     protected populate: mongoose.PopulateOptions | undefined = undefined
@@ -37,7 +33,7 @@ export class BaseDao<
     return !!exists;
   }
 
-  async create(newDocument: CreateInterface) {
+  async create(newDocument: NoID<Interface>) {
     const createdDocument = await this.model.create(newDocument);
     return this.getById(createdDocument._id as mongoose.Types.ObjectId);
   }
