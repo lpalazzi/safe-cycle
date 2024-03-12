@@ -145,7 +145,9 @@ describe('POST /user/signup', () => {
     });
     expect(res.statusCode).toBe(400);
     expect(res.body.message).toBe('"email" must be a valid email');
-    const usersWithEmail = await UserModel.count({ email: userSignup.email });
+    const usersWithEmail = await UserModel.countDocuments({
+      email: userSignup.email,
+    });
     expect(usersWithEmail).toBe(0);
   });
 
@@ -164,7 +166,9 @@ describe('POST /user/signup', () => {
     expect(res.body.message).toBe(
       '"password" length must be at least 8 characters long'
     );
-    const usersWithEmail = await UserModel.count({ email: userSignup.email });
+    const usersWithEmail = await UserModel.countDocuments({
+      email: userSignup.email,
+    });
     expect(usersWithEmail).toBe(0);
   });
 
@@ -182,7 +186,9 @@ describe('POST /user/signup', () => {
     });
     expect(res.statusCode).toBe(400);
     expect(res.body.message).toBe('A user already exists with this email');
-    const usersWithEmail = await UserModel.count({ email: user.email });
+    const usersWithEmail = await UserModel.countDocuments({
+      email: user.email,
+    });
     expect(usersWithEmail).toBe(1);
   });
 });
