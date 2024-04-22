@@ -2,8 +2,9 @@ import axios, { AxiosError } from 'axios';
 import { injectable } from 'tsyringe';
 import config from 'config';
 import { Position, Viewbox } from 'types';
-import { IGeocodeSearchResult } from 'interfaces';
+import { IGeocodeSearchResult, IReverseGeocodeResult } from 'interfaces';
 import { fixOutOfBoundsLat, fixOutOfBoundsLon } from 'utils/geo';
+import { asyncCallWithTimeout } from 'utils/async';
 
 @injectable()
 export class BingMapsService {
@@ -13,7 +14,7 @@ export class BingMapsService {
   public async geocode(query: string) {
     if (!config.bingMapsApiKey) return null;
 
-    const { data } = await axios.get<BingLocationResult>(
+    const { data } = await axios.get<BingResponse<BingLocationsResource>>(
       `${this.bingMapsBaseUrl}/Locations?query=${encodeURIComponent(
         query
       )}&maxResults=1&key=${config.bingMapsApiKey}`
@@ -29,6 +30,38 @@ export class BingMapsService {
       latitude: coordinates[0],
       longitude: coordinates[1],
     } as Position;
+  }
+
+  public async reverse(position: Position) {
+    if (!config.bingMapsApiKey) return null;
+
+    const { data } = await axios.get<
+      BingResponse<BingLocationRecognitionResource>
+    >(
+      `${this.bingMapsBaseUrl}/LocationRecog/${position.latitude},${position.longitude}?radius=1&top=1&includeEntityTypes=address&verboseplacenames=true&key=${config.bingMapsApiKey}`
+    );
+
+    const addressObj =
+      data?.resourceSets?.[0]?.resources?.[0]?.addressOfLocation?.[0];
+
+    if (
+      data.statusCode !== 200 ||
+      !addressObj ||
+      !addressObj.formattedAddress
+    ) {
+      return null;
+    }
+
+    return {
+      label: addressObj.formattedAddress,
+      address: {
+        road: undefined,
+      },
+      position: {
+        latitude: addressObj.latitude,
+        longitude: addressObj.longitude,
+      },
+    } as IReverseGeocodeResult;
   }
 
   public async autosuggest(
@@ -50,7 +83,7 @@ export class BingMapsService {
       : '';
 
     const { data } = await axios
-      .get<BingAutosuggestResult>(
+      .get<BingResponse<BingAutosuggestResource>>(
         `${this.bingMapsBaseUrl}/Autosuggest?query=${encodeURIComponent(
           query
         )}&userMapView=${userMapViewStr}&userLocation=${userLocationStr}&maxResults=10&key=${
@@ -77,59 +110,48 @@ export class BingMapsService {
       } as IGeocodeSearchResult;
     });
   }
-}
 
-interface BingAutosuggestResult {
-  authenticationResultCode: string;
-  brandLogoUri: string;
-  copyright: string;
-  resourceSets: [
-    {
-      estimatedTotal: number;
-      resources: [
-        {
-          __type: string;
-          value: {
-            __type: 'Address' | 'Place' | 'LocalBusiness';
-            name?: string;
-            address: BingMapsAddress;
-          }[];
+  public async bulkReverse(positions: Position[]) {
+    const results: (IReverseGeocodeResult | null)[] = [];
+    for (const position of positions) {
+      let tries = 0;
+      let result: IReverseGeocodeResult | null = null;
+      let resultFetched = false;
+      while (tries < 3 && !result && !resultFetched) {
+        tries++;
+        try {
+          result = await asyncCallWithTimeout<IReverseGeocodeResult | null>(
+            this.reverse(position),
+            5000
+          );
+          resultFetched = true;
+        } catch (e) {
+          result = null;
         }
-      ];
+      }
+      results.push(result);
     }
-  ];
-  statusCode: number;
-  statusDescription: string;
-  traceId: string;
+    return results;
+  }
 }
 
-interface BingLocationResult {
+interface BingResponse<ResourceType> {
+  statusCode: number;
+  statusDescription: string;
   authenticationResultCode: string;
+  traceId: string;
+  coptyright: string;
   brandLogoUri: string;
-  copyright: string;
   resourceSets: [
     {
       estimatedTotal: number;
-      resources: {
-        __type: string;
-        bbox: [number, number, number, number];
-        name: string;
-        point: {
-          type: 'Point';
-          coordinates: [lat: number, lon: number]; // lat,lon
-        };
-        address: BingMapsAddress;
-        confidence: 'High' | 'Medium' | 'Low';
-        entityType: string;
-      }[];
+      resources: ResourceType[];
     }
   ];
-  statusCode: number;
-  statusDescription: string;
-  traceId: string;
+  errorDetails?: string[];
 }
 
-interface BingMapsAddress {
+interface BingAddress {
   countryRegion: string;
   locality: string;
   adminDistrict: string;
@@ -141,4 +163,43 @@ interface BingMapsAddress {
   streetName?: string;
   formattedAddress: string;
   landmark?: string;
+}
+
+interface BingLocationsResource {
+  name: string;
+  point: {
+    coordinates: [lat: number, lon: number];
+    bbox: [number, number, number, number];
+    entityType: string;
+    address: BingAddress;
+    confidence: 'High' | 'Medium' | 'Low';
+  };
+}
+
+interface BingLocationRecognitionResource {
+  addressOfLocation: [
+    {
+      latitude: number;
+      longitude: number;
+      addressLine: string;
+      locality: string;
+      neighborhood: string;
+      adminDivision: string;
+      countryIso2: string;
+      postalCode: string;
+      formattedAddress: string;
+    }
+  ];
+  businessesAtLocation: any[];
+}
+
+interface BingAutosuggestResource {
+  __type: string;
+  value: [
+    {
+      __type: 'Address' | 'Place' | 'LocalBusiness';
+      name?: string;
+      address: BingAddress;
+    }
+  ];
 }

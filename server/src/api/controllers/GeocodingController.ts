@@ -1,7 +1,7 @@
 import express from 'express';
 import joi from 'joi';
 import { container } from 'tsyringe';
-import { BingMapsService, NominatimService } from 'services';
+import { BingMapsService } from 'services';
 import { Position, Viewbox } from 'types';
 import { BadRequestError, GatewayTimeoutError } from 'api/errors';
 import { IGeocodeSearchResult, IReverseGeocodeResult } from 'interfaces';
@@ -11,7 +11,6 @@ export const geocoding = (app: express.Router) => {
   const route = express.Router();
   app.use('/geocoding', route);
   const bingMapsService = container.resolve(BingMapsService);
-  const nominatimService = container.resolve(NominatimService);
 
   route.get('/search/:query', async (req, res, next) => {
     try {
@@ -60,13 +59,7 @@ export const geocoding = (app: express.Router) => {
         userLocation
       );
 
-      if (!bingSearchResults) {
-        const nominatimSearchResults = await nominatimService.search(
-          query,
-          viewbox
-        );
-        searchResults.push(...nominatimSearchResults);
-      } else {
+      if (bingSearchResults) {
         searchResults.push(...bingSearchResults);
       }
 
@@ -106,8 +99,8 @@ export const geocoding = (app: express.Router) => {
         .validate(position);
       if (error) throw new BadRequestError(error.message);
       try {
-        const result = await asyncCallWithTimeout<IReverseGeocodeResult>(
-          nominatimService.reverse(position, zoom),
+        const result = await asyncCallWithTimeout<IReverseGeocodeResult | null>(
+          bingMapsService.reverse(position),
           5000
         );
         return res.json({ result });
@@ -134,7 +127,7 @@ export const geocoding = (app: express.Router) => {
         .required()
         .validate({ positions, zoom });
       if (error) throw new BadRequestError(error.message);
-      const results = await nominatimService.bulkReverse(positions, zoom);
+      const results = await bingMapsService.bulkReverse(positions);
       return res.json({ results });
     } catch (err) {
       next(err);
