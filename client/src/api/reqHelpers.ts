@@ -1,4 +1,3 @@
-import { Capacitor } from '@capacitor/core';
 import { INetworkError } from './interfaces/NetworkError';
 
 export const makeRequest = async (
@@ -6,9 +5,7 @@ export const makeRequest = async (
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
   body: any = undefined
 ) => {
-  const baseUrl = Capacitor.isNativePlatform() ? 'https://safecycle.xyz' : '';
-
-  return fetch(baseUrl + url, {
+  return fetch(url, {
     method: method,
     headers: ['POST', 'PUT'].includes(method)
       ? {

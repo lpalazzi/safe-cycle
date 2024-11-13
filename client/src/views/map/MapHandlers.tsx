@@ -6,7 +6,6 @@ import { useMapContext } from 'contexts/mapContext';
 import { Anchor } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { useGlobalContext } from 'contexts/globalContext';
-import { Capacitor } from '@capacitor/core';
 
 export const MapHandlers: React.FC = () => {
   const {
@@ -61,77 +60,33 @@ export const MapHandlers: React.FC = () => {
   });
 
   useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      map.locate({ setView: true, maxZoom: 14 });
-      // Geolocation.checkPermissions().then((status) => {
-      //   console.log(status);
-      //   if (status.location === 'denied') {
-      //     showNotification({
-      //       title: 'Cannot access location',
-      //       message: (
-      //         <>
-      //           SafeCycle does not have permission to use your location. Please{' '}
-      //           <Anchor
-      //             href={
-      //               Capacitor.getPlatform() === 'ios'
-      //                 ? 'https://support.apple.com/en-ca/HT207092'
-      //                 : 'https://support.google.com/accounts/answer/6179507'
-      //             }
-      //             target='_blank'
-      //           >
-      //             enable location permissions
-      //           </Anchor>{' '}
-      //           to use all of SafeCycle's features.
-      //         </>
-      //       ),
-      //       autoClose: false,
-      //     });
-      //   } else if (status.location === 'granted') {
-      //     map.locate({ setView: true, maxZoom: 10 });
-      //   } else {
-      //     Geolocation.requestPermissions({ permissions: ['location'] })
-      //       .then((newStatus) => {
-      //         if (newStatus.location === 'granted')
-      //           map.locate({ setView: true, maxZoom: 10 });
-      //       })
-      //       .catch((reason) => {
-      //         showNotification({
-      //           title: 'System location services not enabled',
-      //           message: reason,
-      //         });
-      //       });
-      //   }
-      // });
-    } else {
-      navigator.permissions.query({ name: 'geolocation' }).then((status) => {
-        switch (status.state) {
-          case 'granted':
-            map.locate({ setView: true, maxZoom: 14 });
-            break;
-          case 'denied':
-            showNotification({
-              title: 'Cannot access location',
-              message: (
-                <>
-                  SafeCycle does not have permission to use your location.
-                  Please{' '}
-                  <Anchor
-                    href='https://www.lifewire.com/denying-access-to-your-location-4027789'
-                    target='_blank'
-                  >
-                    enable location permissions
-                  </Anchor>{' '}
-                  to use all of SafeCycle's features.
-                </>
-              ),
-              autoClose: false,
-            });
-            break;
-          default:
-            break;
-        }
-      });
-    }
+    navigator.permissions.query({ name: 'geolocation' }).then((status) => {
+      switch (status.state) {
+        case 'granted':
+          map.locate({ setView: true, maxZoom: 14 });
+          break;
+        case 'denied':
+          showNotification({
+            title: 'Cannot access location',
+            message: (
+              <>
+                SafeCycle does not have permission to use your location. Please{' '}
+                <Anchor
+                  href='https://www.lifewire.com/denying-access-to-your-location-4027789'
+                  target='_blank'
+                >
+                  enable location permissions
+                </Anchor>{' '}
+                to use all of SafeCycle's features.
+              </>
+            ),
+            autoClose: false,
+          });
+          break;
+        default:
+          break;
+      }
+    });
   }, []);
 
   useEffect(() => {

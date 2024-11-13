@@ -21,12 +21,10 @@
     "dev-server": "nodemon --exec \"yarn build-server && node\" build/index.js",
     "test": "yarn workspace server test"
   },
-  "dependencies": {
-    "@capacitor/status-bar": "^5.0.6"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "nodemon": "^3.0.1",
-    "concurrently": "^7.6.0"
+    "concurrently": "^7.6.0",
+    "nodemon": "^3.0.1"
   },
   "nodemonConfig": {
     "watch": [

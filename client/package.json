@@ -8,9 +8,6 @@
   },
   "dependencies": {
     "@babel/core": "^7.23.5",
-    "@capacitor/android": "^5.5.1",
-    "@capacitor/core": "^5.5.1",
-    "@capacitor/ios": "^5.5.1",
     "@emotion/react": "^11.10.5",
     "@mantine/core": "^6.0.21",
     "@mantine/form": "^6.0.21",
@@ -51,9 +48,7 @@
     "react-leaflet": "^4.2.0",
     "typescript": "^4.9.4"
   },
-  "devDependencies": {
-    "@capacitor/cli": "^5.5.1"
-  },
+  "devDependencies": {},
   "eslintConfig": {
     "extends": [
       "react-app",

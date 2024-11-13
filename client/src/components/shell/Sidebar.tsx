@@ -7,7 +7,6 @@ import { WaypointsList } from './content/WaypointsList';
 import { RoutePreferences } from './content/RoutePreferences';
 import { TurnInstructions } from './content/TurnInstructions';
 import { SidebarFooter } from './SidebarFooter';
-import { Capacitor } from '@capacitor/core';
 
 export const Sidebar: React.FC = () => {
   const { isMobileSize, isNavbarOpen } = useGlobalContext();
@@ -18,9 +17,7 @@ export const Sidebar: React.FC = () => {
       <Navbar
         px='md'
         pb='xs'
-        pt={
-          Capacitor.getPlatform() === 'ios' ? 'env(safe-area-inset-top)' : 'xs'
-        }
+        pt='xs'
         hiddenBreakpoint='sm'
         hidden={!isMobileSize && !isNavbarOpen}
         width={{ sm: 400 }}
